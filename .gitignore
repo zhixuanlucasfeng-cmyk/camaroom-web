@@ -1,0 +1,13 @@
+# 系统垃圾
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# 工具临时探测文件
+sedK5B0TE
+_writetest.txt
+__probe.txt
+
+# 大体积素材（不是网站运行需要的）
+watermark(2).zip

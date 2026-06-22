@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Restar Solar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#09060F;--panel:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);--line-2:rgba(255,255,255,.18);
+--text:#ECE9F5;--muted:#A7A2BE;--violet:#8B5CF6;--teal:#2DD4BF;--sun:#F7A81B;--sun-light:#FFC24D;
+--display:"Fraunces",Georgia,serif;--body:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;
+--maxw:1180px;--r:16px;--glass:saturate(160%) blur(16px)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--body);color:var(--text);background:var(--bg);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.05;margin:0;color:#fff}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:1}
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--violet);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--sun)}
+/* background */
+.site-bg{position:fixed;inset:0;z-index:-12;overflow:hidden;background:var(--bg)}
+.site-bg .slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:sf 45s linear infinite}
+.site-bg .slide:nth-child(1){animation-delay:0s}.site-bg .slide:nth-child(2){animation-delay:9s}.site-bg .slide:nth-child(3){animation-delay:18s}.site-bg .slide:nth-child(4){animation-delay:27s}.site-bg .slide:nth-child(5){animation-delay:36s}
+@keyframes sf{0%{opacity:0}3%{opacity:1}18%{opacity:1}22%{opacity:0}100%{opacity:0}}
+.bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.2s}
+.bg-video.ready{opacity:1}
+.veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,6,15,.62),rgba(9,6,15,.74) 45%,rgba(9,6,15,.88))}
+/* header */
+.header{position:sticky;top:0;z-index:60;background:rgba(9,6,15,.6);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:22px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--display);font-weight:600;font-size:20px}
+.brand svg{width:30px;height:30px}
+.nav-links{display:flex;gap:22px;margin-left:14px}
+.nav-links a{color:var(--muted);font-size:15px;font-weight:500;padding:6px 0;position:relative}
+.nav-links a:hover,.nav-links a.on{color:#fff}
+.nav-links a.on::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--sun)}
+.nav-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;padding:11px 18px;border-radius:999px;cursor:pointer;border:1px solid transparent}
+.btn--sun{background:linear-gradient(180deg,var(--sun-light),var(--sun));color:#241500}
+.btn svg{width:17px;height:17px}
+.burger{display:none;background:none;border:0;cursor:pointer;padding:6px}.burger span{display:block;width:24px;height:2px;background:#fff;margin:5px 0}
+/* page hero */
+.phero{padding:clamp(54px,8vw,96px) 0 18px}
+.phero h1{font-size:clamp(34px,6vw,60px);margin:14px 0 0}
+.phero p{color:var(--muted);max-width:60ch;margin-top:16px;font-size:17px}
+.section{padding:clamp(34px,5vw,56px) 0}
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 26px}
+.chip{padding:9px 18px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--muted);font:inherit;font-size:14px;font-weight:500;cursor:pointer;-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+.chip:hover{color:#fff}.chip.on{background:var(--sun);border-color:var(--sun);color:#241500}
+/* gallery grid (masonry via columns) */
+.gal{column-count:4;column-gap:14px}
+@media(max-width:980px){.gal{column-count:3}}
+@media(max-width:680px){.gal{column-count:2}}
+.gal .cell{break-inside:avoid;margin:0 0 14px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0d0a16;cursor:zoom-in;position:relative;display:block}
+.gal .cell img{width:100%;height:auto;display:block;transition:transform .4s ease}
+.gal .cell:hover img{transform:scale(1.05)}
+.gal .tag{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:rgba(0,0,0,.55);color:#fff;opacity:0;transition:.2s}
+.gal .cell:hover .tag{opacity:1}
+.count{color:var(--muted);font-size:13px;margin-bottom:18px;font-family:var(--mono)}
+/* fixed grid for factory */
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:880px){.fgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+.fgrid .cell{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0d0a16;cursor:zoom-in;aspect-ratio:4/3}
+.fgrid .cell img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.fgrid .cell:hover img{transform:scale(1.06)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0 8px}
+@media(max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
+.step{border:1px solid var(--line);border-radius:var(--r);padding:20px;background:var(--panel);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
+.step .n{font-family:var(--mono);font-size:13px;color:var(--sun)}
+.step h3{font-size:17px;margin-top:10px}.step p{color:var(--muted);font-size:14px;margin:8px 0 0}
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.lb.open{opacity:1;pointer-events:auto}
+.lb-bg{position:absolute;inset:0;background:rgba(5,3,12,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lb img{position:relative;z-index:1;max-width:92vw;max-height:88vh;border-radius:10px;box-shadow:0 30px 80px -20px #000;background:#111}
+.lb button{position:absolute;z-index:2;border:0;background:rgba(0,0,0,.5);color:#fff;cursor:pointer;border-radius:50%}
+.lb .x{top:18px;right:22px;width:44px;height:44px;font-size:26px}
+.lb .nav-btn{top:50%;transform:translateY(-50%);width:50px;height:50px;font-size:28px}
+.lb .prev{left:18px}.lb .next{right:18px}
+.lb button:hover{background:rgba(0,0,0,.78)}
+/* footer */
+.footer{border-top:1px solid var(--line);background:rgba(0,0,0,.3);margin-top:40px}
+.footer .wrap{padding:40px 24px 26px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px;align-items:center}
+.footer .muted{color:var(--muted);font-size:13px}
+@media(max-width:720px){.nav-links{display:none;position:absolute;top:68px;left:0;right:0;flex-direction:column;gap:0;background:rgba(9,6,15,.96);padding:8px 24px 16px;border-bottom:1px solid var(--line)}.nav-links.open{display:flex}.nav-links a{padding:12px 0;border-bottom:1px solid var(--line)}.burger{display:block}}
+@media(prefers-reduced-motion:reduce){.site-bg .slide{animation:none}.site-bg .slide:nth-child(1){opacity:1}}
+</style></head>
+<body>
+<div class="site-bg" aria-hidden="true">
+  <div class="slide" style="background-image:url('assets/farm/farm1.jpg')"></div>
+  <div class="slide" style="background-image:url('assets/farm/farm2.jpg')"></div>
+  <div class="slide" style="background-image:url('assets/farm/farm3.jpg')"></div>
+  <div class="slide" style="background-image:url('assets/farm/farm4.jpg')"></div>
+  <div class="slide" style="background-image:url('assets/farm/farm5.jpg')"></div>
+  <video id="bgVideo" class="bg-video" autoplay muted loop playsinline poster="assets/video/poster.jpg"><source src="assets/video/background.mp4" type="video/mp4"></video>
+  <div class="veil"></div>
+</div>
+<header class="header"><div class="wrap nav">
+  <a href="index_restar.html" class="brand"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="26" r="9" fill="#F7A81B"/><g stroke="#F7A81B" stroke-width="2.4" stroke-linecap="round"><path d="M24 6v6M24 40v2M9 26H4M44 26h-5M13 15l-4-4M39 11l-4 4M13 37l-4 4M39 41l-4-4"/></g><path d="M3 40h42" stroke="#1E6FB8" stroke-width="3" stroke-linecap="round"/></svg>Restar Solar</a>
+  <nav class="nav-links" id="navLinks">
+    <a href="index_restar.html#products">Products</a>
+    <a href="index_restar.html#certs">Certificates</a>
+    <a href="factory.html" >Factory</a>
+    <a href="gallery.html" class="on">Gallery</a>
+    <a href="index_restar.html#contact">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <a class="btn btn--sun" href="https://wa.me/237600000000" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>WhatsApp</a>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</div></header>
+
+<section class="wrap phero">
+  <span class="eyebrow">Photo library</span>
+  <h1>Full gallery</h1>
+  <p>Every product, project, factory and certificate photo in one place — 336 images. Use the filters below and tap any photo to view it full size.</p>
+</section>
+<section class="wrap section">
+  <div class="filters" id="filters">
+    <button class="chip on" data-c="all">All</button>
+    <button class="chip" data-c="product">Products</button>
+    <button class="chip" data-c="project">Projects</button>
+    <button class="chip" data-c="factory">Factory</button>
+    <button class="chip" data-c="company">Company</button>
+    <button class="chip" data-c="cert">Certificates</button>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="gal" id="gal"></div>
+</section>
+<footer class="footer"><div class="wrap">
+  <span class="brand" style="font-size:18px"><svg viewBox="0 0 48 48" fill="none" style="width:26px;height:26px"><circle cx="24" cy="26" r="9" fill="#F7A81B"/><path d="M3 40h42" stroke="#1E6FB8" stroke-width="3" stroke-linecap="round"/></svg>Restar Solar</span>
+  <span class="muted">Reliable solar power for Cameroon · Supply &amp; installation</span>
+  <a class="muted" href="index_restar.html">← Back to home</a>
+</div></footer>
+<div class="lb" id="lb"><div class="lb-bg" id="lbBg"></div><button class="x" id="lbX" aria-label="Close">&times;</button><button class="nav-btn prev" id="lbPrev" aria-label="Previous">&#8249;</button><img id="lbImg" alt=""><button class="nav-btn next" id="lbNext" aria-label="Next">&#8250;</button></div>
+<script>
+var burger=document.getElementById('burger'),nl=document.getElementById('navLinks');
+if(burger)burger.onclick=function(){nl.classList.toggle('open')};
+var bg=document.getElementById('bgVideo');if(bg){var sh=function(){if(bg.readyState>=2&&bg.videoWidth>0)bg.classList.add('ready')};bg.addEventListener('loadeddata',sh);bg.addEventListener('canplay',sh);}
+
+var ITEMS=[{i:6,c:"product"},{i:10,c:"product"},{i:11,c:"product"},{i:66,c:"product"},{i:68,c:"product"},{i:69,c:"product"},{i:75,c:"product"},{i:77,c:"product"},{i:78,c:"product"},{i:83,c:"product"},{i:84,c:"product"},{i:86,c:"product"},{i:88,c:"product"},{i:89,c:"product"},{i:90,c:"product"},{i:91,c:"product"},{i:92,c:"product"},{i:93,c:"product"},{i:95,c:"product"},{i:96,c:"product"},{i:97,c:"product"},{i:99,c:"product"},{i:100,c:"product"},{i:101,c:"product"},{i:103,c:"product"},{i:104,c:"product"},{i:106,c:"product"},{i:107,c:"product"},{i:109,c:"product"},{i:110,c:"product"},{i:112,c:"product"},{i:113,c:"product"},{i:114,c:"product"},{i:116,c:"product"},{i:117,c:"product"},{i:118,c:"product"},{i:120,c:"product"},{i:122,c:"product"},{i:123,c:"product"},{i:124,c:"product"},{i:125,c:"product"},{i:127,c:"product"},{i:128,c:"product"},{i:129,c:"product"},{i:131,c:"product"},{i:132,c:"product"},{i:133,c:"product"},{i:134,c:"product"},{i:136,c:"product"},{i:137,c:"product"},{i:138,c:"product"},{i:140,c:"product"},{i:141,c:"product"},{i:142,c:"product"},{i:144,c:"product"},{i:145,c:"product"},{i:146,c:"product"},{i:147,c:"product"},{i:149,c:"product"},{i:150,c:"product"},{i:152,c:"product"},{i:154,c:"product"},{i:156,c:"product"},{i:158,c:"product"},{i:159,c:"product"},{i:160,c:"product"},{i:162,c:"product"},{i:163,c:"product"},{i:164,c:"product"},{i:165,c:"product"},{i:167,c:"product"},{i:168,c:"product"},{i:170,c:"product"},{i:171,c:"product"},{i:172,c:"product"},{i:176,c:"product"},{i:178,c:"product"},{i:180,c:"product"},{i:182,c:"product"},{i:184,c:"product"},{i:187,c:"product"},{i:188,c:"product"},{i:189,c:"product"},{i:190,c:"product"},{i:192,c:"product"},{i:193,c:"product"},{i:194,c:"product"},{i:196,c:"product"},{i:197,c:"product"},{i:198,c:"product"},{i:200,c:"product"},{i:201,c:"product"},{i:202,c:"product"},{i:203,c:"product"},{i:205,c:"product"},{i:206,c:"product"},{i:207,c:"product"},{i:209,c:"product"},{i:210,c:"product"},{i:211,c:"product"},{i:213,c:"product"},{i:214,c:"product"},{i:215,c:"product"},{i:216,c:"product"},{i:218,c:"product"},{i:219,c:"product"},{i:221,c:"product"},{i:223,c:"product"},{i:224,c:"product"},{i:225,c:"product"},{i:227,c:"product"},{i:228,c:"product"},{i:229,c:"product"},{i:231,c:"product"},{i:232,c:"product"},{i:233,c:"product"},{i:235,c:"product"},{i:236,c:"product"},{i:237,c:"product"},{i:239,c:"product"},{i:240,c:"product"},{i:241,c:"product"},{i:243,c:"product"},{i:244,c:"product"},{i:245,c:"product"},{i:247,c:"product"},{i:248,c:"product"},{i:249,c:"product"},{i:251,c:"product"},{i:252,c:"product"},{i:253,c:"product"},{i:254,c:"product"},{i:255,c:"product"},{i:256,c:"product"},{i:257,c:"product"},{i:258,c:"product"},{i:265,c:"product"},{i:269,c:"product"},{i:270,c:"product"},{i:271,c:"product"},{i:274,c:"product"},{i:275,c:"product"},{i:276,c:"product"},{i:277,c:"product"},{i:293,c:"product"},{i:294,c:"product"},{i:295,c:"product"},{i:298,c:"product"},{i:299,c:"product"},{i:300,c:"product"},{i:302,c:"product"},{i:303,c:"product"},{i:304,c:"product"},{i:305,c:"product"},{i:306,c:"product"},{i:308,c:"product"},{i:309,c:"product"},{i:310,c:"product"},{i:311,c:"product"},{i:312,c:"product"},{i:318,c:"product"},{i:324,c:"product"},{i:328,c:"product"},{i:330,c:"product"},{i:331,c:"product"},{i:333,c:"product"},{i:335,c:"product"},{i:336,c:"product"},{i:337,c:"product"},{i:339,c:"product"},{i:341,c:"product"},{i:343,c:"product"},{i:344,c:"product"},{i:346,c:"product"},{i:354,c:"product"},{i:364,c:"product"},{i:375,c:"product"},{i:377,c:"product"},{i:378,c:"product"},{i:380,c:"product"},{i:381,c:"product"},{i:383,c:"product"},{i:385,c:"product"},{i:387,c:"product"},{i:397,c:"product"},{i:398,c:"product"},{i:399,c:"product"},{i:400,c:"product"},{i:401,c:"product"},{i:402,c:"product"},{i:404,c:"product"},{i:407,c:"product"},{i:408,c:"product"},{i:410,c:"product"},{i:412,c:"product"},{i:414,c:"product"},{i:416,c:"product"},{i:418,c:"product"},{i:420,c:"product"},{i:422,c:"product"},{i:423,c:"product"},{i:424,c:"product"},{i:426,c:"product"},{i:427,c:"product"},{i:428,c:"product"},{i:430,c:"product"},{i:431,c:"product"},{i:432,c:"product"},{i:433,c:"product"},{i:434,c:"product"},{i:436,c:"product"},{i:437,c:"product"},{i:438,c:"product"},{i:440,c:"product"},{i:443,c:"product"},{i:444,c:"product"},{i:447,c:"product"},{i:451,c:"product"},{i:452,c:"product"},{i:453,c:"product"},{i:455,c:"product"},{i:469,c:"product"},{i:470,c:"product"},{i:471,c:"product"},{i:473,c:"product"},{i:474,c:"product"},{i:475,c:"product"},{i:480,c:"product"},{i:481,c:"product"},{i:482,c:"product"},{i:484,c:"product"},{i:486,c:"product"},{i:488,c:"product"},{i:489,c:"product"},{i:491,c:"product"},{i:3,c:"project"},{i:4,c:"project"},{i:15,c:"project"},{i:16,c:"project"},{i:17,c:"project"},{i:18,c:"project"},{i:19,c:"project"},{i:21,c:"project"},{i:22,c:"project"},{i:23,c:"project"},{i:25,c:"project"},{i:26,c:"project"},{i:27,c:"project"},{i:28,c:"project"},{i:31,c:"project"},{i:32,c:"project"},{i:259,c:"project"},{i:260,c:"project"},{i:261,c:"project"},{i:262,c:"project"},{i:263,c:"project"},{i:264,c:"project"},{i:268,c:"project"},{i:278,c:"project"},{i:279,c:"project"},{i:280,c:"project"},{i:281,c:"project"},{i:282,c:"project"},{i:283,c:"project"},{i:284,c:"project"},{i:285,c:"project"},{i:286,c:"project"},{i:287,c:"project"},{i:288,c:"project"},{i:289,c:"project"},{i:290,c:"project"},{i:291,c:"project"},{i:292,c:"project"},{i:497,c:"project"},{i:1,c:"factory"},{i:41,c:"factory"},{i:42,c:"factory"},{i:44,c:"factory"},{i:45,c:"factory"},{i:46,c:"factory"},{i:47,c:"factory"},{i:48,c:"factory"},{i:50,c:"factory"},{i:51,c:"factory"},{i:52,c:"factory"},{i:53,c:"factory"},{i:54,c:"factory"},{i:55,c:"factory"},{i:56,c:"factory"},{i:57,c:"factory"},{i:58,c:"factory"},{i:59,c:"factory"},{i:60,c:"factory"},{i:61,c:"factory"},{i:62,c:"factory"},{i:13,c:"company"},{i:14,c:"company"},{i:20,c:"company"},{i:345,c:"company"},{i:389,c:"company"},{i:390,c:"company"},{i:391,c:"company"},{i:392,c:"company"},{i:393,c:"company"},{i:394,c:"company"},{i:395,c:"company"},{i:396,c:"company"},{i:449,c:"company"},{i:450,c:"company"},{i:458,c:"company"},{i:459,c:"company"},{i:460,c:"company"},{i:461,c:"company"},{i:462,c:"company"},{i:463,c:"company"},{i:464,c:"company"},{i:465,c:"company"},{i:467,c:"company"},{i:468,c:"company"},{i:476,c:"company"},{i:477,c:"company"},{i:478,c:"company"},{i:479,c:"company"},{i:494,c:"company"},{i:495,c:"company"},{i:496,c:"company"},{i:2,c:"cert"},{i:33,c:"cert"},{i:34,c:"cert"},{i:35,c:"cert"},{i:36,c:"cert"},{i:37,c:"cert"},{i:38,c:"cert"},{i:39,c:"cert"},{i:40,c:"cert"},{i:446,c:"cert"}];
+var LABEL={product:"Product",project:"Project",factory:"Factory",company:"Company",cert:"Certificate"};
+var gal=document.getElementById('gal'),countEl=document.getElementById('count'),active='all';
+var view=[];
+function pad(n){return ('00'+n).slice(-3)}
+function render(){
+  view=ITEMS.filter(function(x){return active==='all'||x.c===active});
+  gal.innerHTML=view.map(function(x,idx){return '<a class="cell" data-k="'+idx+'"><img loading="lazy" src="assets/gallery/thumb/'+pad(x.i)+'.jpg" alt="Restar Solar '+LABEL[x.c]+'"><span class="tag">'+LABEL[x.c]+'</span></a>'}).join('');
+  countEl.textContent=view.length+' images';
+  [].slice.call(gal.querySelectorAll('.cell')).forEach(function(c){c.onclick=function(){open(+c.getAttribute('data-k'))}});
+}
+document.querySelectorAll('.chip').forEach(function(ch){ch.onclick=function(){active=ch.getAttribute('data-c');document.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===ch)});render();}});
+var cur=0,lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg');
+function open(k){cur=k;lbImg.src='assets/gallery/full/'+pad(view[k].i)+'.jpg';lb.classList.add('open');document.body.style.overflow='hidden';}
+function close(){lb.classList.remove('open');document.body.style.overflow='';}
+function step(d){cur=(cur+d+view.length)%view.length;lbImg.src='assets/gallery/full/'+pad(view[cur].i)+'.jpg';}
+document.getElementById('lbX').onclick=close;document.getElementById('lbBg').onclick=close;
+document.getElementById('lbPrev').onclick=function(){step(-1)};document.getElementById('lbNext').onclick=function(){step(1)};
+document.addEventListener('keydown',function(e){if(!lb.classList.contains('open'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1);});
+render();
+
+</script>
+</body></html>
