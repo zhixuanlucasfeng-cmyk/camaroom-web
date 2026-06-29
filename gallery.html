@@ -44,9 +44,15 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
 .phero p{color:var(--muted);max-width:60ch;margin-top:16px;font-size:17px}
 .section{padding:clamp(34px,5vw,56px) 0}
 /* filters */
-.filters{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 26px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 32px}
 .chip{padding:9px 18px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--muted);font:inherit;font-size:14px;font-weight:500;cursor:pointer;-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass)}
 .chip:hover{color:#fff}.chip.on{background:var(--sun);border-color:var(--sun);color:#241500}
+/* section headers */
+.sec-block{margin-bottom:48px}
+.sec-block:last-child{margin-bottom:0}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.sec-head h2{font-size:22px;margin:0}
+.sec-head .sec-count{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:3px 10px;border-radius:99px}
 /* gallery grid (masonry via columns) */
 .gal{column-count:4;column-gap:14px}
 @media(max-width:980px){.gal{column-count:3}}
@@ -126,7 +132,7 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
     <button class="chip" data-c="cert">Certificates</button>
   </div>
   <div class="count" id="count"></div>
-  <div class="gal" id="gal"></div>
+  <div id="gal-root"></div>
 </section>
 <footer class="footer"><div class="wrap">
   <span class="brand" style="font-size:18px"><svg viewBox="0 0 48 48" fill="none" style="width:26px;height:26px"><circle cx="24" cy="26" r="9" fill="#F7A81B"/><path d="M3 40h42" stroke="#1E6FB8" stroke-width="3" stroke-linecap="round"/></svg>Restar Solar</span>
@@ -140,21 +146,68 @@ if(burger)burger.onclick=function(){nl.classList.toggle('open')};
 var bg=document.getElementById('bgVideo');if(bg){var sh=function(){if(bg.readyState>=2&&bg.videoWidth>0)bg.classList.add('ready')};bg.addEventListener('loadeddata',sh);bg.addEventListener('canplay',sh);}
 
 var ITEMS=[{i:6,c:"product"},{i:10,c:"product"},{i:11,c:"product"},{i:66,c:"product"},{i:68,c:"product"},{i:69,c:"product"},{i:75,c:"product"},{i:77,c:"product"},{i:78,c:"product"},{i:83,c:"product"},{i:84,c:"product"},{i:86,c:"product"},{i:88,c:"product"},{i:89,c:"product"},{i:90,c:"product"},{i:91,c:"product"},{i:92,c:"product"},{i:93,c:"product"},{i:95,c:"product"},{i:96,c:"product"},{i:97,c:"product"},{i:99,c:"product"},{i:100,c:"product"},{i:101,c:"product"},{i:103,c:"product"},{i:104,c:"product"},{i:106,c:"product"},{i:107,c:"product"},{i:109,c:"product"},{i:110,c:"product"},{i:112,c:"product"},{i:113,c:"product"},{i:114,c:"product"},{i:116,c:"product"},{i:117,c:"product"},{i:118,c:"product"},{i:120,c:"product"},{i:122,c:"product"},{i:123,c:"product"},{i:124,c:"product"},{i:125,c:"product"},{i:127,c:"product"},{i:128,c:"product"},{i:129,c:"product"},{i:131,c:"product"},{i:132,c:"product"},{i:133,c:"product"},{i:134,c:"product"},{i:136,c:"product"},{i:137,c:"product"},{i:138,c:"product"},{i:140,c:"product"},{i:141,c:"product"},{i:142,c:"product"},{i:144,c:"product"},{i:145,c:"product"},{i:146,c:"product"},{i:147,c:"product"},{i:149,c:"product"},{i:150,c:"product"},{i:152,c:"product"},{i:154,c:"product"},{i:156,c:"product"},{i:158,c:"product"},{i:159,c:"product"},{i:160,c:"product"},{i:162,c:"product"},{i:163,c:"product"},{i:164,c:"product"},{i:165,c:"product"},{i:167,c:"product"},{i:168,c:"product"},{i:170,c:"product"},{i:171,c:"product"},{i:172,c:"product"},{i:176,c:"product"},{i:178,c:"product"},{i:180,c:"product"},{i:182,c:"product"},{i:184,c:"product"},{i:187,c:"product"},{i:188,c:"product"},{i:189,c:"product"},{i:190,c:"product"},{i:192,c:"product"},{i:193,c:"product"},{i:194,c:"product"},{i:196,c:"product"},{i:197,c:"product"},{i:198,c:"product"},{i:200,c:"product"},{i:201,c:"product"},{i:202,c:"product"},{i:203,c:"product"},{i:205,c:"product"},{i:206,c:"product"},{i:207,c:"product"},{i:209,c:"product"},{i:210,c:"product"},{i:211,c:"product"},{i:213,c:"product"},{i:214,c:"product"},{i:215,c:"product"},{i:216,c:"product"},{i:218,c:"product"},{i:219,c:"product"},{i:221,c:"product"},{i:223,c:"product"},{i:224,c:"product"},{i:225,c:"product"},{i:227,c:"product"},{i:228,c:"product"},{i:229,c:"product"},{i:231,c:"product"},{i:232,c:"product"},{i:233,c:"product"},{i:235,c:"product"},{i:236,c:"product"},{i:237,c:"product"},{i:239,c:"product"},{i:240,c:"product"},{i:241,c:"product"},{i:243,c:"product"},{i:244,c:"product"},{i:245,c:"product"},{i:247,c:"product"},{i:248,c:"product"},{i:249,c:"product"},{i:251,c:"product"},{i:252,c:"product"},{i:253,c:"product"},{i:254,c:"product"},{i:255,c:"product"},{i:256,c:"product"},{i:257,c:"product"},{i:258,c:"product"},{i:265,c:"product"},{i:269,c:"product"},{i:270,c:"product"},{i:271,c:"product"},{i:274,c:"product"},{i:275,c:"product"},{i:276,c:"product"},{i:277,c:"product"},{i:293,c:"product"},{i:294,c:"product"},{i:295,c:"product"},{i:298,c:"product"},{i:299,c:"product"},{i:300,c:"product"},{i:302,c:"product"},{i:303,c:"product"},{i:304,c:"product"},{i:305,c:"product"},{i:306,c:"product"},{i:308,c:"product"},{i:309,c:"product"},{i:310,c:"product"},{i:311,c:"product"},{i:312,c:"product"},{i:318,c:"product"},{i:324,c:"product"},{i:328,c:"product"},{i:330,c:"product"},{i:331,c:"product"},{i:333,c:"product"},{i:335,c:"product"},{i:336,c:"product"},{i:337,c:"product"},{i:339,c:"product"},{i:341,c:"product"},{i:343,c:"product"},{i:344,c:"product"},{i:346,c:"product"},{i:354,c:"product"},{i:364,c:"product"},{i:375,c:"product"},{i:377,c:"product"},{i:378,c:"product"},{i:380,c:"product"},{i:381,c:"product"},{i:383,c:"product"},{i:385,c:"product"},{i:387,c:"product"},{i:397,c:"product"},{i:398,c:"product"},{i:399,c:"product"},{i:400,c:"product"},{i:401,c:"product"},{i:402,c:"product"},{i:404,c:"product"},{i:407,c:"product"},{i:408,c:"product"},{i:410,c:"product"},{i:412,c:"product"},{i:414,c:"product"},{i:416,c:"product"},{i:418,c:"product"},{i:420,c:"product"},{i:422,c:"product"},{i:423,c:"product"},{i:424,c:"product"},{i:426,c:"product"},{i:427,c:"product"},{i:428,c:"product"},{i:430,c:"product"},{i:431,c:"product"},{i:432,c:"product"},{i:433,c:"product"},{i:434,c:"product"},{i:436,c:"product"},{i:437,c:"product"},{i:438,c:"product"},{i:440,c:"product"},{i:443,c:"product"},{i:444,c:"product"},{i:447,c:"product"},{i:451,c:"product"},{i:452,c:"product"},{i:453,c:"product"},{i:455,c:"product"},{i:469,c:"product"},{i:470,c:"product"},{i:471,c:"product"},{i:473,c:"product"},{i:474,c:"product"},{i:475,c:"product"},{i:480,c:"product"},{i:481,c:"product"},{i:482,c:"product"},{i:484,c:"product"},{i:486,c:"product"},{i:488,c:"product"},{i:489,c:"product"},{i:491,c:"product"},{i:3,c:"project"},{i:4,c:"project"},{i:15,c:"project"},{i:16,c:"project"},{i:17,c:"project"},{i:18,c:"project"},{i:19,c:"project"},{i:21,c:"project"},{i:22,c:"project"},{i:23,c:"project"},{i:25,c:"project"},{i:26,c:"project"},{i:27,c:"project"},{i:28,c:"project"},{i:31,c:"project"},{i:32,c:"project"},{i:259,c:"project"},{i:260,c:"project"},{i:261,c:"project"},{i:262,c:"project"},{i:263,c:"project"},{i:264,c:"project"},{i:268,c:"project"},{i:278,c:"project"},{i:279,c:"project"},{i:280,c:"project"},{i:281,c:"project"},{i:282,c:"project"},{i:283,c:"project"},{i:284,c:"project"},{i:285,c:"project"},{i:286,c:"project"},{i:287,c:"project"},{i:288,c:"project"},{i:289,c:"project"},{i:290,c:"project"},{i:291,c:"project"},{i:292,c:"project"},{i:497,c:"project"},{i:1,c:"factory"},{i:41,c:"factory"},{i:42,c:"factory"},{i:44,c:"factory"},{i:45,c:"factory"},{i:46,c:"factory"},{i:47,c:"factory"},{i:48,c:"factory"},{i:50,c:"factory"},{i:51,c:"factory"},{i:52,c:"factory"},{i:53,c:"factory"},{i:54,c:"factory"},{i:55,c:"factory"},{i:56,c:"factory"},{i:57,c:"factory"},{i:58,c:"factory"},{i:59,c:"factory"},{i:60,c:"factory"},{i:61,c:"factory"},{i:62,c:"factory"},{i:13,c:"company"},{i:14,c:"company"},{i:20,c:"company"},{i:345,c:"company"},{i:389,c:"company"},{i:390,c:"company"},{i:391,c:"company"},{i:392,c:"company"},{i:393,c:"company"},{i:394,c:"company"},{i:395,c:"company"},{i:396,c:"company"},{i:449,c:"company"},{i:450,c:"company"},{i:458,c:"company"},{i:459,c:"company"},{i:460,c:"company"},{i:461,c:"company"},{i:462,c:"company"},{i:463,c:"company"},{i:464,c:"company"},{i:465,c:"company"},{i:467,c:"company"},{i:468,c:"company"},{i:476,c:"company"},{i:477,c:"company"},{i:478,c:"company"},{i:479,c:"company"},{i:494,c:"company"},{i:495,c:"company"},{i:496,c:"company"},{i:2,c:"cert"},{i:33,c:"cert"},{i:34,c:"cert"},{i:35,c:"cert"},{i:36,c:"cert"},{i:37,c:"cert"},{i:38,c:"cert"},{i:39,c:"cert"},{i:40,c:"cert"},{i:446,c:"cert"}];
-var LABEL={product:"Product",project:"Project",factory:"Factory",company:"Company",cert:"Certificate"};
-var gal=document.getElementById('gal'),countEl=document.getElementById('count'),active='all';
-var view=[];
+var LABEL={product:"Products",project:"Projects",factory:"Factory",company:"Company",cert:"Certificates"};
+var ICON={product:"📦",project:"🏗️",factory:"🏭",company:"🏢",cert:"🏅"};
+var CATS=["product","project","factory","company","cert"];
+var root=document.getElementById('gal-root'),countEl=document.getElementById('count'),active='all';
+var allView=[];
 function pad(n){return ('00'+n).slice(-3)}
+
 function render(){
-  view=ITEMS.filter(function(x){return active==='all'||x.c===active});
-  gal.innerHTML=view.map(function(x,idx){return '<a class="cell" data-k="'+idx+'"><img loading="lazy" src="assets/gallery/thumb/'+pad(x.i)+'.jpg" alt="Restar Solar '+LABEL[x.c]+'"><span class="tag">'+LABEL[x.c]+'</span></a>'}).join('');
-  countEl.textContent=view.length+' images';
-  [].slice.call(gal.querySelectorAll('.cell')).forEach(function(c){c.onclick=function(){open(+c.getAttribute('data-k'))}});
+  root.innerHTML='';
+  allView=[];
+
+  if(active==='all'){
+    // Grouped sections with headers
+    CATS.forEach(function(cat){
+      var items=ITEMS.filter(function(x){return x.c===cat});
+      if(!items.length)return;
+      var offset=allView.length;
+      allView=allView.concat(items);
+
+      var block=document.createElement('div');
+      block.className='sec-block';
+      block.innerHTML='<div class="sec-head"><h2>'+ICON[cat]+' '+LABEL[cat]+'</h2><span class="sec-count">'+items.length+' photos</span></div>';
+
+      var grid=document.createElement('div');
+      grid.className='gal';
+      grid.innerHTML=items.map(function(x,idx){
+        return '<a class="cell" data-k="'+(offset+idx)+'"><img loading="lazy" src="assets/gallery/thumb/'+pad(x.i)+'.jpg" alt="Restar Solar '+LABEL[x.c]+'"></a>';
+      }).join('');
+      block.appendChild(grid);
+      root.appendChild(block);
+    });
+    countEl.textContent=allView.length+' images across '+CATS.length+' categories';
+  } else {
+    // Single category
+    var items=ITEMS.filter(function(x){return x.c===active});
+    allView=items;
+    var grid=document.createElement('div');
+    grid.className='gal';
+    grid.innerHTML=items.map(function(x,idx){
+      return '<a class="cell" data-k="'+idx+'"><img loading="lazy" src="assets/gallery/thumb/'+pad(x.i)+'.jpg" alt="Restar Solar '+LABEL[x.c]+'"><span class="tag">'+LABEL[x.c]+'</span></a>';
+    }).join('');
+    root.appendChild(grid);
+    countEl.textContent=items.length+' images';
+  }
+
+  [].slice.call(root.querySelectorAll('.cell')).forEach(function(c){
+    c.onclick=function(){open(+c.getAttribute('data-k'))};
+  });
 }
-document.querySelectorAll('.chip').forEach(function(ch){ch.onclick=function(){active=ch.getAttribute('data-c');document.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===ch)});render();}});
+
+document.querySelectorAll('.chip').forEach(function(ch){
+  ch.onclick=function(){
+    active=ch.getAttribute('data-c');
+    document.querySelectorAll('.chip').forEach(function(x){x.classList.toggle('on',x===ch)});
+    render();
+  };
+});
+
 var cur=0,lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg');
-function open(k){cur=k;lbImg.src='assets/gallery/full/'+pad(view[k].i)+'.jpg';lb.classList.add('open');document.body.style.overflow='hidden';}
+function open(k){cur=k;lbImg.src='assets/gallery/full/'+pad(allView[k].i)+'.jpg';lb.classList.add('open');document.body.style.overflow='hidden';}
 function close(){lb.classList.remove('open');document.body.style.overflow='';}
-function step(d){cur=(cur+d+view.length)%view.length;lbImg.src='assets/gallery/full/'+pad(view[cur].i)+'.jpg';}
+function step(d){cur=(cur+d+allView.length)%allView.length;lbImg.src='assets/gallery/full/'+pad(allView[cur].i)+'.jpg';}
 document.getElementById('lbX').onclick=close;document.getElementById('lbBg').onclick=close;
 document.getElementById('lbPrev').onclick=function(){step(-1)};document.getElementById('lbNext').onclick=function(){step(1)};
 document.addEventListener('keydown',function(e){if(!lb.classList.contains('open'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1);});
