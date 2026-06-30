@@ -308,14 +308,7 @@ img{max-width:100%;display:block}
 <header class="header">
   <div class="wrap nav">
     <a href="#top" class="brand" aria-label="Restar Solar home">
-      <svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <circle cx="24" cy="26" r="9" fill="#F7A81B"/>
-        <g stroke="#F7A81B" stroke-width="2.4" stroke-linecap="round">
-          <path d="M24 6v6M24 40v2M9 26H4M44 26h-5M13 15l-4-4M39 11l-4 4M13 37l-4 4M39 41l-4-4"/>
-        </g>
-        <path d="M3 40h42" stroke="#1E6FB8" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-      Restar Solar
+      <img src="logo.webp" alt="Restar Solar" style="height:44px;width:auto;object-fit:contain;">
     </a>
     <nav class="nav-links" id="navLinks">
       <a href="#offer" data-i18n="nav.products">Products</a>
@@ -340,6 +333,9 @@ img{max-width:100%;display:block}
   </div>
 </header>
 <section class="hero" id="top">
+  <video autoplay muted loop playsinline aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.45;pointer-events:none;">
+    <source src="hero-bg.mp4" type="video/mp4">
+  </video>
   <div class="hero-sky" data-depth="6" aria-hidden="true"></div>
   <div class="hero-rays2" data-depth="9" aria-hidden="true"></div>
   <div class="hero-haze" data-depth="14" aria-hidden="true"></div>
@@ -490,8 +486,7 @@ img{max-width:100%;display:block}
     <div class="footer-top">
       <div>
         <div class="brand">
-          <svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="26" r="9" fill="#F7A81B"/><g stroke="#F7A81B" stroke-width="2.4" stroke-linecap="round"><path d="M24 6v6M24 40v2M9 26H4M44 26h-5M13 15l-4-4M39 11l-4 4M13 37l-4 4M39 41l-4-4"/></g><path d="M3 40h42" stroke="#1E6FB8" stroke-width="3" stroke-linecap="round"/></svg>
-          Restar Solar
+          <img src="logo.webp" alt="Restar Solar" style="height:40px;width:auto;object-fit:contain;filter:brightness(0) invert(1);">
         </div>
         <p class="footer-tag" data-i18n="footer.tag">Reliable solar power for Cameroon's homes, shops, and businesses.</p>
       </div>
@@ -1142,6 +1137,144 @@ observeReveals();
   for(var i=0;i<N;i++)dots.push({x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.5+0.4)*dpr,vx:(Math.random()-0.5)*0.12*dpr,vy:(Math.random()-0.5)*0.12*dpr,a:Math.random()*0.5+0.15,c:pal[(Math.random()*pal.length)|0]});
   (function tick(){x.clearRect(0,0,w,h);for(var i=0;i<dots.length;i++){var d=dots[i];d.x+=d.vx;d.y+=d.vy;if(d.x<0)d.x=w;if(d.x>w)d.x=0;if(d.y<0)d.y=h;if(d.y>h)d.y=0;x.beginPath();x.arc(d.x,d.y,d.r,0,6.283);x.fillStyle=d.c+d.a+")";x.fill();}requestAnimationFrame(tick);})();
   addEventListener("resize",size);
+})();
+</script>
+<!-- AI Customer Service Widget -->
+<script>
+(function(){
+  var API = 'http://localhost:8000/api/chat';
+  var SESSION = 'rs-' + Math.random().toString(36).slice(2);
+
+  // Build widget HTML
+  var el = document.createElement('div');
+  el.innerHTML = [
+    '<div id="rs-bubble" style="position:fixed;bottom:24px;right:24px;width:58px;height:58px;',
+    'background:linear-gradient(180deg,#FFC24D,#F7A81B);border-radius:50%;display:flex;',
+    'align-items:center;justify-content:center;cursor:pointer;',
+    'box-shadow:0 4px 20px rgba(247,168,27,.5);z-index:9999;transition:transform .2s;">',
+    '<svg width="26" height="26" fill="#241500" viewBox="0 0 24 24">',
+    '<path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg></div>',
+
+    '<div id="rs-win" style="display:none;position:fixed;z-index:9998;',
+    'bottom:92px;right:24px;width:360px;height:520px;',
+    'background:#09060F;border-radius:20px;flex-direction:column;overflow:hidden;',
+    'box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);">',
+
+    // Header
+    '<div style="background:linear-gradient(180deg,#FFC24D,#F7A81B);padding:16px 18px;',
+    'display:flex;justify-content:space-between;align-items:center;">',
+    '<div style="display:flex;align-items:center;gap:10px;">',
+    '<div style="width:9px;height:9px;background:#241500;border-radius:50%;opacity:.6;"></div>',
+    '<span style="font-weight:700;font-size:15px;color:#241500;">Restar Solar Assistant</span></div>',
+    '<button id="rs-close" style="background:none;border:none;color:#241500;font-size:22px;',
+    'cursor:pointer;line-height:1;opacity:.7;">&#x2715;</button></div>',
+
+    // Messages
+    '<div id="rs-msgs" style="flex:1;overflow-y:auto;padding:16px;display:flex;',
+    'flex-direction:column;gap:10px;"></div>',
+
+    // Typing indicator
+    '<div id="rs-typing" style="display:none;padding:0 18px 8px;',
+    'font-size:12px;color:rgba(255,255,255,.4);">Thinking…</div>',
+
+    // Input
+    '<div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;">',
+    '<input id="rs-input" type="text" placeholder="Ask about products, prices…"',
+    'style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);',
+    'border-radius:10px;padding:10px 14px;font-size:14px;color:#fff;outline:none;',
+    'font-family:inherit;" />',
+    '<button id="rs-send" style="background:linear-gradient(180deg,#FFC24D,#F7A81B);',
+    'color:#241500;border:none;border-radius:10px;padding:10px 16px;',
+    'cursor:pointer;font-size:13px;font-weight:700;">Send</button></div></div>'
+  ].join('');
+  document.body.appendChild(el);
+
+  var bubble = document.getElementById('rs-bubble');
+  var win    = document.getElementById('rs-win');
+  var msgs   = document.getElementById('rs-msgs');
+  var input  = document.getElementById('rs-input');
+  var typing = document.getElementById('rs-typing');
+  var opened = false;
+
+  bubble.onmouseenter = function(){ bubble.style.transform='scale(1.1)'; };
+  bubble.onmouseleave = function(){ bubble.style.transform='scale(1)'; };
+
+  bubble.onclick = function(){
+    win.style.display = 'flex';
+    bubble.style.display = 'none';
+    if(!opened){ greet(); opened=true; }
+    input.focus();
+  };
+  document.getElementById('rs-close').onclick = function(){
+    win.style.display = 'none';
+    bubble.style.display = 'flex';
+  };
+  document.getElementById('rs-send').onclick = send;
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') send(); });
+
+  function greet(){
+    addMsg('assistant', "Hello! I'm your Restar Solar assistant. How can I help you today?");
+  }
+
+  function send(){
+    var text = input.value.trim();
+    if(!text) return;
+    addMsg('user', text);
+    input.value = '';
+    typing.style.display = 'block';
+
+    fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message: text, session_id: SESSION})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      typing.style.display = 'none';
+      addMsg('assistant', d.reply || d.detail || 'Sorry, something went wrong.');
+    })
+    .catch(function(){
+      typing.style.display = 'none';
+      addMsg('assistant', 'Connection error. Please try again.');
+    });
+  }
+
+  var AGENT_PHONE = '237681105611';
+
+  function addMsg(role, text){
+    var d = document.createElement('div');
+    var isUser = role==='user';
+    d.style.cssText = [
+      'max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;',
+      'font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;word-break:break-word;',
+      isUser
+        ? 'align-self:flex-end;background:linear-gradient(180deg,#FFC24D,#F7A81B);color:#241500;border-bottom-right-radius:4px;'
+        : 'align-self:flex-start;background:rgba(255,255,255,.09);color:#ECE9F5;border-bottom-left-radius:4px;'
+    ].join('');
+
+    // Check for WhatsApp order trigger
+    if(!isUser && text.indexOf('WHATSAPP_ORDER::') !== -1) {
+      var parts = text.split('WHATSAPP_ORDER::');
+      var before = parts[0].trim();
+      var orderSummary = parts[1] ? parts[1].trim() : '';
+      var waText = encodeURIComponent('🛒 New Order from Restar Solar website:\n\n' + orderSummary);
+      var waUrl = 'https://wa.me/' + AGENT_PHONE + '?text=' + waText;
+
+      d.innerHTML = (before ? before + '\n\n' : '') +
+        '<a href="' + waUrl + '" target="_blank" style="' +
+        'display:inline-flex;align-items:center;gap:8px;margin-top:8px;' +
+        'background:#25D366;color:#fff;text-decoration:none;' +
+        'padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="white">' +
+        '<path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>' +
+        'Send Order via WhatsApp</a>';
+    } else {
+      d.textContent = text;
+    }
+
+    msgs.appendChild(d);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
 })();
 </script>
 </body>
