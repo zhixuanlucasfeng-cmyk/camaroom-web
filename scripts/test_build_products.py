@@ -91,6 +91,44 @@ def test_build_other_entry_reclassified():
     assert entry["cat"] == "pump"
 
 
+def test_build_panel_sp137_garbled_model_bug():
+    """SP-137 has a garbled model string with leading non-ASCII Chinese characters.
+    The name and specs must show the cleaned version without the 中文 prefix."""
+    raw = {
+        "sku": "SP-137", "category": "solar_panels",
+        "model": "中文RT8I-M-DG TOPCON 560-585W 2278x1134x30mm",
+        "title_raw": "RT8I-M-DG TOPCON 560-585W", "wattage": "560-585W",
+        "dimensions": "2278x1134x30mm", "features": ["IP67", "Bifacial"],
+        "power_kw": None, "capacity_ah": None, "capacity_kwh": None, "voltage": None,
+    }
+    entry = build_product_entry(raw)
+
+    # Name must not contain the garbled 中文 prefix
+    assert "中文" not in entry["name"], f"name contains garbled prefix: {entry['name']}"
+    # Name must contain the clean model string
+    assert "RT8I-M-DG" in entry["name"], f"name missing clean model: {entry['name']}"
+    assert entry["name"] == "RT8I-M-DG TOPCON 560-585W 2278x1134x30mm"
+
+    # Specs must also be cleaned
+    specs_model = entry["specs"]["en"]["Model"]
+    assert "中文" not in specs_model, f"specs Model contains garbled prefix: {specs_model}"
+    assert specs_model == "RT8I-M-DG TOPCON 560-585W 2278x1134x30mm"
+
+
+def test_clean_model_string_passes_through():
+    """Already-clean model strings like 'DC water pump' must pass through unchanged."""
+    raw = {
+        "sku": "OTH-999", "category": "other", "model": "DC water pump",
+        "title_raw": "DC water pump", "wattage": None, "power_kw": None,
+        "capacity_ah": None, "capacity_kwh": None, "voltage": None,
+        "dimensions": None, "features": [],
+    }
+    entry = build_product_entry(raw)
+    # Model string should be completely unchanged
+    assert entry["name"] == "DC water pump"
+    assert entry["specs"]["en"]["Model"] == "DC water pump"
+
+
 if __name__ == "__main__":
     tests = [v for k, v in list(globals().items()) if k.startswith("test_")]
     failed = 0

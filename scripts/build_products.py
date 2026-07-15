@@ -10,12 +10,33 @@ Options:
 """
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from warranty_classifier import classify_panel_warranty
+
+
+def _clean_model_string(model: str | None) -> str | None:
+    """Strip leading non-ASCII characters from a model string.
+
+    Some source data (e.g., SP-137) has garbled prefixes like "中文" (Chinese
+    for "Chinese text") that are artifacts of PDF text extraction. This removes
+    them while leaving the rest of the string unchanged.
+
+    Examples:
+      "中文RT8I-M-DG TOPCON 560-585W..." -> "RT8I-M-DG TOPCON 560-585W..."
+      "DC water pump" -> "DC water pump" (no change)
+      "RF12-100A" -> "RF12-100A" (no change)
+    """
+    if not model:
+        return model
+    # Remove leading non-ASCII characters and strip whitespace
+    cleaned = re.sub(r'^[^\x00-\x7F]+', '', model).strip()
+    return cleaned if cleaned else model
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG_JSON = Path("/Users/lucasfeng/rest-solar-agent/data/catalog_2026/products.json")
@@ -87,7 +108,7 @@ def _field_value(raw: dict, field_key: str) -> str | None:
     if field_key == "capacity":
         return raw.get("capacity_ah") or raw.get("capacity_kwh")
     if field_key == "model":
-        return raw.get("model")
+        return _clean_model_string(raw.get("model"))
     if field_key == "voltage":
         return raw.get("voltage")
     if field_key == "dimensions":
@@ -135,7 +156,8 @@ def build_product_entry(raw: dict) -> dict:
     img_filename = f"{sku}.jpg"
 
     warranty = classify_panel_warranty(raw.get("model")) if source_cat == "solar_panels" else None
-    name = raw.get("model") or raw.get("title_raw") or sku
+    cleaned_model = _clean_model_string(raw.get("model"))
+    name = cleaned_model or raw.get("title_raw") or sku
 
     return {
         "id": sku,
