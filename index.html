@@ -642,7 +642,7 @@ const I18N = {
   }
 };
 let lang = "en";
-const t = k => (I18N[lang][k] ?? k);
+const t = k => (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
 const fmt = n => n.toLocaleString("fr-FR");
 const wa = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 function renderOffer(){
