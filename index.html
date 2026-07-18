@@ -243,6 +243,14 @@ img{max-width:100%;display:block}
 .modal-thumbs{display:none;gap:8px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,.28);border-bottom:1px solid var(--line)}
 .modal-thumbs .mthumb{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;opacity:.7;transition:opacity .15s,border-color .15s;padding:3px}
 .modal-thumbs .mthumb:hover,.modal-thumbs .mthumb.on{opacity:1;border-color:var(--sun)}
+/* Arabic (Sudan) RTL overrides — the handful of explicit left/right rules
+   that dir="rtl" doesn't flip automatically. General text alignment and
+   flex ordering already follow the document direction natively. */
+[dir="rtl"] .nav-links{margin-left:0;margin-right:18px}
+[dir="rtl"] .nav-right{margin-left:0;margin-right:auto}
+[dir="rtl"] .spec-table td:last-child{text-align:left}
+[dir="rtl"] .cert{text-align:right}
+[dir="rtl"] .nav-links a::after{left:auto;right:0}
 </style>
 </head>
 <body>
@@ -263,6 +271,7 @@ img{max-width:100%;display:block}
       <div class="lang" role="group" aria-label="Language">
         <button data-lang="en" class="on">EN</button>
         <button data-lang="fr">FR</button>
+        <button data-lang="ar">AR</button>
       </div>
     </div>
   </div>
@@ -554,34 +563,37 @@ const ICON = {
 };
 const CAT_COLOR = {panel:"#2E86C1",battery:"#279E5B",inverter:"#7C5CDB",light:"#F2A516",kit:"#EC6A2C",controller:"#13A1A1",pump:"#1E6FB8",ess:"#6D28D9",ac:"#22D3EE",fan:"#2DD4BF",fridge:"#3B82F6"};
 const OFFER = [
-  {icon:"panel", t:{en:"Solar panels",fr:"Panneaux solaires"}, d:{en:"Mono panels from 100W to 550W.",fr:"Panneaux mono de 100W à 550W."}},
-  {icon:"battery", t:{en:"Batteries",fr:"Batteries"}, d:{en:"Lithium and tubular storage.",fr:"Stockage lithium et tubulaire."}},
-  {icon:"inverter", t:{en:"Inverters",fr:"Onduleurs"}, d:{en:"Hybrid inverters with MPPT.",fr:"Onduleurs hybrides avec MPPT."}},
-  {icon:"light", t:{en:"Lighting",fr:"Éclairage"}, d:{en:"Solar street and area lights.",fr:"Lampadaires et éclairage solaire."}},
-  {icon:"kit", t:{en:"Complete kits",fr:"Kits complets"}, d:{en:"Ready-to-install systems.",fr:"Systèmes prêts à installer."}}
+  {icon:"panel", t:{en:"Solar panels",fr:"Panneaux solaires",ar:"الألواح الشمسية"}, d:{en:"Mono panels from 100W to 550W.",fr:"Panneaux mono de 100W à 550W.",ar:"ألواح أحادية البلورة من 100 إلى 550 واط."}},
+  {icon:"battery", t:{en:"Batteries",fr:"Batteries",ar:"البطاريات"}, d:{en:"Lithium and tubular storage.",fr:"Stockage lithium et tubulaire.",ar:"تخزين بطاريات الليثيوم والأنبوبية."}},
+  {icon:"inverter", t:{en:"Inverters",fr:"Onduleurs",ar:"العاكسات"}, d:{en:"Hybrid inverters with MPPT.",fr:"Onduleurs hybrides avec MPPT.",ar:"عاكسات هجينة مزودة بتقنية MPPT."}},
+  {icon:"light", t:{en:"Lighting",fr:"Éclairage",ar:"الإضاءة"}, d:{en:"Solar street and area lights.",fr:"Lampadaires et éclairage solaire.",ar:"إنارة شمسية للشوارع والمناطق."}},
+  {icon:"kit", t:{en:"Complete kits",fr:"Kits complets",ar:"أطقم متكاملة"}, d:{en:"Ready-to-install systems.",fr:"Systèmes prêts à installer.",ar:"أنظمة جاهزة للتركيب."}}
 ];
 const WHY = [
-  {t:{en:"Genuine equipment",fr:"Matériel authentique"}, d:{en:"Brand-name panels, batteries, and inverters — not grey-market copies.",fr:"Panneaux, batteries et onduleurs de marque — pas de copies."}},
-  {t:{en:"Right-sized systems",fr:"Systèmes bien dimensionnés"}, d:{en:"We size to your real load, so you don't overpay or fall short.",fr:"Dimensionnés selon votre charge réelle, sans payer trop ni manquer."}},
-  {t:{en:"After-sales support",fr:"Service après-vente"}, d:{en:"Help after the sale, plus one month of free maintenance.",fr:"Assistance après l'achat et un mois de maintenance gratuite."}},
-  {t:{en:"Delivery & install",fr:"Livraison et installation"}, d:{en:"Delivery across Cameroon with installation support.",fr:"Livraison partout au Cameroun avec aide à l'installation."}}
+  {t:{en:"Genuine equipment",fr:"Matériel authentique",ar:"معدات أصلية"}, d:{en:"Brand-name panels, batteries, and inverters — not grey-market copies.",fr:"Panneaux, batteries et onduleurs de marque — pas de copies.",ar:"ألواح وبطاريات وعاكسات أصلية من علامات معروفة — ليست نسخًا مقلدة."}},
+  {t:{en:"Right-sized systems",fr:"Systèmes bien dimensionnés",ar:"أنظمة بالحجم المناسب"}, d:{en:"We size to your real load, so you don't overpay or fall short.",fr:"Dimensionnés selon votre charge réelle, sans payer trop ni manquer.",ar:"نحدد الحجم وفق احتياجك الفعلي، دون دفع أكثر من اللازم أو نقص في الطاقة."}},
+  {t:{en:"After-sales support",fr:"Service après-vente",ar:"دعم ما بعد البيع"}, d:{en:"Help after the sale, plus one month of free maintenance.",fr:"Assistance après l'achat et un mois de maintenance gratuite.",ar:"مساعدة بعد الشراء، مع شهر واحد من الصيانة المجانية."}},
+  {t:{en:"Delivery & install",fr:"Livraison et installation",ar:"التوصيل والتركيب"}, d:{en:"Delivery across Cameroon with installation support.",fr:"Livraison partout au Cameroun avec aide à l'installation.",ar:"التوصيل مع دعم التركيب."}}
 ];
 const WARRANTY_TYPES = [
-  {t:{en:"Product warranty",fr:"Garantie produit"}, d:{en:"Covers defects in design, material, and workmanship — 10 to 15 years depending on panel type.",fr:"Couvre les défauts de conception, de matériau et de fabrication — de 10 à 15 ans selon le type de panneau."}},
-  {t:{en:"Performance warranty",fr:"Garantie de performance"}, d:{en:"Guarantees minimum power output over 20 to 30 years, measured against the panel's original rated power.",fr:"Garantit un rendement minimum sur 20 à 30 ans, mesuré par rapport à la puissance nominale d'origine du panneau."}}
+  {t:{en:"Product warranty",fr:"Garantie produit",ar:"ضمان المنتج"}, d:{en:"Covers defects in design, material, and workmanship — 10 to 15 years depending on panel type.",fr:"Couvre les défauts de conception, de matériau et de fabrication — de 10 à 15 ans selon le type de panneau.",ar:"يغطي عيوب التصميم والمواد والتصنيع — من 10 إلى 15 عامًا حسب نوع اللوح."}},
+  {t:{en:"Performance warranty",fr:"Garantie de performance",ar:"ضمان الأداء"}, d:{en:"Guarantees minimum power output over 20 to 30 years, measured against the panel's original rated power.",fr:"Garantit un rendement minimum sur 20 à 30 ans, mesuré par rapport à la puissance nominale d'origine du panneau.",ar:"يضمن حدًا أدنى من إنتاج الطاقة لمدة 20 إلى 30 عامًا، مقارنة بالطاقة الاسمية الأصلية للوح."}}
 ];
 const WARRANTY_TABLE = [
-  {family:{en:"Cutting-cell",fr:"Cellules découpées"}, product:"10", perf:"20", output:{en:"≥80.7%",fr:"≥80,7 %"}},
-  {family:{en:"Full-cell",fr:"Cellule entière"}, product:"12", perf:"25", output:{en:"≥80.7%",fr:"≥80,7 %"}},
-  {family:{en:"Half-cell & full black",fr:"Demi-cellule et full black"}, product:"15", perf:"30", output:{en:"≥83%",fr:"≥83 %"}},
-  {family:{en:"Bifacial",fr:"Bifacial"}, product:"15", perf:"30", output:{en:"≥84.95%",fr:"≥84,95 %"}}
+  {family:{en:"Cutting-cell",fr:"Cellules découpées",ar:"خلايا مقصوصة"}, product:"10", perf:"20", output:{en:"≥80.7%",fr:"≥80,7 %",ar:"≥80.7%"}},
+  {family:{en:"Full-cell",fr:"Cellule entière",ar:"خلية كاملة"}, product:"12", perf:"25", output:{en:"≥80.7%",fr:"≥80,7 %",ar:"≥80.7%"}},
+  {family:{en:"Half-cell & full black",fr:"Demi-cellule et full black",ar:"نصف خلية وأسود كامل"}, product:"15", perf:"30", output:{en:"≥83%",fr:"≥83 %",ar:"≥83%"}},
+  {family:{en:"Bifacial",fr:"Bifacial",ar:"ثنائي الوجه"}, product:"15", perf:"30", output:{en:"≥84.95%",fr:"≥84,95 %",ar:"≥84.95%"}}
 ];
 function renderWarranty(){
-  document.getElementById("warrantyTypes").innerHTML = WARRANTY_TYPES.map(w=>`<div class="why-card"><h3>${w.t[lang]}</h3><p>${w.d[lang]}</p></div>`).join("");
+  document.getElementById("warrantyTypes").innerHTML = WARRANTY_TYPES.map(w=>`<div class="why-card"><h3>${tr(w.t)}</h3><p>${tr(w.d)}</p></div>`).join("");
   const head = lang==='fr'
     ? `<tr><td><b>Famille</b></td><td><b>Garantie produit</b></td><td><b>Garantie performance</b></td><td><b>Rendement garanti</b></td></tr>`
+    : lang==='ar'
+    ? `<tr><td><b>الفئة</b></td><td><b>ضمان المنتج</b></td><td><b>ضمان الأداء</b></td><td><b>ضمان الإنتاج</b></td></tr>`
     : `<tr><td><b>Family</b></td><td><b>Product warranty</b></td><td><b>Performance warranty</b></td><td><b>Output guarantee</b></td></tr>`;
-  const rows = WARRANTY_TABLE.map(r=>`<tr><td>${r.family[lang]}</td><td>${r.product} ${lang==='fr'?'ans':'yr'}</td><td>${r.perf} ${lang==='fr'?'ans':'yr'}</td><td>${r.output[lang]}</td></tr>`).join("");
+  const yrUnit = lang==='fr' ? 'ans' : (lang==='ar' ? 'سنة' : 'yr');
+  const rows = WARRANTY_TABLE.map(r=>`<tr><td>${tr(r.family)}</td><td>${r.product} ${yrUnit}</td><td>${r.perf} ${yrUnit}</td><td>${tr(r.output)}</td></tr>`).join("");
   document.getElementById("warrantyTable").innerHTML = head + rows;
 }
 const I18N = {
@@ -650,24 +662,58 @@ const I18N = {
     "warranty.excl":"Une installation incorrecte, des réparations par des techniciens non agréés, un numéro de série altéré ou retiré, un montage mobile ou marin, les dommages liés aux intempéries/foudre/inondation, l'usure cosmétique sans impact sur la performance, et le bris de verre d'origine externe ne sont pas couverts par la garantie du fabricant.",
     "warranty.claimTitle":"Faire une réclamation",
     "warranty.claim":"Contactez Rest Solar sur WhatsApp avec le numéro de série du panneau, des photos du problème et une preuve d'achat. Ne retirez pas et n'endommagez pas l'étiquette du numéro de série. RESTAR doit être informé dans les 3 mois suivant la découverte du défaut."
+  },
+  ar:{
+    "nav.products":"المنتجات","nav.catalogue":"الكتالوج","nav.about":"من نحن","nav.contact":"اتصل بنا","nav.whatsapp":"واتساب","nav.onlineService":"خدمة العملاء عبر الإنترنت",
+    "hero.eyebrow":"الطاقة الشمسية · السودان","hero.title1":"طاقة","hero.title2":"لا تنقطع.",
+    "hero.sub":"تقوم ريستار سولار بتوريد وتركيب الألواح الشمسية والبطاريات والعاكسات المصممة للمنازل والمحلات والشركات في السودان — مع المساعدة في تحديد الحجم المناسب والتوصيل وخدمة ما بعد البيع.",
+    "hero.cta1":"تصفح المنتجات","hero.cta2":"تحدث عبر واتساب",
+    "hero.t1":"معدات أصلية ومضمونة","hero.t2":"مساعدة في التحديد والتركيب","hero.t3":"التوصيل في جميع أنحاء السودان",
+    "offer.eyebrow":"ما نوفره","offer.title":"كل ما تحتاجه لبناء نظام شمسي","offer.sub":"من لوح واحد إلى طقم متكامل مستقل عن الشبكة.",
+    "products.eyebrow":"الكتالوج","products.title":"المنتجات والأسعار","products.sub":"اضغط على منتج لعرض المواصفات الكاملة. الأسعار عند الطلب — تواصل معنا لتأكيد السعر والتوفر.",
+    "qnav.products":"المنتجات","qnav.catalogue":"الكتالوج","qnav.why":"لماذا ريستار سولار","qnav.about":"من نحن","qnav.contact":"اتصل بنا",
+    "filter.all":"الكل","card.details":"التفاصيل","card.inquire":"استفسار",
+    "why.eyebrow":"لماذا نحن","why.title":"لماذا ريستار سولار",
+    "about.eyebrow":"من نحن","about.title":"مصممة لتلبية الاستخدام الحقيقي للطاقة في السودان",
+    "about.body1":"تساعد ريستار سولار المنازل والشركات في السودان على البقاء مزودة بالطاقة عندما تنقطع الشبكة الكهربائية. نقوم بتوريد وتركيب الألواح الشمسية، وبطاريات الليثيوم والأنبوبية، والعاكسات، ومنظمات الشحن، وأطقم مستقلة متكاملة — نختار معدات تتحمل الحرارة والغبار والاستخدام اليومي.",
+    "about.body2":"سواء كنت بحاجة إلى طاقة احتياطية لبضعة مصابيح وثلاجة أو نظام كامل لمتجر أو بئر، فإننا نحدد الحجم المناسب لاحتياجاتك الفعلية، ونقوم بالتوصيل، ونبقى على تواصل بعد ذلك.",
+    "contact.eyebrow":"تواصل معنا","contact.title":"أخبرنا بما تحتاجه","contact.sub":"أرسل بياناتك وسنرد عبر واتساب بتحديد الحجم المناسب وعرض سعر.",
+    "contact.or":"أو تواصل معنا مباشرة","contact.phone":"الهاتف","contact.email":"البريد الإلكتروني","contact.location":"الموقع","contact.start":"ابدأ محادثة واتساب",
+    "form.nameL":"اسمك","form.nameP":"اسمك","form.contactL":"الهاتف أو البريد الإلكتروني","form.contactP":"للرد عليك",
+    "form.msgL":"ما الذي تحتاجه؟","form.msgP":"مثال: طاقة احتياطية لمنزل من 3 غرف مع ثلاجة ومصابيح",
+    "form.send":"إرسال عبر واتساب","form.note":"لا حاجة لحساب — سيؤدي هذا إلى فتح واتساب مع رسالتك جاهزة للإرسال.","form.ok":"جارٍ فتح واتساب برسالتك…",
+    "modal.specs":"المواصفات","modal.inquire":"استفسار عبر واتساب","modal.price":"السعر",
+    "footer.tag":"طاقة شمسية موثوقة للمنازل والمحلات والشركات في السودان.","footer.explore":"استكشف","footer.contact":"اتصل بنا",
+    "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · السودان",
+    "price.contact":"السعر عند الطلب",
+    "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع","nav.gallery":"معرض الصور",
+    "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وSGS وCE. اضغط على شهادة لتكبيرها.",
+    "nav.warranty":"الضمان","nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
+    "warranty.eyebrow":"الضمان","warranty.title":"ضمان الشركة المصنعة RESTAR",
+    "warranty.sub":"الألواح التي تبيعها Rest Solar مشمولة بضمان الشركة المصنعة الرسمي RESTAR (ساري المفعول اعتبارًا من 1 يناير 2026).",
+    "warranty.exclTitle":"ما لا يشمله الضمان",
+    "warranty.excl":"التركيب غير الصحيح، والإصلاحات من قبل فنيين غير معتمدين، والرقم التسلسلي التالف أو المزال، والتركيب المتنقل أو البحري، والأضرار الناتجة عن الطقس/البرق/الفيضانات، والتآكل الجمالي الذي لا يؤثر على الأداء، وكسر الزجاج بسبب أسباب خارجية — كلها غير مشمولة بضمان الشركة المصنعة.",
+    "warranty.claimTitle":"تقديم مطالبة",
+    "warranty.claim":"تواصل مع Rest Solar عبر واتساب مع الرقم التسلسلي للوح وصور المشكلة وإثبات الشراء. لا تقم بإزالة أو إتلاف ملصق الرقم التسلسلي. يجب إبلاغ RESTAR خلال 3 أشهر من اكتشاف العيب."
   }
 };
 let lang = "en";
 const t = k => (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
+const tr = o => (o[lang] !== undefined ? o[lang] : o.en);
 const fmt = n => n.toLocaleString("fr-FR");
 const wa = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 function renderOffer(){
-  document.getElementById("offerGrid").innerHTML = OFFER.map(o=>`<div class="ocard"><div class="ic" style="color:${CAT_COLOR[o.icon]}">${ICON[o.icon]}</div><h3>${o.t[lang]}</h3><p>${o.d[lang]}</p></div>`).join("");
+  document.getElementById("offerGrid").innerHTML = OFFER.map(o=>`<div class="ocard"><div class="ic" style="color:${CAT_COLOR[o.icon]}">${ICON[o.icon]}</div><h3>${tr(o.t)}</h3><p>${tr(o.d)}</p></div>`).join("");
 }
 function renderWhy(){
-  document.getElementById("whyGrid").innerHTML = WHY.map((w,i)=>`<div class="why-card"><div class="n">0${i+1}</div><h3>${w.t[lang]}</h3><p>${w.d[lang]}</p></div>`).join("");
+  document.getElementById("whyGrid").innerHTML = WHY.map((w,i)=>`<div class="why-card"><div class="n">0${i+1}</div><h3>${tr(w.t)}</h3><p>${tr(w.d)}</p></div>`).join("");
 }
 let activeCat = "all";
 function catLabel(cat){
   const map = {panel:OFFER[0],battery:OFFER[1],inverter:OFFER[2],light:OFFER[3],kit:OFFER[4]};
-  const extra = {controller:{en:"Controllers",fr:"Régulateurs"}, pump:{en:"Water pumps",fr:"Pompes à eau"}, ess:{en:"Energy storage",fr:"Stockage"}, ac:{en:"Air conditioners",fr:"Climatiseurs"}, fan:{en:"Fans",fr:"Ventilateurs"}, fridge:{en:"Refrigeration",fr:"Réfrigération"}};
-  if(map[cat]) return map[cat].t[lang];
-  if(extra[cat]) return extra[cat][lang];
+  const extra = {controller:{en:"Controllers",fr:"Régulateurs",ar:"أجهزة التحكم"}, pump:{en:"Water pumps",fr:"Pompes à eau",ar:"مضخات المياه"}, ess:{en:"Energy storage",fr:"Stockage",ar:"تخزين الطاقة"}, ac:{en:"Air conditioners",fr:"Climatiseurs",ar:"مكيفات الهواء"}, fan:{en:"Fans",fr:"Ventilateurs",ar:"مراوح"}, fridge:{en:"Refrigeration",fr:"Réfrigération",ar:"التبريد"}};
+  if(map[cat]) return tr(map[cat].t);
+  if(extra[cat]) return tr(extra[cat]);
   return cat;
 }
 function renderFilters(){
@@ -691,11 +737,11 @@ function renderGrid(){
         <span class="cat-tag">${catLabel(p.cat)}</span>
         <h3>${p.name}</h3>
         <div class="price">${p.price?fmt(p.price)+' <small>FCFA</small>':t('price.contact')}</div>
-        <p class="desc">${p.desc[lang]}</p>
+        <p class="desc">${tr(p.desc)}</p>
         <div class="card-actions">
           <button class="btn btn--line" data-open="${p.id}">${t('card.details')}</button>
           <a class="btn btn--dark" target="_blank" rel="noopener"
-             href="${wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':'Hello Restar Solar, I am interested in: ')+p.name+'.')}">
+             href="${wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':lang==='ar'?'مرحبًا ريستار سولار، أنا مهتم بـ: ':'Hello Restar Solar, I am interested in: ')+p.name+'.')}">
              ${t('card.inquire')}</a>
         </div>
       </div>
@@ -726,10 +772,10 @@ function openModal(id){
   document.getElementById("mName").textContent = p.name;
   document.getElementById("mPrice").innerHTML = p.price?`${fmt(p.price)} <small>FCFA</small>`:t('price.contact');
   document.getElementById("mSpecH").textContent = t('modal.specs');
-  const specs = p.specs[lang];
+  const specs = tr(p.specs);
   document.getElementById("mSpecs").innerHTML = Object.entries(specs).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
   const mWa = document.getElementById("mWa");
-  mWa.href = wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.');
+  mWa.href = wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':lang==='ar'?'مرحبًا ريستار سولار، أرغب في عرض سعر لـ: ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.');
   document.getElementById("mWaText").textContent = t('modal.inquire');
   modal.classList.add("open"); document.body.style.overflow="hidden";
 }
@@ -739,11 +785,14 @@ document.getElementById("modalBg").onclick=closeModal;
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function applyI18n(){
   document.documentElement.lang = lang;
+  document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
   document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n"); if(I18N[lang][k]!==undefined) el.textContent=I18N[lang][k];});
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const k=el.getAttribute("data-i18n-ph"); if(I18N[lang][k]!==undefined) el.placeholder=I18N[lang][k];});
 }
 function wireContacts(){
-  const hello = lang==='fr' ? "Bonjour Restar Solar, j'ai une question sur le solaire." : "Hello Restar Solar, I have a question about solar.";
+  const hello = lang==='fr' ? "Bonjour Restar Solar, j'ai une question sur le solaire."
+    : lang==='ar' ? "مرحبًا ريستار سولار، لدي سؤال حول الطاقة الشمسية."
+    : "Hello Restar Solar, I have a question about solar.";
   ["navWa","heroWa","directWa","fWa"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=wa(hello);});
   document.getElementById("cEmail").textContent = CONFIG.email;
   document.getElementById("cAddr").textContent = CONFIG.address;
@@ -762,6 +811,8 @@ document.getElementById("formSend").onclick=()=>{
   const msg=document.getElementById("f-msg").value.trim();
   const lines = lang==='fr'
     ? [`Bonjour Restar Solar,`, name&&`Nom : ${name}`, contact&&`Contact : ${contact}`, msg&&`Besoin : ${msg}`]
+    : lang==='ar'
+    ? [`مرحبًا ريستار سولار،`, name&&`الاسم: ${name}`, contact&&`للتواصل: ${contact}`, msg&&`الاحتياج: ${msg}`]
     : [`Hello Restar Solar,`, name&&`Name: ${name}`, contact&&`Contact: ${contact}`, msg&&`Need: ${msg}`];
   const ok=document.getElementById("formOk"); ok.style.display="block";
   window.open(wa(lines.filter(Boolean).join("\n")),"_blank","noopener");
@@ -803,7 +854,7 @@ const CERTS = [
 ];
 function renderCerts(){
   const el=document.getElementById("certGrid"); if(!el) return;
-  el.innerHTML = CERTS.map(c=>`<button class="cert" data-cert="assets/certs/${c.img}" aria-label="${c.t[lang]}"><span class="cert-img"><img src="assets/certs/${c.img}" alt="${c.t[lang]}" loading="lazy"></span><span class="cert-cap">${c.t[lang]}</span></button>`).join("");
+  el.innerHTML = CERTS.map(c=>`<button class="cert" data-cert="assets/certs/${c.img}" aria-label="${tr(c.t)}"><span class="cert-img"><img src="assets/certs/${c.img}" alt="${tr(c.t)}" loading="lazy"></span><span class="cert-cap">${tr(c.t)}</span></button>`).join("");
   el.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openLightbox(b.dataset.cert));
 }
 function openLightbox(s){const lb=document.getElementById("lightbox");document.getElementById("lbImg").src=s;lb.classList.add("open");document.body.style.overflow="hidden";}

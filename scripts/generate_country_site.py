@@ -34,6 +34,13 @@ COUNTRIES = {
         "html_lang": "fr",
         "has_local_contact": False,
     },
+    "sudan": {
+        "name_en": "Sudan",
+        "name_fr": "Sudan",
+        "default_lang": "ar",
+        "html_lang": "ar",
+        "has_local_contact": False,
+    },
 }
 
 
@@ -83,8 +90,15 @@ def apply_country_name(html: str, country: dict) -> str:
 
 
 def set_default_language(html: str, country: dict) -> str:
-    html = re.sub(r'<html lang="[a-z]{2}">', f'<html lang="{country["html_lang"]}">', html, count=1)
+    dir_attr = ' dir="rtl"' if country["default_lang"] == "ar" else ""
+    html = re.sub(r'<html lang="[a-z]{2}">', f'<html lang="{country["html_lang"]}"{dir_attr}>', html, count=1)
     html = html.replace('let lang = "en";', f'let lang = "{country["default_lang"]}";', 1)
+    if country["default_lang"] != "en":
+        html = html.replace('<button data-lang="en" class="on">EN</button>', '<button data-lang="en">EN</button>')
+        html = html.replace(
+            f'<button data-lang="{country["default_lang"]}">',
+            f'<button data-lang="{country["default_lang"]}" class="on">',
+        )
     return html
 
 
