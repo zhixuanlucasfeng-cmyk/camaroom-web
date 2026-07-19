@@ -20,12 +20,29 @@ const LOGIN_PAGE = `<!doctype html><html><body>
 </script>
 </body></html>`;
 
+// The storefront (index.html) is served from a different origin than this
+// Worker (e.g. a static host on one domain, the Worker on *.workers.dev), so
+// the browser's cross-origin checks apply to /api/orders. Allow any origin
+// to POST here — it's a public order-intake endpoint, not authenticated.
+const CART_CORS_HEADERS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'POST, OPTIONS',
+  'access-control-allow-headers': 'content-type',
+};
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
 
+    if (pathname === '/api/orders' && request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CART_CORS_HEADERS });
+    }
+
     if (pathname === '/api/orders' && request.method === 'POST') {
-      return handleCreateOrder(request, env);
+      const res = await handleCreateOrder(request, env);
+      const headers = new Headers(res.headers);
+      for (const [k, v] of Object.entries(CART_CORS_HEADERS)) headers.set(k, v);
+      return new Response(res.body, { status: res.status, headers });
     }
 
     const quoteApiMatch = pathname.match(/^\/api\/orders\/([^/]+)\/quote$/);
