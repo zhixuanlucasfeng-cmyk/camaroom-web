@@ -11,3 +11,7 @@ __probe.txt
 
 # 大体积素材（不是网站运行需要的）
 watermark(2).zip
+
+# Cart backend
+backend/node_modules
+backend/.wrangler

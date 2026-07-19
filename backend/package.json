@@ -1,0 +1,14 @@
+{
+  "name": "camaroom-cart-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.1",
+    "vitest": "^2.1.4",
+    "wrangler": "^3.90.0"
+  }
+}
