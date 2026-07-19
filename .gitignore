@@ -15,3 +15,4 @@ watermark(2).zip
 # Cart backend
 backend/node_modules
 backend/.wrangler
+backend/.dev.vars
