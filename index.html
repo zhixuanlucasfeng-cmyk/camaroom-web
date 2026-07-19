@@ -1061,7 +1061,12 @@ observeReveals();
   var AGENT_PHONE = '8618707737002';   // Tom Yang (China)
   var AGENT_PHONE_2 = '237681105611'; // Luc Su (Cameroon)
   window.CART_API_BASE = '';
-  window.CART_WHATSAPP_NUMBER = AGENT_PHONE_2;
+  // Guarded: the country-site generator strips the AGENT_PHONE_2 declaration
+  // above for countries without a local rep (see strip_local_contact_block()
+  // in scripts/generate_country_site.py), which would otherwise leave this a
+  // dangling reference and throw a ReferenceError that aborts this whole
+  // script block (breaking the chat widget below it) on page load.
+  window.CART_WHATSAPP_NUMBER = (typeof AGENT_PHONE_2 !== 'undefined' ? AGENT_PHONE_2 : '');
 
   function addMsg(role, text){
     var d = document.createElement('div');
