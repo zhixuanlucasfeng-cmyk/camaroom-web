@@ -1,6 +1,7 @@
 import { handleCreateOrder } from './orders.js';
 import { handleGetQuotePage, handleSubmitQuote } from './quote.js';
 import { isAuthenticated, checkPassword, makeSessionCookie } from './auth.js';
+import { handleFlutterwaveWebhook } from './webhook.js';
 
 const LOGIN_PAGE = `<!doctype html><html><body>
 <form id="loginForm"><input type="password" id="pw" placeholder="Password"><button>Enter</button></form>
@@ -55,6 +56,10 @@ export default {
         return new Response(LOGIN_PAGE, { status: 401, headers: { 'content-type': 'text/html' } });
       }
       return handleGetQuotePage(request, env, quotePageMatch[1]);
+    }
+
+    if (pathname === '/api/webhook/flutterwave' && request.method === 'POST') {
+      return handleFlutterwaveWebhook(request, env);
     }
 
     return new Response('Not found', { status: 404 });
