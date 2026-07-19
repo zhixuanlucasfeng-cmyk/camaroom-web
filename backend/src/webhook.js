@@ -34,7 +34,11 @@ export async function handleFlutterwaveWebhook(request, env) {
     .bind(paid_at, order.id)
     .run();
 
-  await sendPaidNotification({ ...order, status: 'paid', paid_at }, env);
+  try {
+    await sendPaidNotification({ ...order, status: 'paid', paid_at }, env);
+  } catch (err) {
+    console.error('sendPaidNotification failed for order', order.id, err);
+  }
 
   return new Response('OK', { status: 200 });
 }

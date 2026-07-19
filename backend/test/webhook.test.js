@@ -57,6 +57,21 @@ describe('handleFlutterwaveWebhook', () => {
     expect(emailFetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('still marks the order paid and returns 200 when the email notification fails', async () => {
+    const { id, tx_ref } = await quotedOrder();
+    const emailFetchMock = vi.fn(async () => {
+      throw new Error('Resend API is down');
+    });
+    vi.stubGlobal('fetch', emailFetchMock);
+
+    const res = await handleFlutterwaveWebhook(webhookRequest(tx_ref, 'webhook_secret_123'), env);
+    expect(res.status).toBe(200);
+
+    const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+    expect(order.status).toBe('paid');
+    expect(order.paid_at).toBeTruthy();
+  });
+
   it('rejects a request with an invalid signature and does not change order state', async () => {
     const { tx_ref } = await quotedOrder();
 
