@@ -102,6 +102,12 @@ def set_default_language(html: str, country: dict) -> str:
     return html
 
 
+def disable_cart(html: str) -> str:
+    """Cart checkout is Cameroon-only for now — other countries don't have
+    the backend deployed, so ship the flag off rather than a broken button."""
+    return html.replace("const CART_ENABLED = true;", "const CART_ENABLED = false;")
+
+
 def clear_address(html: str) -> str:
     """No confirmed local address yet — show the country name only, not an
     invented street address."""
@@ -121,6 +127,7 @@ def generate_index_html(country_key: str) -> str:
     html = strip_local_contact_block(html)
     html = apply_country_name(html, country)
     html = set_default_language(html, country)
+    html = disable_cart(html)
     # Fix the address field now that "Cameroon" inside it has already become
     # the new country name — drop the fabricated Douala street address,
     # keep just the country name.

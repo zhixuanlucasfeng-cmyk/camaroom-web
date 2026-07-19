@@ -79,6 +79,58 @@
         remove(btn.getAttribute('data-sku'));
       });
     });
+
+    var submitBtn = drawer.querySelector('#cart-submit');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function () {
+        renderContactForm(drawer);
+      });
+    }
+  }
+
+  function renderContactForm(drawer) {
+    drawer.innerHTML =
+      '<form id="cart-contact-form">' +
+      '<input id="cart-name" placeholder="Name" required>' +
+      '<input id="cart-phone" placeholder="WhatsApp number (with country code)" required>' +
+      '<select id="cart-currency"><option value="XAF">XAF (Mobile Money)</option><option value="USD">USD (Card)</option></select>' +
+      '<button type="submit" class="btn btn--sun">Submit</button>' +
+      '</form><p id="cart-submit-error"></p>';
+
+    document.getElementById('cart-contact-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      submitOrder({
+        customer_name: document.getElementById('cart-name').value,
+        customer_phone: document.getElementById('cart-phone').value,
+        currency: document.getElementById('cart-currency').value,
+        items: items,
+      });
+    });
+  }
+
+  function submitOrder(payload) {
+    var base = window.CART_API_BASE || '';
+    fetch(base + '/api/orders', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        if (!result.ok) {
+          document.getElementById('cart-submit-error').textContent = 'Error: ' + result.data.error;
+          return;
+        }
+        var summary = payload.items.map(function (i) { return i.qty + 'x ' + i.name; }).join(', ');
+        var waText = encodeURIComponent(
+          'Hello Restar Solar, I would like a quote for: ' + summary + ' (order ' + result.data.id + ')'
+        );
+        window.open('https://wa.me/' + window.CART_WHATSAPP_NUMBER + '?text=' + waText, '_blank');
+        clear();
+      })
+      .catch(function () {
+        document.getElementById('cart-submit-error').textContent = 'Network error, please try again.';
+      });
   }
 
   window.Cart = { add: add, remove: remove, list: list, clear: clear, count: count, renderDrawer: renderDrawer };
