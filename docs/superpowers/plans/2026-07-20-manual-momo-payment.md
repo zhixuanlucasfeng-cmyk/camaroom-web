@@ -803,3 +803,41 @@ Append to `.superpowers/sdd/progress.md` (create the `# Progress Ledger - Manual
 git add .superpowers/sdd/progress.md
 git commit -m "Record manual verification of the MoMo/OM manual-transfer payment flow"
 ```
+
+---
+
+## Deployment Note (not a task — do this once, outside this plan, when going live)
+
+This plan builds and locally verifies the feature against Miniflare's simulated D1. The
+Worker has never been deployed with real Cloudflare infrastructure —
+`backend/wrangler.toml`'s `database_id` is still `"placeholder-local-db-id"`. Production
+rollout needs, separately, in order:
+
+1. `cd backend && npx wrangler login` — requires the real Cloudflare account owner to
+   approve in their own browser; nobody else can do this step.
+2. `cd backend && npx wrangler d1 create camaroom-orders` — prints a real database UUID.
+   Copy it into `backend/wrangler.toml`, replacing `"placeholder-local-db-id"`.
+3. `cd backend && npx wrangler d1 execute camaroom-orders --remote --file=schema.sql` —
+   applies the current (post-Flutterwave-removal) schema to the real D1 database. Note
+   this schema has no `payment_link`/`flutterwave_tx_ref` columns — if an earlier,
+   pre-this-plan D1 database already exists with those columns from a previous deploy
+   attempt, drop and recreate it rather than trying to migrate, since it has never held
+   real order data.
+4. `cd backend && npx wrangler secret put ADMIN_PASSWORD` (and the same for
+   `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`, `SALES_NOTIFICATION_EMAIL`) — real
+   values, not the local dev placeholders. `MOMO_TRANSFER_NUMBER` and
+   `MOMO_ACCOUNT_NAME` do NOT need `secret put` — they're already committed as plain
+   `[vars]` in `wrangler.toml` since they're customer-facing, not credentials.
+   (Flutterwave's `FLUTTERWAVE_SECRET_KEY`/`FLUTTERWAVE_WEBHOOK_SECRET`/
+   `PAYMENT_REDIRECT_URL` from the old deployment note are gone — this plan removed
+   that dependency entirely.)
+5. `cd backend && npm run deploy` (added in this plan) — get the Worker's real
+   `*.workers.dev` URL (or a custom route once the `.cm` domain work happens).
+6. Set `window.CART_API_BASE` in the deployed `index.html` to that URL, commit, push
+   (GitHub Pages picks it up automatically).
+7. Run one real end-to-end smoke test against the deployed Worker: submit a cart order
+   from the live storefront, quote it from `/admin/quote/:id`, confirm the transfer
+   instructions show the real MoMo number, click "Mark as paid", and confirm the
+   archive email actually arrives at `SALES_NOTIFICATION_EMAIL` via the real Resend key
+   (not just that the endpoint returns 200 — the email step is best-effort and fails
+   silently by design, so a 200 response alone doesn't prove the email account works).
