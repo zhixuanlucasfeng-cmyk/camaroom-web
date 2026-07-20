@@ -93,7 +93,6 @@
       '<form id="cart-contact-form">' +
       '<input id="cart-name" placeholder="Name" required>' +
       '<input id="cart-phone" placeholder="WhatsApp number (with country code)" required>' +
-      '<select id="cart-currency"><option value="XAF">XAF (Mobile Money)</option><option value="USD">USD (Card)</option></select>' +
       '<button type="submit" class="btn btn--sun">Submit</button>' +
       '</form><p id="cart-submit-error"></p>';
 
@@ -102,7 +101,7 @@
       submitOrder({
         customer_name: document.getElementById('cart-name').value,
         customer_phone: document.getElementById('cart-phone').value,
-        currency: document.getElementById('cart-currency').value,
+        currency: 'XAF',
         items: items,
       });
     });
