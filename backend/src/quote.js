@@ -1,5 +1,4 @@
 import { getOrder } from './orders.js';
-import { createPaymentLink } from './flutterwave.js';
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -20,29 +19,15 @@ export async function submitQuote(db, env, id, price) {
     throw new Error('order_not_found');
   }
   if (order.status !== 'submitted') {
-    return { id: order.id, payment_link: order.payment_link, status: order.status };
+    return { id: order.id, status: order.status, quoted_price: order.quoted_price };
   }
 
-  const tx_ref = `${order.id}_${Date.now()}`;
-  const payment_link = await createPaymentLink(
-    {
-      amount: price,
-      currency: order.currency,
-      txRef: tx_ref,
-      customerName: order.customer_name,
-      customerPhone: order.customer_phone,
-    },
-    env
-  );
-
   await db
-    .prepare(
-      `UPDATE orders SET quoted_price = ?, payment_link = ?, flutterwave_tx_ref = ?, status = 'quoted' WHERE id = ?`
-    )
-    .bind(price, payment_link, tx_ref, order.id)
+    .prepare(`UPDATE orders SET quoted_price = ?, status = 'quoted' WHERE id = ?`)
+    .bind(price, order.id)
     .run();
 
-  return { id: order.id, payment_link, status: 'quoted' };
+  return { id: order.id, status: 'quoted', quoted_price: price };
 }
 
 export async function handleSubmitQuote(request, env, id) {
@@ -80,13 +65,15 @@ export async function handleGetQuotePage(request, env, id) {
     .map((i) => `<li>${escapeHtml(i.qty)} x ${escapeHtml(i.name)}</li>`)
     .join('');
   const digitsOnlyPhone = order.customer_phone.replace(/[^0-9]/g, '');
+  const momoNumber = escapeHtml(env.MOMO_TRANSFER_NUMBER || '');
+  const momoName = escapeHtml(env.MOMO_ACCOUNT_NAME || '');
 
   let actionHtml;
   if (order.status === 'submitted') {
     actionHtml = `
       <form id="quoteForm">
         <input type="number" id="price" placeholder="Price in ${escapeHtml(order.currency)}" required>
-        <button type="submit">Generate payment link</button>
+        <button type="submit">Save price and get transfer instructions</button>
       </form>
       <p id="result"></p>
       <script>
@@ -101,21 +88,48 @@ export async function handleGetQuotePage(request, env, id) {
             .then(function (res) { return res.json(); })
             .then(function (data) {
               var resultEl = document.getElementById('result');
-              if (data.payment_link) {
-                var waText = encodeURIComponent('Here is your payment link: ' + data.payment_link);
+              if (data.quoted_price) {
+                var instructions = 'Please send ' + data.quoted_price + ' ${escapeHtml(order.currency)} via MTN Mobile Money or Orange Money to ${momoNumber} (${momoName}). Include order ' + data.id + ' as the transfer note/reference.';
+                var waText = encodeURIComponent(instructions);
                 var waUrl = 'https://wa.me/${digitsOnlyPhone}?text=' + waText;
                 resultEl.innerHTML =
-                  '<a href="' + data.payment_link + '" target="_blank">Payment link</a><br>' +
-                  '<a href="' + waUrl + '" target="_blank">Send via WhatsApp</a>';
+                  '<p>' + instructions + '</p>' +
+                  '<a href="' + waUrl + '" target="_blank">Send via WhatsApp</a><br>' +
+                  '<button id="markPaidBtn" type="button">Mark as paid</button>';
+                document.getElementById('markPaidBtn').addEventListener('click', function () {
+                  fetch('/api/orders/${order.id}/mark-paid', { method: 'POST' })
+                    .then(function () { window.location.reload(); });
+                });
               } else {
                 resultEl.textContent = 'Error: ' + data.error;
               }
             });
         });
       </script>`;
+  } else if (order.status === 'quoted') {
+    const instructions = `Please send ${order.quoted_price} ${escapeHtml(order.currency)} via MTN Mobile Money or Orange Money to ${momoNumber} (${momoName}). Include order ${escapeHtml(order.id)} as the transfer note/reference.`;
+    const waText = encodeURIComponent(instructions);
+    const waUrl = `https://wa.me/${digitsOnlyPhone}?text=${waText}`;
+    actionHtml = `
+      <p>${instructions}</p>
+      <a href="${waUrl}" target="_blank">Send via WhatsApp</a><br>
+      <button id="markPaidBtn" type="button">Mark as paid</button>
+      <p id="result"></p>
+      <script>
+        document.getElementById('markPaidBtn').addEventListener('click', function () {
+          fetch('/api/orders/${order.id}/mark-paid', { method: 'POST' })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data.status === 'paid') {
+                window.location.reload();
+              } else {
+                document.getElementById('result').textContent = 'Error: ' + data.error;
+              }
+            });
+        });
+      </script>`;
   } else {
-    const link = escapeHtml(order.payment_link || '');
-    actionHtml = `<p>Payment link: <a href="${link}">${link}</a></p>`;
+    actionHtml = `<p>Paid at: ${escapeHtml(order.paid_at || '')}</p>`;
   }
 
   const html = `<!doctype html>

@@ -7,7 +7,5 @@ CREATE TABLE orders (
   currency TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'submitted',
   quoted_price INTEGER,
-  payment_link TEXT,
-  flutterwave_tx_ref TEXT,
   paid_at TEXT
 );

@@ -2,6 +2,10 @@ name = "camaroom-cart-backend"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
+[vars]
+MOMO_TRANSFER_NUMBER = "681105611"
+MOMO_ACCOUNT_NAME = "su jiangmin"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "camaroom-orders"

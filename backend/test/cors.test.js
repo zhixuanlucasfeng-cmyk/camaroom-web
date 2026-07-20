@@ -3,7 +3,7 @@ import { env } from 'cloudflare:test';
 import worker from '../src/index.js';
 
 // keep in sync with backend/schema.sql
-const schema = 'CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, payment_link TEXT, flutterwave_tx_ref TEXT, paid_at TEXT);';
+const schema = 'CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, paid_at TEXT);';
 
 beforeEach(async () => {
   await env.DB.exec('DROP TABLE IF EXISTS orders');
