@@ -49,13 +49,24 @@ describe('createOrder', () => {
     ).rejects.toThrow('invalid_order');
   });
 
-  it('rejects a currency that is not XAF or USD', async () => {
+  it('rejects a currency that is not XAF', async () => {
     await expect(
       createOrder(env.DB, {
         customer_name: 'Jean',
         customer_phone: '+237600000001',
         items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
         currency: 'EUR',
+      })
+    ).rejects.toThrow('invalid_currency');
+  });
+
+  it('rejects USD now that card payments are out of scope', async () => {
+    await expect(
+      createOrder(env.DB, {
+        customer_name: 'Jean',
+        customer_phone: '+237600000001',
+        items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+        currency: 'USD',
       })
     ).rejects.toThrow('invalid_currency');
   });

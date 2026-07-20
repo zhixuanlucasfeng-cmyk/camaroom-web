@@ -4,7 +4,7 @@ export async function createOrder(db, { customer_name, customer_phone, items, cu
   if (!customer_name || !customer_phone || !Array.isArray(items) || items.length === 0) {
     throw new Error('invalid_order');
   }
-  if (currency !== 'XAF' && currency !== 'USD') {
+  if (currency !== 'XAF') {
     throw new Error('invalid_currency');
   }
   const id = generateOrderId();
