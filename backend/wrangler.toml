@@ -9,4 +9,4 @@ MOMO_ACCOUNT_NAME = "su jiangmin"
 [[d1_databases]]
 binding = "DB"
 database_name = "camaroom-orders"
-database_id = "placeholder-local-db-id"
+database_id = "6b25460c-5248-4a1d-a5bf-c5abb23eda85"
