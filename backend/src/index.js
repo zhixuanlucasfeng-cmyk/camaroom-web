@@ -1,5 +1,5 @@
 import { handleCreateOrder } from './orders.js';
-import { handleGetQuotePage, handleSubmitQuote } from './quote.js';
+import { handleGetQuotePage, handleSubmitQuote, handleMarkOrderPaid } from './quote.js';
 import { isAuthenticated, checkPassword, makeSessionCookie } from './auth.js';
 
 const LOGIN_PAGE = `<!doctype html><html><body>
@@ -50,6 +50,14 @@ export default {
         return new Response('Unauthorized', { status: 401 });
       }
       return handleSubmitQuote(request, env, quoteApiMatch[1]);
+    }
+
+    const markPaidMatch = pathname.match(/^\/api\/orders\/([^/]+)\/mark-paid$/);
+    if (markPaidMatch && request.method === 'POST') {
+      if (!(await isAuthenticated(request, env))) {
+        return new Response('Unauthorized', { status: 401 });
+      }
+      return handleMarkOrderPaid(request, env, markPaidMatch[1]);
     }
 
     if (pathname === '/admin/login' && request.method === 'POST') {

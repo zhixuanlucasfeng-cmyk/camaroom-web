@@ -86,4 +86,14 @@ describe('CORS on POST /api/orders', () => {
     expect(res.status).toBe(401);
     expect(res.headers.get('access-control-allow-origin')).toBeNull();
   });
+
+  it('does not add CORS headers to /api/orders/:id/mark-paid (a different, authenticated route)', async () => {
+    const request = new Request('https://example.com/api/orders/ord_doesnotexist/mark-paid', {
+      method: 'POST',
+    });
+    const res = await worker.fetch(request, env);
+
+    expect(res.status).toBe(401);
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
+  });
 });

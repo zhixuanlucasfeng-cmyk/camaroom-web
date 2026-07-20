@@ -1,4 +1,5 @@
 import { getOrder } from './orders.js';
+import { sendPaidNotification } from './email.js';
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -143,4 +144,44 @@ export async function handleGetQuotePage(request, env, id) {
 ${actionHtml}
 </body></html>`;
   return new Response(html, { headers: { 'content-type': 'text/html' } });
+}
+
+export async function markOrderPaid(db, env, id) {
+  const order = await getOrder(db, id);
+  if (!order) {
+    throw new Error('order_not_found');
+  }
+  if (order.status === 'paid') {
+    return { id: order.id, status: 'paid', paid_at: order.paid_at };
+  }
+  if (order.status !== 'quoted') {
+    throw new Error('order_not_quoted');
+  }
+
+  const paid_at = new Date().toISOString();
+  await db.prepare("UPDATE orders SET status = 'paid', paid_at = ? WHERE id = ?").bind(paid_at, id).run();
+
+  try {
+    await sendPaidNotification({ ...order, status: 'paid', paid_at }, env);
+  } catch (err) {
+    console.error('sendPaidNotification failed for order', order.id, err);
+  }
+
+  return { id: order.id, status: 'paid', paid_at };
+}
+
+export async function handleMarkOrderPaid(request, env, id) {
+  try {
+    const result = await markOrderPaid(env.DB, env, id);
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  } catch (err) {
+    const status = err.message === 'order_not_found' ? 404 : 400;
+    return new Response(JSON.stringify({ error: err.message }), {
+      status,
+      headers: { 'content-type': 'application/json' },
+    });
+  }
 }
