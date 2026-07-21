@@ -70,12 +70,27 @@ def strip_local_contact_block(html: str) -> str:
     # check in index.html so it can't throw), but strip it here too so the
     # generated output doesn't carry a pointless reference to a var that no
     # longer exists on this site.
+    #
+    # Matched narrowly on the AGENT_PHONE_2 line alone (not bundled with
+    # neighboring lines like CART_API_BASE) so this survives unrelated edits
+    # to that line — see the SP-137-adjacent "dangling AGENT_PHONE_2" incident
+    # in this repo's git history for why a wider match silently broke before.
+    html = re.sub(
+        r"\n  var AGENT_PHONE_2 = '237681105611'; // Luc Su \(Cameroon\)",
+        "",
+        html,
+    )
     html = html.replace(
-        "  var AGENT_PHONE = '8618707737002';   // Tom Yang (China)\n"
-        "  var AGENT_PHONE_2 = '237681105611'; // Luc Su (Cameroon)\n"
-        "  window.CART_API_BASE = '';\n",
-        "  var AGENT_PHONE = '8618707737002';   // Tom Yang (China) — shared contact until a local rep is confirmed\n"
-        "  window.CART_API_BASE = '';\n",
+        "var AGENT_PHONE = '8618707737002';   // Tom Yang (China)\n",
+        "var AGENT_PHONE = '8618707737002';   // Tom Yang (China) — shared contact until a local rep is confirmed\n",
+    )
+    # CART_API_BASE points at the Cameroon-only cart Worker; CART_ENABLED is
+    # forced off below for every generated site, but don't ship a dangling
+    # reference to Cameroon's backend on sites that never call it.
+    html = re.sub(
+        r"window\.CART_API_BASE = '[^']*';",
+        "window.CART_API_BASE = '';",
+        html,
     )
     html = re.sub(
         r"\n  // Guarded:.*?\n  window\.CART_WHATSAPP_NUMBER = \(typeof AGENT_PHONE_2 !== 'undefined' \? AGENT_PHONE_2 : ''\);\n",
