@@ -19,7 +19,7 @@ describe('createOrder', () => {
       currency: 'XAF',
     });
 
-    expect(result.id).toMatch(/^ord_[0-9a-f]{16}$/);
+    expect(result.id).toMatch(/^REST-[0-9A-Z]{6}$/);
     expect(result.created_at).toBeTruthy();
 
     const stored = await getOrder(env.DB, result.id);

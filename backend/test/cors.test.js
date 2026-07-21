@@ -44,7 +44,7 @@ describe('CORS on POST /api/orders', () => {
     expect(res.headers.get('content-type')).toBe('application/json');
 
     const body = await res.json();
-    expect(body.id).toMatch(/^ord_[0-9a-f]{16}$/);
+    expect(body.id).toMatch(/^REST-[0-9A-Z]{6}$/);
   });
 
   it('a validation-failure POST /api/orders (400) still carries both the CORS header and the original content-type', async () => {
