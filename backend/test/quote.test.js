@@ -2,13 +2,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { env } from 'cloudflare:test';
 import { createOrder, getOrder } from '../src/orders.js';
 import { submitQuote, markOrderPaid } from '../src/quote.js';
+import { setStock, getStock } from '../src/inventory.js';
 
 // keep in sync with backend/schema.sql
-const schema = 'CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, paid_at TEXT);';
+const schema = 'CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, paid_at TEXT, shipment_id TEXT);';
+const inventorySchema = 'CREATE TABLE inventory (sku TEXT PRIMARY KEY, stock_qty INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL);';
 
 beforeEach(async () => {
   await env.DB.exec('DROP TABLE IF EXISTS orders');
   await env.DB.exec(schema);
+  await env.DB.exec('DROP TABLE IF EXISTS inventory');
+  await env.DB.exec(inventorySchema);
   env.RESEND_API_KEY = 'test_resend_key';
   env.NOTIFICATION_FROM_EMAIL = 'orders@restarsolar.com';
   env.SALES_NOTIFICATION_EMAIL = 'sales@restarsolar.com';
@@ -53,6 +57,32 @@ describe('submitQuote', () => {
 
     expect(second.quoted_price).toBe(first.quoted_price);
     expect(second.quoted_price).toBe(150000);
+  });
+
+  it('reserves (decrements) tracked stock when quoting', async () => {
+    await setStock(env.DB, 'panel-450w', 5);
+    const { id } = await makeOrder(); // orders 2x panel-450w
+
+    await submitQuote(env.DB, env, id, 150000);
+
+    expect(await getStock(env.DB, 'panel-450w')).toBe(3);
+  });
+
+  it('rejects the quote if a tracked SKU does not have enough stock', async () => {
+    await setStock(env.DB, 'panel-450w', 1); // order wants 2
+    const { id } = await makeOrder();
+
+    await expect(submitQuote(env.DB, env, id, 150000)).rejects.toThrow('insufficient_stock:panel-450w');
+
+    const stored = await getOrder(env.DB, id);
+    expect(stored.status).toBe('submitted'); // never advanced to quoted
+    expect(await getStock(env.DB, 'panel-450w')).toBe(1); // untouched
+  });
+
+  it('does not block quoting when the SKU has no inventory row at all', async () => {
+    const { id } = await makeOrder(); // panel-450w never tracked
+    const result = await submitQuote(env.DB, env, id, 150000);
+    expect(result.status).toBe('quoted');
   });
 });
 

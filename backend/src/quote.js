@@ -1,5 +1,6 @@
 import { getOrder } from './orders.js';
 import { sendPaidNotification } from './email.js';
+import { reserveStockForItems } from './inventory.js';
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -22,6 +23,12 @@ export async function submitQuote(db, env, id, price) {
   if (order.status !== 'submitted') {
     return { id: order.id, status: order.status, quoted_price: order.quoted_price };
   }
+
+  // Reserve stock at quote time — this is the point sales commits to
+  // selling specific units, since there's no real-time checkout. Throws
+  // insufficient_stock:<sku> if any tracked line item doesn't have enough,
+  // which handleSubmitQuote surfaces to the admin quote page.
+  await reserveStockForItems(db, JSON.parse(order.items));
 
   await db
     .prepare(`UPDATE orders SET quoted_price = ?, status = 'quoted' WHERE id = ?`)
