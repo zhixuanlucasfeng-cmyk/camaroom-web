@@ -1,6 +1,7 @@
 import { getOrder } from './orders.js';
 import { sendPaidNotification } from './email.js';
 import { reserveStockForItems } from './inventory.js';
+import { listShipments, getShipment } from './shipments.js';
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
@@ -76,6 +77,42 @@ export async function handleGetQuotePage(request, env, id) {
   const momoNumber = escapeHtml(env.MOMO_TRANSFER_NUMBER || '');
   const momoName = escapeHtml(env.MOMO_ACCOUNT_NAME || '');
 
+  const allShipments = await listShipments(env.DB);
+  const currentShipment = order.shipment_id ? await getShipment(env.DB, order.shipment_id) : null;
+  const shipmentOptions = allShipments
+    .map(
+      (s) =>
+        `<option value="${escapeHtml(s.id)}"${s.id === order.shipment_id ? ' selected' : ''}>${escapeHtml(s.label)} (${escapeHtml(s.status)})</option>`
+    )
+    .join('');
+  const shipmentHtml = `
+    <p>Shipment: ${currentShipment ? escapeHtml(currentShipment.label) + ' — ' + escapeHtml(currentShipment.status) : 'not assigned'}</p>
+    <select id="shipmentSelect">
+      <option value="">— none —</option>
+      ${shipmentOptions}
+    </select>
+    <button type="button" id="assignShipmentBtn">Assign</button>
+    <p id="shipmentResult"></p>
+    <script>
+      document.getElementById('assignShipmentBtn').addEventListener('click', function () {
+        var shipmentId = document.getElementById('shipmentSelect').value;
+        if (!shipmentId) { return; }
+        fetch('/api/orders/${order.id}/assign-shipment', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ shipment_id: shipmentId }),
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.shipment_id) {
+              window.location.reload();
+            } else {
+              document.getElementById('shipmentResult').textContent = 'Error: ' + data.error;
+            }
+          });
+      });
+    </script>`;
+
   let actionHtml;
   if (order.status === 'submitted') {
     actionHtml = `
@@ -143,12 +180,14 @@ export async function handleGetQuotePage(request, env, id) {
   const html = `<!doctype html>
 <html><head><meta charset="utf-8"><title>Quote order ${escapeHtml(order.id)}</title></head>
 <body>
+<p><a href="/admin/shipments">Shipments</a> · <a href="/admin/inventory">Inventory</a></p>
 <h1>Order ${escapeHtml(order.id)}</h1>
 <p>Customer: ${escapeHtml(order.customer_name)} (${escapeHtml(order.customer_phone)})</p>
 <p>Currency: ${escapeHtml(order.currency)}</p>
 <ul>${itemsHtml}</ul>
 <p>Status: ${escapeHtml(order.status)}</p>
 ${actionHtml}
+${shipmentHtml}
 </body></html>`;
   return new Response(html, { headers: { 'content-type': 'text/html' } });
 }

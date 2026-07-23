@@ -194,3 +194,117 @@ describe('POST /api/orders/:id/assign-shipment', () => {
     expect(html).toContain('Shipment tracking');
   });
 });
+
+describe('GET /admin/shipments', () => {
+  it('shows the login page, unauthenticated', async () => {
+    const res = await worker.fetch(new Request('https://example.com/admin/shipments'), env);
+    expect(res.status).toBe(401);
+    expect(await res.text()).toContain('loginForm');
+  });
+
+  it('lists shipments and a create form, authenticated', async () => {
+    const cookie = await authCookie();
+    await worker.fetch(
+      new Request('https://example.com/api/shipments', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ label: 'Container A' }),
+      }),
+      env
+    );
+
+    const res = await worker.fetch(new Request('https://example.com/admin/shipments', { headers: { cookie } }), env);
+    const html = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(html).toContain('Container A');
+    expect(html).toContain('createForm');
+  });
+});
+
+describe('GET /admin/inventory', () => {
+  it('shows the login page, unauthenticated', async () => {
+    const res = await worker.fetch(new Request('https://example.com/admin/inventory'), env);
+    expect(res.status).toBe(401);
+    expect(await res.text()).toContain('loginForm');
+  });
+
+  it('lists stock levels and a set-stock form, authenticated', async () => {
+    const cookie = await authCookie();
+    await worker.fetch(
+      new Request('https://example.com/api/inventory/SP-005', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ stock_qty: 12 }),
+      }),
+      env
+    );
+
+    const res = await worker.fetch(new Request('https://example.com/admin/inventory', { headers: { cookie } }), env);
+    const html = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(html).toContain('SP-005');
+    expect(html).toContain('12');
+    expect(html).toContain('setForm');
+  });
+});
+
+describe('GET /admin/quote/:id — shipment assignment section', () => {
+  it('shows "not assigned" and a select of available shipments', async () => {
+    const cookie = await authCookie();
+    const { id: orderId } = await createOrder(env.DB, {
+      customer_name: 'Jean',
+      customer_phone: '+237600000001',
+      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+      currency: 'XAF',
+    });
+    await worker.fetch(
+      new Request('https://example.com/api/shipments', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ label: 'Container A' }),
+      }),
+      env
+    );
+
+    const res = await worker.fetch(new Request(`https://example.com/admin/quote/${orderId}`, { headers: { cookie } }), env);
+    const html = await res.text();
+
+    expect(html).toContain('not assigned');
+    expect(html).toContain('Container A');
+    expect(html).toContain('assignShipmentBtn');
+  });
+
+  it('shows the shipment label and status once assigned', async () => {
+    const cookie = await authCookie();
+    const { id: orderId } = await createOrder(env.DB, {
+      customer_name: 'Jean',
+      customer_phone: '+237600000001',
+      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+      currency: 'XAF',
+    });
+    const createRes = await worker.fetch(
+      new Request('https://example.com/api/shipments', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ label: 'Container A' }),
+      }),
+      env
+    );
+    const { id: shipmentId } = await createRes.json();
+    await worker.fetch(
+      new Request(`https://example.com/api/orders/${orderId}/assign-shipment`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ shipment_id: shipmentId }),
+      }),
+      env
+    );
+
+    const res = await worker.fetch(new Request(`https://example.com/admin/quote/${orderId}`, { headers: { cookie } }), env);
+    const html = await res.text();
+
+    expect(html).toContain('Container A — preparing');
+  });
+});

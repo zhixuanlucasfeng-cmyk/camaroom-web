@@ -145,6 +145,9 @@ img{max-width:100%;display:block}
 .card h3{font-size:19px;margin-top:8px;font-weight:600}
 .price{font-family:var(--display);font-size:22px;font-weight:600;color:var(--text);margin-top:8px}
 .price small{font-size:13px;color:var(--muted);font-family:var(--body);font-weight:500}
+.stock-badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;margin-top:6px}
+.stock-badge--out{background:#FBE7E7;color:#B3261E}
+.stock-badge--low{background:#FFF3E0;color:#B5620A}
 .desc{color:var(--muted);font-size:14px;margin-top:8px;flex:1}
 .card-actions{display:flex;gap:10px;margin-top:18px}
 .card-actions .btn{padding:10px 16px;font-size:14px;flex:1;justify-content:center}
@@ -633,7 +636,7 @@ const I18N = {
     "modal.specs":"Specifications","modal.inquire":"Inquire on WhatsApp","modal.price":"Price",
     "footer.tag":"Reliable solar power for Cameroon's homes, shops, and businesses.","footer.explore":"Explore","footer.contact":"Contact",
     "footer.rights":"© 2026 Restar Solar. All rights reserved.","footer.built":"Solar supply & installation · Cameroon",
-    "price.contact":"Contact for price",
+    "price.contact":"Contact for price","stock.out":"Out of stock","stock.low":"Only {n} left",
     "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory","nav.gallery":"Gallery",
     "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, SGS, and CE. Tap a certificate to enlarge.",
     "nav.warranty":"Warranty","nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
@@ -666,7 +669,7 @@ const I18N = {
     "modal.specs":"Spécifications","modal.inquire":"Demander sur WhatsApp","modal.price":"Prix",
     "footer.tag":"Énergie solaire fiable pour les maisons, boutiques et entreprises du Cameroun.","footer.explore":"Explorer","footer.contact":"Contact",
     "footer.rights":"© 2026 Restar Solar. Tous droits réservés.","footer.built":"Fourniture & installation solaire · Cameroun",
-    "price.contact":"Prix sur demande",
+    "price.contact":"Prix sur demande","stock.out":"Rupture de stock","stock.low":"Plus que {n} en stock",
     "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine","nav.gallery":"Galerie",
     "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, SGS et CE. Touchez un certificat pour l'agrandir.",
     "nav.warranty":"Garantie","nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
@@ -699,7 +702,7 @@ const I18N = {
     "modal.specs":"المواصفات","modal.inquire":"استفسار عبر واتساب","modal.price":"السعر",
     "footer.tag":"طاقة شمسية موثوقة للمنازل والمحلات والشركات في السودان.","footer.explore":"استكشف","footer.contact":"اتصل بنا",
     "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · السودان",
-    "price.contact":"السعر عند الطلب",
+    "price.contact":"السعر عند الطلب","stock.out":"نفذ من المخزون","stock.low":"باقي {n} فقط",
     "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع","nav.gallery":"معرض الصور",
     "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وSGS وCE. اضغط على شهادة لتكبيرها.",
     "nav.warranty":"الضمان","nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
@@ -714,6 +717,12 @@ const I18N = {
 let lang = "en";
 const CART_ENABLED = true;
 window.CART_ENABLED = CART_ENABLED;
+// Populated after DOMContentLoaded once window.CART_API_BASE is set (that
+// happens in a later <script> block) — see the fetch below, near the bottom
+// of this file. sku -> stock_qty; a SKU absent from this object is
+// untracked (unlimited), matching the backend's inventory.js semantics.
+let INVENTORY = {};
+const LOW_STOCK_THRESHOLD = 5;
 const t = k => (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
 const tr = o => (o[lang] !== undefined ? o[lang] : o.en);
 const fmt = n => n.toLocaleString("fr-FR");
@@ -742,6 +751,11 @@ function renderGrid(){
   document.getElementById("grid").innerHTML = list.map(p=>{
     const col = CAT_COLOR[p.cat]||"#004598";
     const ic = ICON[p.cat]||ICON.kit;
+    const stock = INVENTORY[p.id]; // undefined = untracked/unlimited
+    const outOfStock = stock === 0;
+    const stockBadge = outOfStock ? `<span class="stock-badge stock-badge--out">${t('stock.out')}</span>`
+      : (typeof stock === "number" && stock <= LOW_STOCK_THRESHOLD) ? `<span class="stock-badge stock-badge--low">${t('stock.low').replace('{n}', stock)}</span>`
+      : "";
     return `<article class="card" style="--cat:${col}">
       <div class="card-art">
         <div class="sheen"></div>
@@ -753,13 +767,14 @@ function renderGrid(){
         <span class="cat-tag">${catLabel(p.cat)}</span>
         <h3>${p.name}</h3>
         <div class="price">${p.price?fmt(p.price)+' <small>FCFA</small>':t('price.contact')}</div>
+        ${stockBadge}
         <p class="desc">${tr(p.desc)}</p>
         <div class="card-actions">
           <button class="btn btn--line" data-open="${p.id}">${t('card.details')}</button>
           <a class="btn btn--dark" target="_blank" rel="noopener"
              href="${wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':lang==='ar'?'مرحبًا ريستار سولار، أنا مهتم بـ: ':'Hello Restar Solar, I am interested in: ')+p.name+'.')}">
              ${t('card.inquire')}</a>
-          ${window.CART_ENABLED ? `<button class="btn btn--ghost add-to-cart" data-sku="${p.id}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" type="button">Add to cart</button>` : ''}
+          ${window.CART_ENABLED ? `<button class="btn btn--ghost add-to-cart" data-sku="${p.id}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? t('stock.out') : 'Add to cart'}</button>` : ''}
         </div>
       </div>
     </article>`;
@@ -1067,6 +1082,20 @@ observeReveals();
   var AGENT_PHONE = '8618707737002';   // Tom Yang (China)
   var AGENT_PHONE_2 = '237681105611'; // Luc Su (Cameroon)
   window.CART_API_BASE = 'https://camaroom-cart-backend.zhixuanlucasfeng.workers.dev';
+  // Stock badges: fetch once CART_API_BASE exists, then re-render the grid
+  // (INVENTORY/renderGrid are defined in the earlier <script> block — top-level
+  // let/const and function declarations are shared across inline scripts on
+  // the same page). Silently no-ops on failure — an unreachable inventory
+  // endpoint should never block the storefront from showing products.
+  if (window.CART_API_BASE) {
+    fetch(window.CART_API_BASE + '/api/inventory')
+      .then(function (res) { return res.json(); })
+      .then(function (rows) {
+        rows.forEach(function (row) { INVENTORY[row.sku] = row.stock_qty; });
+        if (typeof renderGrid === 'function') renderGrid();
+      })
+      .catch(function () {});
+  }
   // Guarded: the country-site generator strips the AGENT_PHONE_2 declaration
   // above for countries without a local rep (see strip_local_contact_block()
   // in scripts/generate_country_site.py), which would otherwise leave this a

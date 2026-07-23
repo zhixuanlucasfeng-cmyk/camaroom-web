@@ -9,6 +9,7 @@ import {
   handleAssignOrderShipment,
 } from './shipments.js';
 import { handleGetOrderStatusPage } from './order_status.js';
+import { handleGetShipmentsPage, handleGetInventoryPage } from './admin_pages.js';
 
 const LOGIN_PAGE = `<!doctype html><html><body>
 <form id="loginForm"><input type="password" id="pw" placeholder="Password"><button>Enter</button></form>
@@ -151,6 +152,20 @@ export default {
     const orderStatusMatch = pathname.match(/^\/order\/([^/]+)$/);
     if (orderStatusMatch && request.method === 'GET') {
       return handleGetOrderStatusPage(request, env, orderStatusMatch[1]);
+    }
+
+    if (pathname === '/admin/shipments' && request.method === 'GET') {
+      if (!(await isAuthenticated(request, env))) {
+        return new Response(LOGIN_PAGE, { status: 401, headers: { 'content-type': 'text/html' } });
+      }
+      return handleGetShipmentsPage(request, env);
+    }
+
+    if (pathname === '/admin/inventory' && request.method === 'GET') {
+      if (!(await isAuthenticated(request, env))) {
+        return new Response(LOGIN_PAGE, { status: 401, headers: { 'content-type': 'text/html' } });
+      }
+      return handleGetInventoryPage(request, env);
     }
 
     return new Response('Not found', { status: 404 });
