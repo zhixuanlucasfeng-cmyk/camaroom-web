@@ -27,6 +27,7 @@ COUNTRIES = {
         "html_lang": "en",
         "has_local_contact": False,
         "currency": "NGN",
+        "cart_backend": None,
     },
     "mali": {
         "name_en": "Mali",
@@ -35,6 +36,10 @@ COUNTRIES = {
         "html_lang": "fr",
         "has_local_contact": False,
         "currency": "XOF",
+        # Deployed 2026-07-24 (see backend/wrangler.mali.toml) — keep this in
+        # sync with the live Worker URL, and with Mali-website/index.html in
+        # the separate sibling repo, if either ever changes.
+        "cart_backend": "https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev",
     },
     "sudan": {
         "name_en": "Sudan",
@@ -43,6 +48,7 @@ COUNTRIES = {
         "html_lang": "ar",
         "has_local_contact": False,
         "currency": "SDG",
+        "cart_backend": None,
     },
 }
 
@@ -87,9 +93,9 @@ def strip_local_contact_block(html: str) -> str:
         "var AGENT_PHONE = '8618707737002';   // Tom Yang (China)\n",
         "var AGENT_PHONE = '8618707737002';   // Tom Yang (China) — shared contact until a local rep is confirmed\n",
     )
-    # CART_API_BASE points at the Cameroon-only cart Worker; CART_ENABLED is
-    # forced off below for every generated site, but don't ship a dangling
-    # reference to Cameroon's backend on sites that never call it.
+    # CART_API_BASE/CART_ENABLED are set per-country by set_cart_backend()
+    # below, not here — this function only strips the dangling Cameroon
+    # Worker URL reference so it's never briefly present mid-pipeline.
     html = re.sub(
         r"window\.CART_API_BASE = '[^']*';",
         "window.CART_API_BASE = '';",
@@ -132,10 +138,28 @@ def set_default_language(html: str, country: dict) -> str:
     return html
 
 
-def disable_cart(html: str) -> str:
-    """Cart checkout is Cameroon-only for now — other countries don't have
-    the backend deployed, so ship the flag off rather than a broken button."""
-    return html.replace("const CART_ENABLED = true;", "const CART_ENABLED = false;")
+def set_cart_backend(html: str, country: dict) -> str:
+    """Cart checkout is enabled only for countries with a deployed backend
+    (COUNTRIES[...]["cart_backend"]) — e.g. Mali, pointed at
+    camaroom-cart-backend-mali (see backend/wrangler.mali.toml). Countries
+    without one (cart_backend is None) get the flag off and an empty API
+    base, same as before.
+
+    This must stay in sync with reality: if a country's cart_backend is set
+    here, regenerating that country's site should reproduce its live
+    CART_ENABLED/CART_API_BASE state, not silently revert it — a mismatch
+    here previously caused a live-discovered bug (see 2026-07-24 Mali cart
+    checkout branch history) and is exactly what this function exists to
+    prevent."""
+    backend_url = country.get("cart_backend")
+    enabled = "true" if backend_url else "false"
+    html = re.sub(r"const CART_ENABLED = (true|false);", f"const CART_ENABLED = {enabled};", html)
+    html = re.sub(
+        r"window\.CART_API_BASE = '[^']*';",
+        f"window.CART_API_BASE = '{backend_url or ''}';",
+        html,
+    )
+    return html
 
 
 def set_cart_currency(html: str, country: dict) -> str:
@@ -170,7 +194,7 @@ def generate_index_html(country_key: str) -> str:
     html = strip_local_contact_block(html)
     html = apply_country_name(html, country)
     html = set_default_language(html, country)
-    html = disable_cart(html)
+    html = set_cart_backend(html, country)
     html = set_cart_currency(html, country)
     # Fix the address field now that "Cameroon" inside it has already become
     # the new country name — drop the fabricated Douala street address,
