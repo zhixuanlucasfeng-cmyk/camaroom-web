@@ -76,6 +76,7 @@ export async function handleGetQuotePage(request, env, id) {
   const digitsOnlyPhone = order.customer_phone.replace(/[^0-9]/g, '');
   const momoNumber = escapeHtml(env.MOMO_TRANSFER_NUMBER || '');
   const momoName = escapeHtml(env.MOMO_ACCOUNT_NAME || '');
+  const momoNetworkLabel = escapeHtml(env.MOMO_NETWORK_LABEL || '');
 
   const allShipments = await listShipments(env.DB);
   const currentShipment = order.shipment_id ? await getShipment(env.DB, order.shipment_id) : null;
@@ -134,7 +135,7 @@ export async function handleGetQuotePage(request, env, id) {
             .then(function (data) {
               var resultEl = document.getElementById('result');
               if (data.quoted_price) {
-                var instructions = 'Please send ' + data.quoted_price + ' ${escapeHtml(order.currency)} via MTN Mobile Money or Orange Money to ${momoNumber} (${momoName}). Include order ' + data.id + ' as the transfer note/reference.';
+                var instructions = 'Please send ' + data.quoted_price + ' ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ' + data.id + ' as the transfer note/reference.';
                 var waText = encodeURIComponent(instructions);
                 var waUrl = 'https://wa.me/${digitsOnlyPhone}?text=' + waText;
                 resultEl.innerHTML =
@@ -152,7 +153,7 @@ export async function handleGetQuotePage(request, env, id) {
         });
       </script>`;
   } else if (order.status === 'quoted') {
-    const instructions = `Please send ${order.quoted_price} ${escapeHtml(order.currency)} via MTN Mobile Money or Orange Money to ${momoNumber} (${momoName}). Include order ${escapeHtml(order.id)} as the transfer note/reference.`;
+    const instructions = `Please send ${order.quoted_price} ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ${escapeHtml(order.id)} as the transfer note/reference.`;
     const waText = encodeURIComponent(instructions);
     const waUrl = `https://wa.me/${digitsOnlyPhone}?text=${waText}`;
     actionHtml = `

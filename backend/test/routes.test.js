@@ -18,6 +18,7 @@ beforeEach(async () => {
     await env.DB.exec(stmt);
   }
   env.ADMIN_PASSWORD = 'test-shared-password';
+  env.ORDER_CURRENCY = 'XAF';
 });
 
 async function authCookie() {
@@ -163,12 +164,16 @@ describe('POST /api/orders/:id/assign-shipment', () => {
 
   it('assigns an order to a shipment when authenticated', async () => {
     const cookie = await authCookie();
-    const { id: orderId } = await createOrder(env.DB, {
-      customer_name: 'Jean',
-      customer_phone: '+237600000001',
-      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
-      currency: 'XAF',
-    });
+    const { id: orderId } = await createOrder(
+      env.DB,
+      {
+        customer_name: 'Jean',
+        customer_phone: '+237600000001',
+        items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+        currency: 'XAF',
+      },
+      'XAF'
+    );
     const createRes = await worker.fetch(
       new Request('https://example.com/api/shipments', {
         method: 'POST',
@@ -253,12 +258,16 @@ describe('GET /admin/inventory', () => {
 describe('GET /admin/quote/:id — shipment assignment section', () => {
   it('shows "not assigned" and a select of available shipments', async () => {
     const cookie = await authCookie();
-    const { id: orderId } = await createOrder(env.DB, {
-      customer_name: 'Jean',
-      customer_phone: '+237600000001',
-      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
-      currency: 'XAF',
-    });
+    const { id: orderId } = await createOrder(
+      env.DB,
+      {
+        customer_name: 'Jean',
+        customer_phone: '+237600000001',
+        items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+        currency: 'XAF',
+      },
+      'XAF'
+    );
     await worker.fetch(
       new Request('https://example.com/api/shipments', {
         method: 'POST',
@@ -278,12 +287,16 @@ describe('GET /admin/quote/:id — shipment assignment section', () => {
 
   it('shows the shipment label and status once assigned', async () => {
     const cookie = await authCookie();
-    const { id: orderId } = await createOrder(env.DB, {
-      customer_name: 'Jean',
-      customer_phone: '+237600000001',
-      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
-      currency: 'XAF',
-    });
+    const { id: orderId } = await createOrder(
+      env.DB,
+      {
+        customer_name: 'Jean',
+        customer_phone: '+237600000001',
+        items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+        currency: 'XAF',
+      },
+      'XAF'
+    );
     const createRes = await worker.fetch(
       new Request('https://example.com/api/shipments', {
         method: 'POST',

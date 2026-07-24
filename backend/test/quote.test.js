@@ -1,30 +1,39 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { env } from 'cloudflare:test';
 import { createOrder, getOrder } from '../src/orders.js';
-import { submitQuote, markOrderPaid } from '../src/quote.js';
+import { handleGetQuotePage, submitQuote, markOrderPaid } from '../src/quote.js';
 import { setStock, getStock } from '../src/inventory.js';
 
 // keep in sync with backend/schema.sql
+const shipmentsSchema = 'CREATE TABLE shipments (id TEXT PRIMARY KEY, label TEXT NOT NULL, status TEXT NOT NULL DEFAULT "preparing", created_at TEXT NOT NULL, updated_at TEXT NOT NULL);';
 const schema = 'CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, paid_at TEXT, shipment_id TEXT);';
 const inventorySchema = 'CREATE TABLE inventory (sku TEXT PRIMARY KEY, stock_qty INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL);';
 
 beforeEach(async () => {
   await env.DB.exec('DROP TABLE IF EXISTS orders');
-  await env.DB.exec(schema);
+  await env.DB.exec('DROP TABLE IF EXISTS shipments');
   await env.DB.exec('DROP TABLE IF EXISTS inventory');
+  await env.DB.exec(shipmentsSchema);
+  await env.DB.exec(schema);
   await env.DB.exec(inventorySchema);
   env.RESEND_API_KEY = 'test_resend_key';
   env.NOTIFICATION_FROM_EMAIL = 'orders@restarsolar.com';
   env.SALES_NOTIFICATION_EMAIL = 'sales@restarsolar.com';
+  env.ORDER_CURRENCY = 'XAF';
+  env.MOMO_NETWORK_LABEL = 'MTN Mobile Money or Orange Money';
 });
 
 async function makeOrder() {
-  return createOrder(env.DB, {
-    customer_name: 'Jean',
-    customer_phone: '+237600000001',
-    items: [{ sku: 'panel-450w', name: '450W Panel', qty: 2 }],
-    currency: 'XAF',
-  });
+  return createOrder(
+    env.DB,
+    {
+      customer_name: 'Jean',
+      customer_phone: '+237600000001',
+      items: [{ sku: 'panel-450w', name: '450W Panel', qty: 2 }],
+      currency: 'XAF',
+    },
+    'XAF'
+  );
 }
 
 describe('submitQuote', () => {
@@ -134,5 +143,19 @@ describe('markOrderPaid', () => {
     expect(result.status).toBe('paid');
     const stored = await getOrder(env.DB, id);
     expect(stored.status).toBe('paid');
+  });
+});
+
+describe('handleGetQuotePage', () => {
+  it('shows the deployment-configured MoMo network label in transfer instructions', async () => {
+    const { id } = await makeOrder();
+    await submitQuote(env.DB, env, id, 150000);
+    env.MOMO_NETWORK_LABEL = 'Orange Money or Moov Money';
+
+    const res = await handleGetQuotePage({}, env, id);
+    const html = await res.text();
+
+    expect(html).toContain('Orange Money or Moov Money');
+    expect(html).not.toContain('MTN Mobile Money');
   });
 });

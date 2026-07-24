@@ -21,15 +21,20 @@ beforeEach(async () => {
   for (const stmt of schema.split(';').map((s) => s.trim()).filter(Boolean)) {
     await env.DB.exec(stmt);
   }
+  env.ORDER_CURRENCY = 'XAF';
 });
 
 async function makeOrder() {
-  return createOrder(env.DB, {
-    customer_name: 'Jean',
-    customer_phone: '+237600000001',
-    items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
-    currency: 'XAF',
-  });
+  return createOrder(
+    env.DB,
+    {
+      customer_name: 'Jean',
+      customer_phone: '+237600000001',
+      items: [{ sku: 'SP-005', name: 'Panel', qty: 1 }],
+      currency: 'XAF',
+    },
+    'XAF'
+  );
 }
 
 describe('createShipment', () => {

@@ -6,6 +6,7 @@ compatibility_date = "2024-11-01"
 MOMO_TRANSFER_NUMBER = "681105611"
 MOMO_ACCOUNT_NAME = "su jiangmin"
 ORDER_CURRENCY = "XAF"
+MOMO_NETWORK_LABEL = "MTN Mobile Money or Orange Money"
 
 [[d1_databases]]
 binding = "DB"
