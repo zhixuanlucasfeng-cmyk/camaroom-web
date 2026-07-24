@@ -1,0 +1,20 @@
+name = "camaroom-cart-backend-mali"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# TODO(mali-momo): PLACEHOLDER — this is Cameroon's real MoMo number/account,
+# reused temporarily. An Orange Money Mali / Moov Money transfer to this
+# MTN-Cameroon number will very likely fail (different country, different
+# network — MTN does not operate in Mali). Replace both values with a real
+# Mali Orange Money or Moov Money number/account name before giving these
+# instructions to any real customer.
+MOMO_TRANSFER_NUMBER = "681105611"
+MOMO_ACCOUNT_NAME = "su jiangmin"
+ORDER_CURRENCY = "XOF"
+MOMO_NETWORK_LABEL = "Orange Money or Moov Money"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "camaroom-orders-mali"
+database_id = "REPLACE_AFTER_D1_CREATE"
