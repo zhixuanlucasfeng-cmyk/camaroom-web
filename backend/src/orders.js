@@ -1,4 +1,5 @@
 import { generateOrderId } from './id.js';
+import { linkOrderToAssignment } from './rep_assignment.js';
 
 export async function createOrder(db, { customer_name, customer_phone, items, currency }, expectedCurrency) {
   if (!customer_name || !customer_phone || !Array.isArray(items) || items.length === 0) {
@@ -36,6 +37,15 @@ export async function handleCreateOrder(request, env) {
   }
   try {
     const order = await createOrder(env.DB, body, env.ORDER_CURRENCY);
+    if (body.session_id) {
+      // Best-effort: a rep-assignment problem must never block order
+      // creation, since the order itself already succeeded above.
+      try {
+        await linkOrderToAssignment(env.DB, body.session_id, order.id, 'order');
+      } catch (err) {
+        console.error('linkOrderToAssignment failed for order', order.id, err);
+      }
+    }
     return new Response(JSON.stringify(order), {
       status: 201,
       headers: { 'content-type': 'application/json' },

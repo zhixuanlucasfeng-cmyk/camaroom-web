@@ -10,6 +10,7 @@ import {
 } from './shipments.js';
 import { handleGetOrderStatusPage } from './order_status.js';
 import { handleGetShipmentsPage, handleGetInventoryPage } from './admin_pages.js';
+import { handleGetSalesRep } from './rep_assignment.js';
 
 const LOGIN_PAGE = `<!doctype html><html><body>
 <form id="loginForm"><input type="password" id="pw" placeholder="Password"><button>Enter</button></form>
@@ -42,6 +43,14 @@ const CART_CORS_HEADERS = {
 // stock" badges) from a different origin — same cross-origin reasoning as
 // CART_CORS_HEADERS above, but for a public GET endpoint instead of POST.
 const INVENTORY_CORS_HEADERS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, OPTIONS',
+};
+
+// The storefront calls this on first page load (and from every WhatsApp
+// entry point) to get this browser session's assigned rep — same
+// cross-origin reasoning as INVENTORY_CORS_HEADERS.
+const SALES_REP_CORS_HEADERS = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, OPTIONS',
 };
@@ -107,6 +116,17 @@ export default {
       const res = await handleGetInventory(request, env);
       const headers = new Headers(res.headers);
       for (const [k, v] of Object.entries(INVENTORY_CORS_HEADERS)) headers.set(k, v);
+      return new Response(res.body, { status: res.status, headers });
+    }
+
+    // Public: storefront reads this to get the session's assigned rep.
+    if (pathname === '/api/sales-rep' && request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: SALES_REP_CORS_HEADERS });
+    }
+    if (pathname === '/api/sales-rep' && request.method === 'GET') {
+      const res = await handleGetSalesRep(request, env);
+      const headers = new Headers(res.headers);
+      for (const [k, v] of Object.entries(SALES_REP_CORS_HEADERS)) headers.set(k, v);
       return new Response(res.body, { status: res.status, headers });
     }
 

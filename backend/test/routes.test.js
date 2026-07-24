@@ -8,15 +8,20 @@ const schema = `
 CREATE TABLE orders (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, items TEXT NOT NULL, currency TEXT NOT NULL, status TEXT NOT NULL DEFAULT "submitted", quoted_price INTEGER, paid_at TEXT, shipment_id TEXT);
 CREATE TABLE shipments (id TEXT PRIMARY KEY, label TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'preparing', created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE TABLE inventory (sku TEXT PRIMARY KEY, stock_qty INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL);
+CREATE TABLE sales_reps (id TEXT PRIMARY KEY, name TEXT NOT NULL, phone TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE rep_assignments (session_id TEXT PRIMARY KEY, rep_id TEXT NOT NULL, source TEXT NOT NULL, order_id TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 `;
 
 beforeEach(async () => {
   await env.DB.exec('DROP TABLE IF EXISTS orders');
   await env.DB.exec('DROP TABLE IF EXISTS shipments');
   await env.DB.exec('DROP TABLE IF EXISTS inventory');
+  await env.DB.exec('DROP TABLE IF EXISTS rep_assignments');
+  await env.DB.exec('DROP TABLE IF EXISTS sales_reps');
   for (const stmt of schema.split(';').map((s) => s.trim()).filter(Boolean)) {
     await env.DB.exec(stmt);
   }
+  await env.DB.prepare('INSERT INTO sales_reps (id, name, phone, active) VALUES (?, ?, ?, 1)').bind('rep-1', 'Yamadou', '22370750537').run();
   env.ADMIN_PASSWORD = 'test-shared-password';
   env.ORDER_CURRENCY = 'XAF';
 });
@@ -319,5 +324,101 @@ describe('GET /admin/quote/:id — shipment assignment section', () => {
     const html = await res.text();
 
     expect(html).toContain('Container A — preparing');
+  });
+});
+
+describe('GET /api/sales-rep', () => {
+  it('returns the assigned rep for a session, CORS-enabled', async () => {
+    const res = await worker.fetch(
+      new Request('https://example.com/api/sales-rep?session=sess-1&source=nav_whatsapp'),
+      env
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    const data = await res.json();
+    expect(data.rep_id).toBe('rep-1');
+    expect(data.name).toBe('Yamadou');
+    expect(data.phone).toBe('22370750537');
+  });
+
+  it('rejects a request with no session param', async () => {
+    const res = await worker.fetch(new Request('https://example.com/api/sales-rep?source=nav_whatsapp'), env);
+    expect(res.status).toBe(400);
+  });
+
+  it('handles the CORS preflight', async () => {
+    const res = await worker.fetch(
+      new Request('https://example.com/api/sales-rep', { method: 'OPTIONS' }),
+      env
+    );
+    expect(res.status).toBe(204);
+    expect(res.headers.get('access-control-allow-origin')).toBe('*');
+  });
+});
+
+describe('POST /api/orders with session_id', () => {
+  it('links the order to the session\'s existing rep assignment', async () => {
+    await worker.fetch(new Request('https://example.com/api/sales-rep?session=sess-2&source=hero_whatsapp'), env);
+
+    const res = await worker.fetch(
+      new Request('https://example.com/api/orders', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'XAF',
+          session_id: 'sess-2',
+        }),
+      }),
+      env
+    );
+    expect(res.status).toBe(201);
+    const { id: orderId } = await res.json();
+
+    const row = await env.DB.prepare('SELECT * FROM rep_assignments WHERE session_id = ?').bind('sess-2').first();
+    expect(row.order_id).toBe(orderId);
+    expect(row.source).toBe('hero_whatsapp');
+  });
+
+  it('creates a fresh assignment when the order is the session\'s first touch', async () => {
+    const res = await worker.fetch(
+      new Request('https://example.com/api/orders', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'XAF',
+          session_id: 'sess-3',
+        }),
+      }),
+      env
+    );
+    expect(res.status).toBe(201);
+    const { id: orderId } = await res.json();
+
+    const row = await env.DB.prepare('SELECT * FROM rep_assignments WHERE session_id = ?').bind('sess-3').first();
+    expect(row.order_id).toBe(orderId);
+    expect(row.source).toBe('order');
+  });
+
+  it('still creates the order successfully when no session_id is sent (backward compatible)', async () => {
+    const res = await worker.fetch(
+      new Request('https://example.com/api/orders', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'XAF',
+        }),
+      }),
+      env
+    );
+    expect(res.status).toBe(201);
   });
 });
