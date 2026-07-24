@@ -17,4 +17,4 @@ MOMO_NETWORK_LABEL = "Orange Money or Moov Money"
 [[d1_databases]]
 binding = "DB"
 database_name = "camaroom-orders-mali"
-database_id = "REPLACE_AFTER_D1_CREATE"
+database_id = "4665bf6e-8c14-4e7b-8a09-a67bfb97daf6"
