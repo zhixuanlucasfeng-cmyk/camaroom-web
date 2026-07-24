@@ -12,12 +12,16 @@ beforeEach(async () => {
 
 describe('createOrder', () => {
   it('creates an order and returns its id', async () => {
-    const result = await createOrder(env.DB, {
-      customer_name: 'Jean',
-      customer_phone: '+237600000001',
-      items: [{ sku: 'panel-450w', name: '450W Panel', qty: 2 }],
-      currency: 'XAF',
-    });
+    const result = await createOrder(
+      env.DB,
+      {
+        customer_name: 'Jean',
+        customer_phone: '+237600000001',
+        items: [{ sku: 'panel-450w', name: '450W Panel', qty: 2 }],
+        currency: 'XAF',
+      },
+      'XAF'
+    );
 
     expect(result.id).toMatch(/^REST-[0-9A-Z]{6}$/);
     expect(result.created_at).toBeTruthy();
@@ -30,44 +34,89 @@ describe('createOrder', () => {
 
   it('rejects an order with no items', async () => {
     await expect(
-      createOrder(env.DB, {
-        customer_name: 'Jean',
-        customer_phone: '+237600000001',
-        items: [],
-        currency: 'XAF',
-      })
+      createOrder(
+        env.DB,
+        {
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [],
+          currency: 'XAF',
+        },
+        'XAF'
+      )
     ).rejects.toThrow('invalid_order');
   });
 
   it('rejects an order missing customer_phone', async () => {
     await expect(
-      createOrder(env.DB, {
-        customer_name: 'Jean',
-        items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
-        currency: 'XAF',
-      })
+      createOrder(
+        env.DB,
+        {
+          customer_name: 'Jean',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'XAF',
+        },
+        'XAF'
+      )
     ).rejects.toThrow('invalid_order');
   });
 
-  it('rejects a currency that is not XAF', async () => {
+  it('rejects a currency that does not match the deployment currency', async () => {
     await expect(
-      createOrder(env.DB, {
-        customer_name: 'Jean',
-        customer_phone: '+237600000001',
-        items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
-        currency: 'EUR',
-      })
+      createOrder(
+        env.DB,
+        {
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'EUR',
+        },
+        'XAF'
+      )
     ).rejects.toThrow('invalid_currency');
   });
 
   it('rejects USD now that card payments are out of scope', async () => {
     await expect(
-      createOrder(env.DB, {
-        customer_name: 'Jean',
-        customer_phone: '+237600000001',
+      createOrder(
+        env.DB,
+        {
+          customer_name: 'Jean',
+          customer_phone: '+237600000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'USD',
+        },
+        'XAF'
+      )
+    ).rejects.toThrow('invalid_currency');
+  });
+
+  it('accepts XOF orders when the deployment currency is XOF (Mali)', async () => {
+    const result = await createOrder(
+      env.DB,
+      {
+        customer_name: 'Awa',
+        customer_phone: '+22376000001',
         items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
-        currency: 'USD',
-      })
+        currency: 'XOF',
+      },
+      'XOF'
+    );
+    expect(result.id).toMatch(/^REST-[0-9A-Z]{6}$/);
+  });
+
+  it('rejects an XAF order when the deployment currency is XOF (Mali)', async () => {
+    await expect(
+      createOrder(
+        env.DB,
+        {
+          customer_name: 'Awa',
+          customer_phone: '+22376000001',
+          items: [{ sku: 'panel-450w', name: '450W Panel', qty: 1 }],
+          currency: 'XAF',
+        },
+        'XOF'
+      )
     ).rejects.toThrow('invalid_currency');
   });
 });

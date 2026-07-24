@@ -1,10 +1,10 @@
 import { generateOrderId } from './id.js';
 
-export async function createOrder(db, { customer_name, customer_phone, items, currency }) {
+export async function createOrder(db, { customer_name, customer_phone, items, currency }, expectedCurrency) {
   if (!customer_name || !customer_phone || !Array.isArray(items) || items.length === 0) {
     throw new Error('invalid_order');
   }
-  if (currency !== 'XAF') {
+  if (currency !== expectedCurrency) {
     throw new Error('invalid_currency');
   }
   const id = generateOrderId();
@@ -35,7 +35,7 @@ export async function handleCreateOrder(request, env) {
     });
   }
   try {
-    const order = await createOrder(env.DB, body);
+    const order = await createOrder(env.DB, body, env.ORDER_CURRENCY);
     return new Response(JSON.stringify(order), {
       status: 201,
       headers: { 'content-type': 'application/json' },
