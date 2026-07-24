@@ -26,6 +26,7 @@ COUNTRIES = {
         "default_lang": "en",
         "html_lang": "en",
         "has_local_contact": False,
+        "currency": "NGN",
     },
     "mali": {
         "name_en": "Mali",
@@ -33,6 +34,7 @@ COUNTRIES = {
         "default_lang": "fr",
         "html_lang": "fr",
         "has_local_contact": False,
+        "currency": "XOF",
     },
     "sudan": {
         "name_en": "Sudan",
@@ -40,6 +42,7 @@ COUNTRIES = {
         "default_lang": "ar",
         "html_lang": "ar",
         "has_local_contact": False,
+        "currency": "SDG",
     },
 }
 
@@ -135,6 +138,19 @@ def disable_cart(html: str) -> str:
     return html.replace("const CART_ENABLED = true;", "const CART_ENABLED = false;")
 
 
+def set_cart_currency(html: str, country: dict) -> str:
+    """window.CART_CURRENCY is read by assets/js/cart.js when building the
+    order payload — it must match whatever ORDER_CURRENCY a country's cart
+    backend deployment validates against (see backend/wrangler.mali.toml for
+    the Mali example), independent of whether CART_ENABLED is currently on.
+    Setting it correctly now means a later cart rollout for this country is
+    just flipping CART_ENABLED, not also hunting for a hardcoded currency."""
+    return html.replace(
+        "window.CART_CURRENCY = 'XAF';",
+        f"window.CART_CURRENCY = '{country['currency']}';",
+    )
+
+
 def clear_address(html: str) -> str:
     """No confirmed local address yet — show the country name only, not an
     invented street address."""
@@ -155,6 +171,7 @@ def generate_index_html(country_key: str) -> str:
     html = apply_country_name(html, country)
     html = set_default_language(html, country)
     html = disable_cart(html)
+    html = set_cart_currency(html, country)
     # Fix the address field now that "Cameroon" inside it has already become
     # the new country name — drop the fabricated Douala street address,
     # keep just the country name.
