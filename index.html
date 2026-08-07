@@ -1102,7 +1102,29 @@ observeReveals();
   // in scripts/generate_country_site.py), which would otherwise leave this a
   // dangling reference and throw a ReferenceError that aborts this whole
   // script block (breaking the chat widget below it) on page load.
-  window.CART_WHATSAPP_NUMBER = (typeof AGENT_PHONE_2 !== 'undefined' ? AGENT_PHONE_2 : '');
+  window.CART_SESSION_ID = SESSION;
+  // Falls back to Tom Yang (real, shared contact — never a fabricated
+  // number, see SP-137 in generate_country_site.py) instead of an empty
+  // string, which previously produced a broken https://wa.me/?text=... link
+  // for any country without a local rep.
+  window.CART_WHATSAPP_NUMBER = (typeof AGENT_PHONE_2 !== 'undefined' ? AGENT_PHONE_2 : AGENT_PHONE);
+  // Session-consistent sales-rep override: if this country has a live cart
+  // backend with a real seeded rep pool (Mali today), replace the Tom Yang
+  // fallback with the customer's actually-assigned local rep. No-ops (keeps
+  // the fallback above) if CART_API_BASE is empty, the request fails, or the
+  // backend has no active reps (e.g. Cameroon's rep pool is intentionally
+  // empty — see schema.sql) — this must never be able to break page load.
+  if (window.CART_API_BASE) {
+    fetch(window.CART_API_BASE + '/api/sales-rep?session=' + encodeURIComponent(SESSION) + '&source=page_load')
+      .then(function (res) { if (!res.ok) throw new Error('no_rep'); return res.json(); })
+      .then(function (rep) {
+        if (rep && rep.phone) {
+          AGENT_PHONE = rep.phone;
+          window.CART_WHATSAPP_NUMBER = rep.phone;
+        }
+      })
+      .catch(function () {});
+  }
 
   function addMsg(role, text){
     var d = document.createElement('div');
