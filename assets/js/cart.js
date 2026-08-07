@@ -103,6 +103,7 @@
         customer_phone: document.getElementById('cart-phone').value,
         currency: window.CART_CURRENCY || 'XAF',
         items: items,
+        session_id: window.CART_SESSION_ID || undefined,
       });
     });
   }
