@@ -102,8 +102,8 @@ def strip_local_contact_block(html: str) -> str:
         html,
     )
     html = re.sub(
-        r"\n  // Guarded:.*?\n  window\.CART_WHATSAPP_NUMBER = \(typeof AGENT_PHONE_2 !== 'undefined' \? AGENT_PHONE_2 : ''\);\n",
-        "\n  window.CART_WHATSAPP_NUMBER = '';\n",
+        r"\n  // Guarded:.*?\n  window\.CART_WHATSAPP_NUMBER = \(typeof AGENT_PHONE_2 !== 'undefined' \? AGENT_PHONE_2 : AGENT_PHONE\);\n",
+        "\n  window.CART_WHATSAPP_NUMBER = AGENT_PHONE;\n",
         html,
         flags=re.DOTALL,
     )
