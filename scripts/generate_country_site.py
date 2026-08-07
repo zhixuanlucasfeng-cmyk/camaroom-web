@@ -101,11 +101,24 @@ def strip_local_contact_block(html: str) -> str:
         "window.CART_API_BASE = '';",
         html,
     )
+    # Strip only the AGENT_PHONE_2-specific guard comment (5 lines, exact
+    # text) — narrowly anchored so it can never reach past the
+    # window.CART_SESSION_ID line Task 1 added right after it.
     html = re.sub(
-        r"\n  // Guarded:.*?\n  window\.CART_WHATSAPP_NUMBER = \(typeof AGENT_PHONE_2 !== 'undefined' \? AGENT_PHONE_2 : AGENT_PHONE\);\n",
-        "\n  window.CART_WHATSAPP_NUMBER = AGENT_PHONE;\n",
+        r"\n  // Guarded: the country-site generator strips the AGENT_PHONE_2 declaration\n"
+        r"  // above for countries without a local rep \(see strip_local_contact_block\(\)\n"
+        r"  // in scripts/generate_country_site\.py\), which would otherwise leave this a\n"
+        r"  // dangling reference and throw a ReferenceError that aborts this whole\n"
+        r"  // script block \(breaking the chat widget below it\) on page load\.\n",
+        "\n",
         html,
-        flags=re.DOTALL,
+    )
+    # Strip the AGENT_PHONE_2 ternary down to the plain AGENT_PHONE fallback
+    # — single-line match, cannot span into neighboring statements.
+    html = re.sub(
+        r"window\.CART_WHATSAPP_NUMBER = \(typeof AGENT_PHONE_2 !== 'undefined' \? AGENT_PHONE_2 : AGENT_PHONE\);",
+        "window.CART_WHATSAPP_NUMBER = AGENT_PHONE;",
+        html,
     )
     html = html.replace(
         "      var waUrl1 = 'https://wa.me/' + AGENT_PHONE_2 + '?text=' + waText;\n"
