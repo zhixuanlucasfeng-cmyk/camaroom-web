@@ -397,7 +397,7 @@ img{max-width:100%;display:block}
         <span class="eyebrow" data-i18n="certs.eyebrow">Trust</span>
         <h2 class="h-lead" data-i18n="certs.title">Certified quality</h2>
       </div>
-      <p class="sub-lead" style="margin-top:0" data-i18n="certs.sub">Our products and factory are certified to international standards — ISO 9001, SGS, and CE. Tap a certificate to enlarge.</p>
+      <p class="sub-lead" style="margin-top:0" data-i18n="certs.sub">Our products and factory are certified to international standards — ISO 9001, TÜV SÜD, CQC, and CE. Tap a certificate to enlarge.</p>
     </div>
     <div class="cert-grid reveal" id="certGrid"></div>
   </div>
@@ -599,7 +599,7 @@ const I18N = {
     "footer.rights":"© 2026 Restar Solar. All rights reserved.","footer.built":"Solar supply & installation · Cameroon",
     "price.contact":"Contact for price","stock.out":"Out of stock","stock.low":"Only {n} left",
     "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory","nav.gallery":"Gallery",
-    "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, SGS, and CE. Tap a certificate to enlarge.",
+    "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, TÜV SÜD, CQC, and CE. Tap a certificate to enlarge.",
     "nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
   },
   fr:{
@@ -626,7 +626,7 @@ const I18N = {
     "footer.rights":"© 2026 Restar Solar. Tous droits réservés.","footer.built":"Fourniture & installation solaire · Cameroun",
     "price.contact":"Prix sur demande","stock.out":"Rupture de stock","stock.low":"Plus que {n} en stock",
     "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine","nav.gallery":"Galerie",
-    "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, SGS et CE. Touchez un certificat pour l'agrandir.",
+    "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, TÜV SÜD, CQC et CE. Touchez un certificat pour l'agrandir.",
     "nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
   },
   ar:{
@@ -653,7 +653,7 @@ const I18N = {
     "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · السودان",
     "price.contact":"السعر عند الطلب","stock.out":"نفذ من المخزون","stock.low":"باقي {n} فقط",
     "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع","nav.gallery":"معرض الصور",
-    "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وSGS وCE. اضغط على شهادة لتكبيرها.",
+    "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وTÜV SÜD وCQC وCE. اضغط على شهادة لتكبيرها.",
     "nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
   }
 };
@@ -835,11 +835,14 @@ function observeReveals(){
   }else{ reveals.forEach(el=>el.classList.add("in")); }
 }
 const CERTS = [
-  {img:"cert_iso9001.jpg", t:{en:"ISO 9001:2015 Quality Management",fr:"ISO 9001:2015 Management de la qualité"}},
-  {img:"cert_sgs1.jpg",    t:{en:"DAS Certificate of Approval",fr:"Certificat d'approbation DAS"}},
-  {img:"cert_ce.jpg",      t:{en:"Quality Management System",fr:"Système de management de la qualité"}},
-  {img:"cert_sgs2.jpg",    t:{en:"SGS Verification of Compliance",fr:"Vérification de conformité SGS"}},
-  {img:"cert_qms.jpg",     t:{en:"SGS Verification of Compliance",fr:"Vérification de conformité SGS"}}
+  {img:"cert_iso9001.jpg",       t:{en:"ISO 9001:2015 Quality Management",fr:"ISO 9001:2015 Management de la qualité"}},
+  {img:"cert_tuv_sud.jpg",       t:{en:"TÜV SÜD Certification",fr:"Certification TÜV SÜD"}},
+  {img:"cert_ce.jpg",            t:{en:"CE Attestation of Conformity",fr:"Attestation de conformité CE"}},
+  {img:"cert_tuv_salt_mist.jpg", t:{en:"TÜV SÜD Salt Mist Test",fr:"Test au brouillard salin TÜV SÜD"}},
+  {img:"cert_tuv_dust_sand.jpg", t:{en:"TÜV SÜD Dust and Sand Test",fr:"Test de poussière et de sable TÜV SÜD"}},
+  {img:"cert_retie.png",         t:{en:"RETIE Certificate (SGS)",fr:"Certificat RETIE (SGS)"}},
+  {img:"cert_cqc_1.jpg",         t:{en:"CQC",fr:"CQC"}},
+  {img:"cert_cqc_2.jpg",         t:{en:"CQC",fr:"CQC"}}
 ];
 function renderCerts(){
   const el=document.getElementById("certGrid"); if(!el) return;
