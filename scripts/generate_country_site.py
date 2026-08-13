@@ -24,6 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 TOM_YANG_PHONE = "8618707737002"
 TOM_YANG_LABEL_EN = "Tom Yang · 🇨🇳 China"
 TOM_YANG_LABEL_FR = "Tom Yang · 🇨🇳 Chine"
+DROP_SALES_CONTACT = "drop"  # sentinel for apply_sales_contact — see below
 
 COUNTRIES = {
     "nigeria": {
@@ -58,7 +59,8 @@ COUNTRIES = {
         # Confirmed 2026-08-13 — Elena is Mali's China-sales contact,
         # replacing the shared Tom Yang fallback.
         "sales_contact": {"name": "Elena", "flag": "🇨🇳", "label": "China sales", "phone": "8615851496160", "phone_display": "+86 158 5149 6160"},
-        "address": None,
+        # Confirmed 2026-08-13.
+        "address": "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
     },
     "sudan": {
         "name_en": "Sudan",
@@ -77,7 +79,10 @@ COUNTRIES = {
             "phone": "8618825187185", "phone_display": "+86 188 2518 7185",
             "secondary_phone_display": "+249 91 534 8323",
         },
-        "sales_contact": None,
+        # 2026-08-13: user asked to remove Tom Yang from Sudan's site ("Tom
+        # is Cameroon's") — no replacement China-sales contact, just Zhang
+        # Gang alone. See DROP_SALES_CONTACT / drop_sales_contact_block.
+        "sales_contact": DROP_SALES_CONTACT,
         "address": None,
     },
 }
@@ -198,14 +203,99 @@ def apply_local_contact(html: str, country: dict) -> str:
     return html
 
 
+def drop_sales_contact_block(html: str, local_contact: dict) -> str:
+    """Remove the Tom Yang slot entirely, with no fallback shared contact
+    — used when a country has a confirmed local_contact and explicitly
+    wants Tom Yang gone (e.g. Sudan, 2026-08-13: "Tom is Cameroon's,
+    remove him"). Promotes AGENT_PHONE_2 to take over as the sole
+    AGENT_PHONE/AGENT_LABEL, mirroring what strip_local_contact_block does
+    for the opposite slot."""
+    name, flag = local_contact["name"], local_contact["flag"]
+
+    # Contact section: the whole Tom Yang row (icon + label + wa.me link).
+    html = re.sub(
+        r'\n\s*<!-- Tom Yang — China sales -->\n\s*<div class="row">\n'
+        r'\s*<div class="ic">.*?</div>\n\s*<div>\n'
+        r'\s*<div class="lbl">Tom Yang · 🇨🇳 China</div>\n'
+        rf'\s*<a class="val" href="https://wa\.me/{TOM_YANG_PHONE}"[^>]*>\+86 187 0773 7002</a>\n'
+        r'\s*</div>\n\s*</div>\n',
+        '\n',
+        html, count=1, flags=re.DOTALL,
+    )
+    # Contact section: the Tom Yang wa-big button. It's still "btn--ghost"
+    # here (strip_local_contact_block never ran, since local_contact is
+    # set) — the local contact's button is already "btn--sun"/primary, so
+    # nothing needs promoting once this is gone.
+    html = re.sub(
+        rf'\n\s*<a class="btn btn--ghost wa-big" href="https://wa\.me/{TOM_YANG_PHONE}"[^>]*>\n'
+        r'\s*<svg[^>]*>.*?</svg>\n'
+        r'\s*<span>WhatsApp Tom Yang \(China\)</span>\n'
+        r'\s*</a>\n',
+        '\n',
+        html, count=1, flags=re.DOTALL,
+    )
+    # JS: drop the Tom Yang AGENT_PHONE/AGENT_LABEL, then promote
+    # AGENT_PHONE_2 to be the sole AGENT_PHONE/AGENT_LABEL.
+    html = re.sub(
+        rf"  var AGENT_PHONE = '{TOM_YANG_PHONE}';   // Tom Yang \(China\)[^\n]*\n"
+        r"  var AGENT_LABEL = '[^']*';[^\n]*\n"
+        r"  var AGENT_PHONE_2 = '([^']+)'; // [^\n]+\n",
+        f"  var AGENT_PHONE = '\\1';   // {name} ({local_contact['label']})\n"
+        f"  var AGENT_LABEL = '{name} {flag}';\n",
+        html, count=1,
+    )
+    html = html.replace(
+        "window.CART_WHATSAPP_NUMBER = (typeof AGENT_PHONE_2 !== 'undefined' ? AGENT_PHONE_2 : AGENT_PHONE);",
+        "window.CART_WHATSAPP_NUMBER = AGENT_PHONE;",
+    )
+    # These two guard/context comments only make sense when AGENT_PHONE_2
+    # is genuinely still a separate var (dual-contact countries like
+    # Nigeria) — here it's been folded into AGENT_PHONE above, so leaving
+    # them in would misleadingly describe logic that no longer exists.
+    html = re.sub(
+        r"  // Guarded: the country-site generator strips the AGENT_PHONE_2 declaration\n"
+        r"  // above for countries without a local rep \(see strip_local_contact_block\(\)\n"
+        r"  // in scripts/generate_country_site\.py\), which would otherwise leave this a\n"
+        r"  // dangling reference and throw a ReferenceError that aborts this whole\n"
+        r"  // script block \(breaking the chat widget below it\) on page load\.\n",
+        "",
+        html,
+    )
+    html = re.sub(
+        r"  // Falls back to Tom Yang \(real, shared contact — never a fabricated\n"
+        r"  // number, see SP-137 in generate_country_site\.py\) instead of an empty\n"
+        r"  // string, which previously produced a broken https://wa\.me/\?text=\.\.\. link\n"
+        r"  // for any country without a local rep\.\n",
+        "",
+        html,
+    )
+    # Chat widget: drop the Tom Yang waUrl2/"Send to X" line, keep only the
+    # (now-sole) AGENT_PHONE-based one, using the already-dynamic AGENT_LABEL.
+    html = html.replace(
+        "      var waUrl1 = 'https://wa.me/' + AGENT_PHONE_2 + '?text=' + waText;\n"
+        "      var waUrl2 = 'https://wa.me/' + AGENT_PHONE + '?text=' + waText;\n",
+        "      var waUrl2 = 'https://wa.me/' + AGENT_PHONE + '?text=' + waText;\n",
+    )
+    html = re.sub(
+        rf"        '<a href=\"' \+ waUrl1 \+ '\" target=\"_blank\" style=\"' \+ btnStyle \+ '\">' \+ waIcon \+ 'Send to {re.escape(name)} {re.escape(flag)}</a>' \+\n",
+        "",
+        html,
+    )
+    return html
+
+
 def apply_sales_contact(html: str, country: dict) -> str:
     """Fill the "Tom Yang" slot the same way apply_local_contact fills the
     Luc Su slot — used when a country has its own dedicated China-sales
     liaison (e.g. Nigeria's James) instead of the shared Tom Yang contact.
-    A no-op when sales_contact is unset (Tom Yang stays as-is)."""
+    A no-op when sales_contact is unset (Tom Yang stays as-is). If
+    sales_contact is DROP_SALES_CONTACT, removes Tom Yang with no
+    replacement at all (see drop_sales_contact_block)."""
     contact = country.get("sales_contact")
     if contact is None:
         return html
+    if contact == DROP_SALES_CONTACT:
+        return drop_sales_contact_block(html, country["local_contact"])
 
     name, flag, label = contact["name"], contact["flag"], contact["label"]
     phone, phone_display = contact["phone"], contact["phone_display"]
