@@ -49,8 +49,15 @@ COUNTRIES = {
         # sync with the live Worker URL, and with Mali-website/index.html in
         # the separate sibling repo, if either ever changes.
         "cart_backend": "https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev",
+        # No single static local_contact — Mali's local side is a 5-person
+        # rep pool (Yamadou, Mamadou Keita, Ousman Maiga, Ouattara Ousmane,
+        # Papa Job Diarra; seeded in backend/scripts/seed_mali_sales_reps.sql)
+        # assigned per-session by the /api/sales-rep backend call below, not
+        # a single named badge on the page.
         "local_contact": None,
-        "sales_contact": None,
+        # Confirmed 2026-08-13 — Elena is Mali's China-sales contact,
+        # replacing the shared Tom Yang fallback.
+        "sales_contact": {"name": "Elena", "flag": "🇨🇳", "label": "China sales", "phone": "8615851496160", "phone_display": "+86 158 5149 6160"},
         "address": None,
     },
     "sudan": {
@@ -215,10 +222,15 @@ def apply_sales_contact(html: str, country: dict) -> str:
         f'<a class="val" href="https://wa.me/{TOM_YANG_PHONE}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">+86 187 0773 7002</a>',
         f'<a class="val" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{phone_display}</a>',
     )
-    html = html.replace(
-        f'<a class="btn btn--ghost wa-big" href="https://wa.me/{TOM_YANG_PHONE}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
-        f'<a class="btn btn--ghost wa-big" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
-    )
+    # The button's class is "btn--ghost" in the dual-button case (local_contact
+    # also set, e.g. Nigeria) but strip_local_contact_block already promotes
+    # it to "btn--sun" when local_contact is unset (e.g. Mali) since it's the
+    # only button left — match whichever class this country actually has.
+    for btn_class in ("btn--ghost", "btn--sun"):
+        html = html.replace(
+            f'<a class="btn {btn_class} wa-big" href="https://wa.me/{TOM_YANG_PHONE}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
+            f'<a class="btn {btn_class} wa-big" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
+        )
     html = html.replace("WhatsApp Tom Yang (China)", f"WhatsApp {name} ({label})")
     # Matches either comment variant — the plain one (local_contact set, so
     # strip_local_contact_block never ran) or the "— shared contact until a
@@ -228,7 +240,11 @@ def apply_sales_contact(html: str, country: dict) -> str:
         f"var AGENT_PHONE = '{phone}';   // {name} ({label})",
         html,
     )
-    html = html.replace("Send to Tom Yang 🇨🇳", f"Send to {name} {flag}")
+    # AGENT_LABEL feeds the chat widget's "Send to X" button text and gets
+    # overwritten again at runtime if a sales-rep API assigns a different
+    # local rep (see the fetch below it) — this just sets its starting/
+    # fallback value to match the AGENT_PHONE override above.
+    html = html.replace("var AGENT_LABEL = 'Tom Yang 🇨🇳';", f"var AGENT_LABEL = '{name} {flag}';")
     return html
 
 
@@ -330,9 +346,18 @@ def generate_simple_html(filename: str, country_key: str) -> str:
     # These pages' WhatsApp button is hardcoded to Luc Su's Cameroon number.
     # Point it at the confirmed local_contact if one exists (matching how
     # camaroom-web's own factory/gallery pages point at Luc Su, not Tom
-    # Yang), otherwise fall back to the shared Tom Yang contact.
+    # Yang); else the sales_contact override if one exists (e.g. Mali's
+    # Elena, who replaces Tom Yang even though Mali has no single named
+    # local_contact — its local side is a dynamic rep pool, not one badge);
+    # else fall back to the shared Tom Yang contact.
     local_contact = country.get("local_contact")
-    target_phone = local_contact["phone"] if local_contact else TOM_YANG_PHONE
+    sales_contact = country.get("sales_contact")
+    if local_contact:
+        target_phone = local_contact["phone"]
+    elif sales_contact:
+        target_phone = sales_contact["phone"]
+    else:
+        target_phone = TOM_YANG_PHONE
     html = html.replace("https://wa.me/237681105611", f"https://wa.me/{target_phone}")
     return html
 
