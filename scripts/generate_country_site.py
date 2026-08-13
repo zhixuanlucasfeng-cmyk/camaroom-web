@@ -7,6 +7,12 @@ Countries without a confirmed real local WhatsApp rep get ONLY the shared
 Tom Yang contact (no invented placeholder number) — see the SP-137 /
 237600000000 incidents in this repo's git history for why that matters.
 
+A country with a confirmed rep sets "local_contact" (replaces the Luc Su
+slot — the contact-direct row, wa-big button, AGENT_PHONE_2, and the chat
+widget's "Send to X" button) and/or "sales_contact" (replaces the Tom Yang
+slot the same way). Both are optional and independent — see Nigeria (both
+slots replaced) and Sudan (only local_contact set, Tom Yang kept) below.
+
 Run: python3 scripts/generate_country_site.py --country nigeria --out /path/to/output-dir
 """
 import argparse
@@ -25,30 +31,47 @@ COUNTRIES = {
         "name_fr": "Nigeria",
         "default_lang": "en",
         "html_lang": "en",
-        "has_local_contact": False,
         "currency": "NGN",
         "cart_backend": None,
+        # Confirmed 2026-08-13 — see Nigeria-website git history (commit
+        # "Add real Nigeria sales contacts and store address").
+        "local_contact": {"name": "Bright", "flag": "🇳🇬", "label": "Nigeria", "phone": "2349063612011", "phone_display": "+234 906 361 2011"},
+        "sales_contact": {"name": "James", "flag": "🇨🇳", "label": "China sales", "phone": "2349161101749", "phone_display": "+234 916 110 1749"},
+        "address": "RESTAR SOLAR ENERGY NIGERIA CO LTD, No 22 Olojo Drive, by Church Bus Stop, Ojo - Alaba International Market Road, Ojo Town, Ojo Local Government Area, Lagos State, Nigeria",
     },
     "mali": {
         "name_en": "Mali",
         "name_fr": "Mali",
         "default_lang": "fr",
         "html_lang": "fr",
-        "has_local_contact": False,
         "currency": "XOF",
         # Deployed 2026-07-24 (see backend/wrangler.mali.toml) — keep this in
         # sync with the live Worker URL, and with Mali-website/index.html in
         # the separate sibling repo, if either ever changes.
         "cart_backend": "https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev",
+        "local_contact": None,
+        "sales_contact": None,
+        "address": None,
     },
     "sudan": {
         "name_en": "Sudan",
         "name_fr": "Sudan",
         "default_lang": "ar",
         "html_lang": "ar",
-        "has_local_contact": False,
         "currency": "SDG",
         "cart_backend": None,
+        # Confirmed 2026-08-13 — Sudan has no store yet, only this expat
+        # rep (see Sudan-website git history, "Add Zhang Gang as Sudan
+        # expat sales contact"). The +86 number is the one he actually
+        # uses for WhatsApp; +249 91 534 8323 is shown as a secondary,
+        # unconfirmed-for-WhatsApp line.
+        "local_contact": {
+            "name": "Zhang Gang", "flag": "🇸🇩", "label": "Sudan",
+            "phone": "8618825187185", "phone_display": "+86 188 2518 7185",
+            "secondary_phone_display": "+249 91 534 8323",
+        },
+        "sales_contact": None,
+        "address": None,
     },
 }
 
@@ -132,6 +155,83 @@ def strip_local_contact_block(html: str) -> str:
     return html
 
 
+def apply_local_contact(html: str, country: dict) -> str:
+    """Fill the "Luc Su" slot (contact row, wa-big button, AGENT_PHONE_2,
+    chat "Send to X" button) with the country's confirmed local_contact, or
+    strip it entirely (existing strip_local_contact_block behavior) if none
+    is confirmed yet."""
+    contact = country.get("local_contact")
+    if contact is None:
+        return strip_local_contact_block(html)
+
+    name, flag, label = contact["name"], contact["flag"], contact["label"]
+    phone, phone_display = contact["phone"], contact["phone_display"]
+
+    html = html.replace("<!-- Luc Su — Cameroon local -->", f"<!-- {name} — {label} local -->")
+    html = html.replace("Luc Su · 🇨🇲 Cameroon", f"{name} · {flag} {label}")
+    html = html.replace("https://wa.me/237681105611", f"https://wa.me/{phone}")
+    html = html.replace("+237 681 105 611", phone_display)
+    html = html.replace("WhatsApp Luc Su (Cameroon)", f"WhatsApp {name} ({label})")
+    html = html.replace(
+        "var AGENT_PHONE_2 = '237681105611'; // Luc Su (Cameroon)",
+        f"var AGENT_PHONE_2 = '{phone}'; // {name} ({label})",
+    )
+    html = html.replace("Send to Luc Su 🇨🇲", f"Send to {name} {flag}")
+
+    secondary = contact.get("secondary_phone_display")
+    if secondary:
+        # Adds a second, non-clickable line under the primary WhatsApp
+        # number — e.g. a confirmed local landline that isn't confirmed to
+        # be WhatsApp-reachable, so it must never become a wa.me link.
+        html = html.replace(
+            f'<a class="val" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{phone_display}</a>\n            </div>',
+            f'<a class="val" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{phone_display}</a>\n'
+            f'              <div class="val" style="font-weight:400;font-size:13px;color:var(--muted-2)">{secondary}</div>\n            </div>',
+        )
+    return html
+
+
+def apply_sales_contact(html: str, country: dict) -> str:
+    """Fill the "Tom Yang" slot the same way apply_local_contact fills the
+    Luc Su slot — used when a country has its own dedicated China-sales
+    liaison (e.g. Nigeria's James) instead of the shared Tom Yang contact.
+    A no-op when sales_contact is unset (Tom Yang stays as-is)."""
+    contact = country.get("sales_contact")
+    if contact is None:
+        return html
+
+    name, flag, label = contact["name"], contact["flag"], contact["label"]
+    phone, phone_display = contact["phone"], contact["phone_display"]
+
+    html = html.replace("<!-- Tom Yang — China sales -->", f"<!-- {name} — {label} -->")
+    html = html.replace("Tom Yang · 🇨🇳 China", f"{name} · {flag} {label}")
+    # NOTE: narrowly scoped to the contact-direct row/button href and the
+    # AGENT_PHONE declaration below — CONFIG.whatsapp/CONFIG.phone (the
+    # top contact-form target and footer number) intentionally keep the
+    # shared Tom Yang number even when this override is set, matching
+    # camaroom-web's own baseline behavior (Cameroon's CONFIG also always
+    # points at Tom Yang regardless of which local reps are shown).
+    html = html.replace(
+        f'<a class="val" href="https://wa.me/{TOM_YANG_PHONE}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">+86 187 0773 7002</a>',
+        f'<a class="val" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">{phone_display}</a>',
+    )
+    html = html.replace(
+        f'<a class="btn btn--ghost wa-big" href="https://wa.me/{TOM_YANG_PHONE}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
+        f'<a class="btn btn--ghost wa-big" href="https://wa.me/{phone}" target="_blank" rel="noopener" style="width:100%;justify-content:center">',
+    )
+    html = html.replace("WhatsApp Tom Yang (China)", f"WhatsApp {name} ({label})")
+    # Matches either comment variant — the plain one (local_contact set, so
+    # strip_local_contact_block never ran) or the "— shared contact until a
+    # local rep is confirmed" one it leaves behind (local_contact unset).
+    html = re.sub(
+        rf"var AGENT_PHONE = '{TOM_YANG_PHONE}';   // Tom Yang \(China\)[^\n]*",
+        f"var AGENT_PHONE = '{phone}';   // {name} ({label})",
+        html,
+    )
+    html = html.replace("Send to Tom Yang 🇨🇳", f"Send to {name} {flag}")
+    return html
+
+
 def apply_country_name(html: str, country: dict) -> str:
     html = html.replace("Cameroon", country["name_en"])
     html = html.replace("Cameroun", country["name_fr"])
@@ -188,40 +288,34 @@ def set_cart_currency(html: str, country: dict) -> str:
     )
 
 
-def clear_address(html: str) -> str:
-    """No confirmed local address yet — show the country name only, not an
-    invented street address."""
-    html = html.replace(
-        '<div class="val" id="cAddr">Rue Léman, Douala, {COUNTRY}</div>'.replace("{COUNTRY}", ""),
-        '',
+def apply_address(html: str, country: dict) -> str:
+    """Use country["address"] if a real store address is confirmed;
+    otherwise fall back to the bare country name (never an invented street
+    address) — same rule that used to live in clear_address()."""
+    address = country.get("address") or country["name_en"]
+    html = re.sub(
+        r'(<div class="val" id="cAddr">)Rue Léman, Douala, [^<]+(</div>)',
+        lambda m: f"{m.group(1)}{address}{m.group(2)}",
+        html,
     )
-    # CONFIG.address and the visible location field: replace the fabricated
-    # Douala street address with just the country name (set post country-name
-    # substitution, so do this narrowly on the known literal string).
+    html = re.sub(
+        r'(address:")Douala, [^"]+(")',
+        lambda m: f"{m.group(1)}{address}{m.group(2)}",
+        html,
+    )
     return html
 
 
 def generate_index_html(country_key: str) -> str:
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / "index.html").read_text(encoding="utf-8")
-    html = strip_local_contact_block(html)
+    html = apply_local_contact(html, country)
+    html = apply_sales_contact(html, country)
     html = apply_country_name(html, country)
     html = set_default_language(html, country)
     html = set_cart_backend(html, country)
     html = set_cart_currency(html, country)
-    # Fix the address field now that "Cameroon" inside it has already become
-    # the new country name — drop the fabricated Douala street address,
-    # keep just the country name.
-    html = re.sub(
-        r'(<div class="val" id="cAddr">)Rue Léman, Douala, ([^<]+)(</div>)',
-        r'\1\2\3',
-        html,
-    )
-    html = re.sub(
-        r'(address:")Douala, ([^"]+)(")',
-        r'\1\2\3',
-        html,
-    )
+    html = apply_address(html, country)
     return html
 
 
@@ -231,9 +325,13 @@ def generate_simple_html(filename: str, country_key: str) -> str:
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / filename).read_text(encoding="utf-8")
     html = apply_country_name(html, country)
-    # These pages' WhatsApp button is hardcoded to Luc Su's Cameroon number —
-    # point it at the shared Tom Yang contact instead of a fabricated number.
-    html = html.replace("https://wa.me/237681105611", f"https://wa.me/{TOM_YANG_PHONE}")
+    # These pages' WhatsApp button is hardcoded to Luc Su's Cameroon number.
+    # Point it at the confirmed local_contact if one exists (matching how
+    # camaroom-web's own factory/gallery pages point at Luc Su, not Tom
+    # Yang), otherwise fall back to the shared Tom Yang contact.
+    local_contact = country.get("local_contact")
+    target_phone = local_contact["phone"] if local_contact else TOM_YANG_PHONE
+    html = html.replace("https://wa.me/237681105611", f"https://wa.me/{target_phone}")
     return html
 
 
