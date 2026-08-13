@@ -320,8 +320,10 @@ def generate_index_html(country_key: str) -> str:
 
 
 def generate_simple_html(filename: str, country_key: str) -> str:
-    """factory.html / gallery.html / 404.html have no per-country contact
-    details beyond the WhatsApp button and the country name in copy."""
+    """gallery.html / 404.html have no per-country contact details beyond
+    the WhatsApp button and the country name in copy. (factory.html was
+    retired 2026-08-13 — its "Factory" nav link now points at
+    restarsolar.com/about-us/ instead, see apply_country_name callers.)"""
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / filename).read_text(encoding="utf-8")
     html = apply_country_name(html, country)
@@ -343,7 +345,7 @@ def main():
 
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "index.html").write_text(generate_index_html(args.country), encoding="utf-8")
-    for fname in ("factory.html", "gallery.html", "404.html"):
+    for fname in ("gallery.html", "404.html"):
         (args.out / fname).write_text(generate_simple_html(fname, args.country), encoding="utf-8")
     print(f"Generated {args.country} site -> {args.out}")
 
