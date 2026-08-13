@@ -132,21 +132,15 @@ def build_specs(raw: dict, cat: str) -> dict:
     return {"en": specs_en, "fr": specs_fr}
 
 
-def build_desc(cat: str, warranty: dict | None) -> dict:
+def build_desc(cat: str) -> dict:
+    # Warranty years/output-% used to be appended here, but local sales reps
+    # (e.g. Mali) don't want to proactively quote warranty duration to
+    # customers — it invites after-sales disputes. classify_panel_warranty()
+    # still runs in build_product_entry and the result is still stored on
+    # the "warranty" field since it's harmless as data; it's just never
+    # rendered into customer-facing copy anymore.
     template = DESC_TEMPLATES[cat]
-    desc_en, desc_fr = template["en"], template["fr"]
-    if warranty is not None:
-        desc_en += (
-            f" {warranty['product_years']}-year product warranty · "
-            f"{warranty['performance_years']}-year performance warranty "
-            f"({warranty['output_pct_en']} output guaranteed)."
-        )
-        desc_fr += (
-            f" Garantie produit {warranty['product_years']} ans · "
-            f"Garantie de performance {warranty['performance_years']} ans "
-            f"({warranty['output_pct_fr']} de rendement garanti)."
-        )
-    return {"en": desc_en, "fr": desc_fr}
+    return {"en": template["en"], "fr": template["fr"]}
 
 
 def build_product_entry(raw: dict) -> dict:
@@ -166,7 +160,7 @@ def build_product_entry(raw: dict) -> dict:
         "gallery": [img_filename],
         "name": name,
         "price": 0,
-        "desc": build_desc(cat, warranty),
+        "desc": build_desc(cat),
         "specs": build_specs(raw, cat),
         "warranty": warranty,
     }

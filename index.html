@@ -310,7 +310,6 @@ img{max-width:100%;display:block}
       <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
       <a href="#about" data-i18n="nav.about">About</a>
       <a href="#certs" data-i18n="nav.certs">Certificates</a>
-      <a href="#warranty" data-i18n="nav.warranty">Warranty</a>
       <a href="https://www.restarsolar.com/product-catalogue/" target="_blank" rel="noopener" data-i18n="nav.download">Download</a>
       <a href="https://www.restarsolar.com/projects/" target="_blank" rel="noopener" data-i18n="nav.projects">Projects</a>
       <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
@@ -401,25 +400,6 @@ img{max-width:100%;display:block}
       <p class="sub-lead" style="margin-top:0" data-i18n="certs.sub">Our products and factory are certified to international standards — ISO 9001, SGS, and CE. Tap a certificate to enlarge.</p>
     </div>
     <div class="cert-grid reveal" id="certGrid"></div>
-  </div>
-</section>
-<section class="section section--mist" id="warranty">
-  <div class="wrap">
-    <div class="head-row">
-      <div>
-        <span class="eyebrow" data-i18n="warranty.eyebrow">Warranty</span>
-        <h2 class="h-lead" data-i18n="warranty.title">RESTAR manufacturer's warranty</h2>
-      </div>
-      <p class="sub-lead" style="margin-top:0" data-i18n="warranty.sub">Panels sold by Rest Solar are covered by the official RESTAR manufacturer's warranty (effective Jan 1, 2026).</p>
-    </div>
-    <div class="why-grid reveal" id="warrantyTypes"></div>
-    <table class="spec-table" style="margin-top:32px" id="warrantyTable"></table>
-    <div class="about-copy reveal" style="margin-top:32px">
-      <h3 class="h-lead" style="font-size:1.2rem" data-i18n="warranty.exclTitle">What's not covered</h3>
-      <p data-i18n="warranty.excl">Improper installation, repairs by unapproved technicians, altered or removed serial numbers, mobile or marine mounting, storm/lightning/flood damage, cosmetic wear that doesn't affect performance, and external glass breakage are not covered by the manufacturer warranty.</p>
-      <h3 class="h-lead" style="font-size:1.2rem;margin-top:20px" data-i18n="warranty.claimTitle">Making a claim</h3>
-      <p data-i18n="warranty.claim">Contact Rest Solar on WhatsApp with your panel's serial number, photos of the issue, and proof of purchase. Do not remove or damage the serial number label. RESTAR must be notified within 3 months of discovering the defect.</p>
-    </div>
   </div>
 </section>
 <section class="section" id="about">
@@ -522,7 +502,6 @@ img{max-width:100%;display:block}
           <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
           <a href="#about" data-i18n="nav.about">About</a>
           <a href="#certs" data-i18n="nav.certs">Certificates</a>
-          <a href="#warranty" data-i18n="nav.warranty">Warranty</a>
           <a href="https://www.restarsolar.com/product-catalogue/" target="_blank" rel="noopener" data-i18n="nav.download">Download</a>
           <a href="https://www.restarsolar.com/projects/" target="_blank" rel="noopener" data-i18n="nav.projects">Projects</a>
           <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
@@ -595,27 +574,6 @@ const WHY = [
   {t:{en:"After-sales support",fr:"Service après-vente",ar:"دعم ما بعد البيع"}, d:{en:"Help after the sale, plus one month of free maintenance.",fr:"Assistance après l'achat et un mois de maintenance gratuite.",ar:"مساعدة بعد الشراء، مع شهر واحد من الصيانة المجانية."}},
   {t:{en:"Delivery & install",fr:"Livraison et installation",ar:"التوصيل والتركيب"}, d:{en:"Delivery across Cameroon with installation support.",fr:"Livraison partout au Cameroun avec aide à l'installation.",ar:"التوصيل مع دعم التركيب."}}
 ];
-const WARRANTY_TYPES = [
-  {t:{en:"Product warranty",fr:"Garantie produit",ar:"ضمان المنتج"}, d:{en:"Covers defects in design, material, and workmanship — 10 to 15 years depending on panel type.",fr:"Couvre les défauts de conception, de matériau et de fabrication — de 10 à 15 ans selon le type de panneau.",ar:"يغطي عيوب التصميم والمواد والتصنيع — من 10 إلى 15 عامًا حسب نوع اللوح."}},
-  {t:{en:"Performance warranty",fr:"Garantie de performance",ar:"ضمان الأداء"}, d:{en:"Guarantees minimum power output over 20 to 30 years, measured against the panel's original rated power.",fr:"Garantit un rendement minimum sur 20 à 30 ans, mesuré par rapport à la puissance nominale d'origine du panneau.",ar:"يضمن حدًا أدنى من إنتاج الطاقة لمدة 20 إلى 30 عامًا، مقارنة بالطاقة الاسمية الأصلية للوح."}}
-];
-const WARRANTY_TABLE = [
-  {family:{en:"Cutting-cell",fr:"Cellules découpées",ar:"خلايا مقصوصة"}, product:"10", perf:"20", output:{en:"≥80.7%",fr:"≥80,7 %",ar:"≥80.7%"}},
-  {family:{en:"Full-cell",fr:"Cellule entière",ar:"خلية كاملة"}, product:"12", perf:"25", output:{en:"≥80.7%",fr:"≥80,7 %",ar:"≥80.7%"}},
-  {family:{en:"Half-cell & full black",fr:"Demi-cellule et full black",ar:"نصف خلية وأسود كامل"}, product:"15", perf:"30", output:{en:"≥83%",fr:"≥83 %",ar:"≥83%"}},
-  {family:{en:"Bifacial",fr:"Bifacial",ar:"ثنائي الوجه"}, product:"15", perf:"30", output:{en:"≥84.95%",fr:"≥84,95 %",ar:"≥84.95%"}}
-];
-function renderWarranty(){
-  document.getElementById("warrantyTypes").innerHTML = WARRANTY_TYPES.map(w=>`<div class="why-card"><h3>${tr(w.t)}</h3><p>${tr(w.d)}</p></div>`).join("");
-  const head = lang==='fr'
-    ? `<tr><td><b>Famille</b></td><td><b>Garantie produit</b></td><td><b>Garantie performance</b></td><td><b>Rendement garanti</b></td></tr>`
-    : lang==='ar'
-    ? `<tr><td><b>الفئة</b></td><td><b>ضمان المنتج</b></td><td><b>ضمان الأداء</b></td><td><b>ضمان الإنتاج</b></td></tr>`
-    : `<tr><td><b>Family</b></td><td><b>Product warranty</b></td><td><b>Performance warranty</b></td><td><b>Output guarantee</b></td></tr>`;
-  const yrUnit = lang==='fr' ? 'ans' : (lang==='ar' ? 'سنة' : 'yr');
-  const rows = WARRANTY_TABLE.map(r=>`<tr><td>${tr(r.family)}</td><td>${r.product} ${yrUnit}</td><td>${r.perf} ${yrUnit}</td><td>${tr(r.output)}</td></tr>`).join("");
-  document.getElementById("warrantyTable").innerHTML = head + rows;
-}
 const I18N = {
   en:{
     "nav.products":"Products","nav.catalogue":"Catalogue","nav.about":"About","nav.contact":"Contact","nav.whatsapp":"WhatsApp",
@@ -642,13 +600,7 @@ const I18N = {
     "price.contact":"Contact for price","stock.out":"Out of stock","stock.low":"Only {n} left",
     "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory","nav.gallery":"Gallery",
     "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, SGS, and CE. Tap a certificate to enlarge.",
-    "nav.warranty":"Warranty","nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
-    "warranty.eyebrow":"Warranty","warranty.title":"RESTAR manufacturer's warranty",
-    "warranty.sub":"Panels sold by Rest Solar are covered by the official RESTAR manufacturer's warranty (effective Jan 1, 2026).",
-    "warranty.exclTitle":"What's not covered",
-    "warranty.excl":"Improper installation, repairs by unapproved technicians, altered or removed serial numbers, mobile or marine mounting, storm/lightning/flood damage, cosmetic wear that doesn't affect performance, and external glass breakage are not covered by the manufacturer warranty.",
-    "warranty.claimTitle":"Making a claim",
-    "warranty.claim":"Contact Rest Solar on WhatsApp with your panel's serial number, photos of the issue, and proof of purchase. Do not remove or damage the serial number label. RESTAR must be notified within 3 months of discovering the defect."
+    "nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
   },
   fr:{
     "nav.products":"Produits","nav.catalogue":"Catalogue","nav.about":"À propos","nav.contact":"Contact","nav.whatsapp":"WhatsApp",
@@ -675,13 +627,7 @@ const I18N = {
     "price.contact":"Prix sur demande","stock.out":"Rupture de stock","stock.low":"Plus que {n} en stock",
     "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine","nav.gallery":"Galerie",
     "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, SGS et CE. Touchez un certificat pour l'agrandir.",
-    "nav.warranty":"Garantie","nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
-    "warranty.eyebrow":"Garantie","warranty.title":"Garantie fabricant RESTAR",
-    "warranty.sub":"Les panneaux vendus par Rest Solar sont couverts par la garantie officielle du fabricant RESTAR (en vigueur depuis le 1er janvier 2026).",
-    "warranty.exclTitle":"Ce qui n'est pas couvert",
-    "warranty.excl":"Une installation incorrecte, des réparations par des techniciens non agréés, un numéro de série altéré ou retiré, un montage mobile ou marin, les dommages liés aux intempéries/foudre/inondation, l'usure cosmétique sans impact sur la performance, et le bris de verre d'origine externe ne sont pas couverts par la garantie du fabricant.",
-    "warranty.claimTitle":"Faire une réclamation",
-    "warranty.claim":"Contactez Rest Solar sur WhatsApp avec le numéro de série du panneau, des photos du problème et une preuve d'achat. Ne retirez pas et n'endommagez pas l'étiquette du numéro de série. RESTAR doit être informé dans les 3 mois suivant la découverte du défaut."
+    "nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
   },
   ar:{
     "nav.products":"المنتجات","nav.catalogue":"الكتالوج","nav.about":"من نحن","nav.contact":"اتصل بنا","nav.whatsapp":"واتساب",
@@ -708,13 +654,7 @@ const I18N = {
     "price.contact":"السعر عند الطلب","stock.out":"نفذ من المخزون","stock.low":"باقي {n} فقط",
     "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع","nav.gallery":"معرض الصور",
     "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وSGS وCE. اضغط على شهادة لتكبيرها.",
-    "nav.warranty":"الضمان","nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
-    "warranty.eyebrow":"الضمان","warranty.title":"ضمان الشركة المصنعة RESTAR",
-    "warranty.sub":"الألواح التي تبيعها Rest Solar مشمولة بضمان الشركة المصنعة الرسمي RESTAR (ساري المفعول اعتبارًا من 1 يناير 2026).",
-    "warranty.exclTitle":"ما لا يشمله الضمان",
-    "warranty.excl":"التركيب غير الصحيح، والإصلاحات من قبل فنيين غير معتمدين، والرقم التسلسلي التالف أو المزال، والتركيب المتنقل أو البحري، والأضرار الناتجة عن الطقس/البرق/الفيضانات، والتآكل الجمالي الذي لا يؤثر على الأداء، وكسر الزجاج بسبب أسباب خارجية — كلها غير مشمولة بضمان الشركة المصنعة.",
-    "warranty.claimTitle":"تقديم مطالبة",
-    "warranty.claim":"تواصل مع Rest Solar عبر واتساب مع الرقم التسلسلي للوح وصور المشكلة وإثبات الشراء. لا تقم بإزالة أو إتلاف ملصق الرقم التسلسلي. يجب إبلاغ RESTAR خلال 3 أشهر من اكتشاف العيب."
+    "nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
   }
 };
 let lang = "en";
@@ -872,7 +812,6 @@ document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{
   lang=b.dataset.lang;
   document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));
   renderAll();
-  renderWarranty();
 });
 const burger=document.getElementById("burger"), navLinks=document.getElementById("navLinks");
 burger.onclick=()=>{const o=navLinks.classList.toggle("open");burger.setAttribute("aria-expanded",o);};
@@ -917,7 +856,6 @@ function closeLightbox(){document.getElementById("lightbox").classList.remove("o
 })();
 function renderAll(){applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();}
 renderAll();
-renderWarranty();
 observeReveals();
 </script>
 <script>

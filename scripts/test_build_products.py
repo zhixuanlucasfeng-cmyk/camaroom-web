@@ -55,8 +55,10 @@ def test_build_panel_entry_has_warranty():
     assert entry["price"] == 0
     assert entry["warranty"] is not None
     assert entry["warranty"]["product_years"] == 12  # RT6S -> full_cell
-    assert "12-year product warranty" in entry["desc"]["en"]
-    assert "Garantie produit 12 ans" in entry["desc"]["fr"]
+    # warranty data is still computed/stored, but must never leak into the
+    # customer-facing description — see build_desc().
+    assert "warranty" not in entry["desc"]["en"].lower()
+    assert "garantie" not in entry["desc"]["fr"].lower()
     assert entry["specs"]["en"]["Model"] == "RT6S-M"
     assert entry["specs"]["en"]["Power"] == "340-400W"
     assert entry["specs"]["en"]["Dimensions"] == "1956x992x30mm"
