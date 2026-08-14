@@ -39,6 +39,9 @@ COUNTRIES = {
         # "Add real Nigeria sales contacts and store address").
         "local_contact": {"name": "Bright", "flag": "🇳🇬", "label": "Nigeria", "phone": "2349063612011", "phone_display": "+234 906 361 2011"},
         "sales_contact": {"name": "James", "flag": "🇨🇳", "label": "China sales", "phone": "2349161101749", "phone_display": "+234 916 110 1749"},
+        # 2026-08-14: top bar/footer shows James, not Bright — see
+        # apply_config_contact().
+        "config_contact": "sales_contact",
         "address": "RESTAR SOLAR ENERGY NIGERIA CO LTD, No 22 Olojo Drive, by Church Bus Stop, Ojo - Alaba International Market Road, Ojo Town, Ojo Local Government Area, Lagos State, Nigeria",
     },
     "mali": {
@@ -415,13 +418,17 @@ def apply_address(html: str, country: dict) -> str:
 
 def apply_config_contact(html: str, country: dict) -> str:
     """Point the top utility bar / footer phone (CONFIG.whatsapp/phone) at
-    this country's own primary contact — local_contact if confirmed, else
-    sales_contact — instead of leaving it on Tom Yang's number, which is
-    Cameroon's contact, not this country's (2026-08-14: user flagged this
-    showing on all 3 non-Cameroon sites). A no-op when neither is set,
-    which only happens for Cameroon itself — its own CONFIG intentionally
-    keeps pointing at Tom Yang."""
-    contact = country.get("local_contact") or country.get("sales_contact")
+    this country's own primary contact instead of leaving it on Tom Yang's
+    number, which is Cameroon's contact, not this country's (2026-08-14:
+    user flagged this showing on all 3 non-Cameroon sites). A no-op when
+    no contact is set at all, which only happens for Cameroon itself — its
+    own CONFIG intentionally keeps pointing at Tom Yang.
+
+    Defaults to local_contact, else sales_contact — but a country can
+    force the other one via "config_contact": "sales_contact" (Nigeria:
+    the top bar shows James, not Bright, per 2026-08-14 instruction)."""
+    which = country.get("config_contact", "local_contact")
+    contact = country.get(which) or country.get("local_contact") or country.get("sales_contact")
     if contact is None or contact == DROP_SALES_CONTACT:
         return html
     phone, phone_display = contact["phone"], contact["phone_display"]
