@@ -336,7 +336,7 @@ img{max-width:100%;display:block}
   </div>
 </header>
 <section class="hero" id="top">
-  <video autoplay muted loop playsinline preload="metadata" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
+  <video autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
     <source src="hero-bg.mp4" type="video/mp4">
   </video>
   <div class="hero-sky" data-depth="6" aria-hidden="true"></div>
@@ -851,7 +851,7 @@ const CERTS = [
   {img:"cert_ce.jpg",            t:{en:"CE Attestation of Conformity",fr:"Attestation de conformité CE"}},
   {img:"cert_tuv_salt_mist.jpg", t:{en:"TÜV SÜD Salt Mist Test",fr:"Test au brouillard salin TÜV SÜD"}},
   {img:"cert_tuv_dust_sand.jpg", t:{en:"TÜV SÜD Dust and Sand Test",fr:"Test de poussière et de sable TÜV SÜD"}},
-  {img:"cert_retie.png",         t:{en:"RETIE Certificate (SGS)",fr:"Certificat RETIE (SGS)"}},
+  {img:"cert_retie.jpg",         t:{en:"RETIE Certificate (SGS)",fr:"Certificat RETIE (SGS)"}},
   {img:"cert_cqc_1.jpg",         t:{en:"CQC",fr:"CQC"}},
   {img:"cert_cqc_2.jpg",         t:{en:"CQC",fr:"CQC"}}
 ];
