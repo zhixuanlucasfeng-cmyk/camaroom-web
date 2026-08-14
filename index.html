@@ -696,12 +696,12 @@ function catLabel(cat){
   return cat;
 }
 function renderFilters(){
-  const cats = ["all", ...Array.from(new Set(PRODUCTS.map(p=>p.cat)))];
+  const cats = ["all", ...Array.from(new Set(PRODUCTS.filter(p=>!p.hidden).map(p=>p.cat)))];
   document.getElementById("filters").innerHTML = cats.map(c=>`<button class="chip ${c===activeCat?'on':''}" data-cat="${c}">${c==='all'?t('filter.all'):catLabel(c)}</button>`).join("");
   document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{activeCat=ch.dataset.cat;renderFilters();renderGrid();});
 }
 function renderGrid(){
-  const list = PRODUCTS.filter(p=>activeCat==="all"||p.cat===activeCat);
+  const list = PRODUCTS.filter(p=>!p.hidden&&(activeCat==="all"||p.cat===activeCat));
   document.getElementById("grid").innerHTML = list.map(p=>{
     const col = CAT_COLOR[p.cat]||"#004598";
     const ic = ICON[p.cat]||ICON.kit;
