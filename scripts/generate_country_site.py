@@ -413,6 +413,25 @@ def apply_address(html: str, country: dict) -> str:
     return html
 
 
+def apply_config_contact(html: str, country: dict) -> str:
+    """Point the top utility bar / footer phone (CONFIG.whatsapp/phone) at
+    this country's own primary contact — local_contact if confirmed, else
+    sales_contact — instead of leaving it on Tom Yang's number, which is
+    Cameroon's contact, not this country's (2026-08-14: user flagged this
+    showing on all 3 non-Cameroon sites). A no-op when neither is set,
+    which only happens for Cameroon itself — its own CONFIG intentionally
+    keeps pointing at Tom Yang."""
+    contact = country.get("local_contact") or country.get("sales_contact")
+    if contact is None or contact == DROP_SALES_CONTACT:
+        return html
+    phone, phone_display = contact["phone"], contact["phone_display"]
+    return re.sub(
+        r'const CONFIG = \{ whatsapp:"[^"]*", phone:"[^"]*"',
+        f'const CONFIG = {{ whatsapp:"{phone}", phone:"{phone_display}"',
+        html,
+    )
+
+
 def generate_index_html(country_key: str) -> str:
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / "index.html").read_text(encoding="utf-8")
@@ -423,6 +442,7 @@ def generate_index_html(country_key: str) -> str:
     html = set_cart_backend(html, country)
     html = set_cart_currency(html, country)
     html = apply_address(html, country)
+    html = apply_config_contact(html, country)
     return html
 
 
