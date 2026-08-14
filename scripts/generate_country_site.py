@@ -1,7 +1,8 @@
 """
-Generates a country-specific variant of index.html/factory.html/gallery.html/
-404.html for a new regional site (Nigeria, Mali, Sudan, ...), reusing
-camaroom-web's proven template rather than hand-duplicating it.
+Generates a country-specific variant of index.html/404.html for a new
+regional site (Nigeria, Mali, Sudan, ...), reusing camaroom-web's proven
+template rather than hand-duplicating it. (factory.html and gallery.html
+were retired 2026-08-13/14 — see git history.)
 
 Countries without a confirmed real local WhatsApp rep get ONLY the shared
 Tom Yang contact (no invented placeholder number) — see the SP-137 /
@@ -426,10 +427,11 @@ def generate_index_html(country_key: str) -> str:
 
 
 def generate_simple_html(filename: str, country_key: str) -> str:
-    """gallery.html / 404.html have no per-country contact details beyond
-    the WhatsApp button and the country name in copy. (factory.html was
-    retired 2026-08-13 — its "Factory" nav link now points at
-    restarsolar.com/about-us/ instead, see apply_country_name callers.)"""
+    """404.html has no per-country contact details beyond the WhatsApp
+    button and the country name in copy. (factory.html was retired
+    2026-08-13 — its "Factory" nav link now points at
+    restarsolar.com/about-us/ instead, see apply_country_name callers.
+    gallery.html was retired 2026-08-14 — its nav link is just gone.)"""
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / filename).read_text(encoding="utf-8")
     html = apply_country_name(html, country)
@@ -460,7 +462,7 @@ def main():
 
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "index.html").write_text(generate_index_html(args.country), encoding="utf-8")
-    for fname in ("gallery.html", "404.html"):
+    for fname in ("404.html",):
         (args.out / fname).write_text(generate_simple_html(fname, args.country), encoding="utf-8")
     print(f"Generated {args.country} site -> {args.out}")
 

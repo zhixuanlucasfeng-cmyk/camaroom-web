@@ -232,12 +232,21 @@ img{max-width:100%;display:block}
 .card:hover .card-photo{transform:scale(1.04);transition:transform .5s ease}
 .modal-art.has-photo{background:#fff;height:230px}
 .modal-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:18px}
-.cert-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px}
-.cert{display:flex;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel);cursor:pointer;color:var(--text);font:inherit;text-align:left;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+.cert-carousel{position:relative;margin-top:48px}
+.cert-grid{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+.cert-grid::-webkit-scrollbar{height:6px}
+.cert-grid::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:99px}
+.cert{flex:0 0 190px;scroll-snap-align:start;display:flex;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel);cursor:pointer;color:var(--text);font:inherit;text-align:left;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
 .cert:hover{transform:translateY(-6px);border-color:var(--line-2);box-shadow:var(--shadow)}
 .cert-img{display:block;background:#fff;aspect-ratio:3/4;overflow:hidden}
 .cert-img img{width:100%;height:100%;object-fit:contain;padding:8px}
 .cert-cap{display:block;padding:12px 14px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+.cert-nav{position:absolute;top:calc(50% - 5px);transform:translateY(-50%);z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line-2);background:var(--panel);color:var(--text);display:grid;place-items:center;cursor:pointer;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--shadow);transition:background .2s}
+.cert-nav:hover{background:var(--sun);color:#fff;border-color:var(--sun)}
+.cert-nav svg{width:18px;height:18px}
+.cert-nav--prev{left:-14px}
+.cert-nav--next{right:-14px}
+@media(max-width:720px){.cert-nav{display:none}.cert{flex-basis:150px}}
 .lightbox{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s ease}
 .lightbox.open{opacity:1;pointer-events:auto}
 .lb-bg{position:absolute;inset:0;background:rgba(5,3,12,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
@@ -246,8 +255,6 @@ img{max-width:100%;display:block}
 .lb-close:hover{background:rgba(0,0,0,.75)}
 #about .about-panel{background-image:linear-gradient(180deg,rgba(9,6,15,.1),rgba(9,6,15,.45)),url('assets/farm/farm3.jpg');background-size:cover;background-position:center}
 #about .about-panel .cells{opacity:.25}
-@media(max-width:980px){.cert-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:720px){.cert-grid{grid-template-columns:repeat(2,1fr)}}
 .modal-thumbs{display:none;gap:8px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,.28);border-bottom:1px solid var(--line)}
 .modal-thumbs .mthumb{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;opacity:.7;transition:opacity .15s,border-color .15s;padding:3px}
 .modal-thumbs .mthumb:hover,.modal-thumbs .mthumb.on{opacity:1;border-color:var(--sun)}
@@ -261,6 +268,8 @@ img{max-width:100%;display:block}
 [dir="rtl"] .nav-links a::after{left:auto;right:0}
 [dir="rtl"] .modal-nav--prev{left:auto;right:10px}
 [dir="rtl"] .modal-nav--next{right:auto;left:10px}
+[dir="rtl"] .cert-nav--prev{left:auto;right:-14px}
+[dir="rtl"] .cert-nav--next{right:auto;left:-14px}
 .util-cart{display:flex;align-items:center;gap:6px;background:transparent;border:0;color:#fff;opacity:.85;padding:5px 10px;cursor:pointer;font:inherit;font-weight:600;letter-spacing:.02em}
 .util-cart:hover{opacity:1}
 .util-cart svg{width:18px;height:18px}
@@ -315,7 +324,6 @@ img{max-width:100%;display:block}
       <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
       <a href="https://www.restarsolar.com/faq/" target="_blank" rel="noopener" data-i18n="nav.faq">FAQ</a>
       <a href="https://www.restarsolar.com/about-us/" target="_blank" rel="noopener" data-i18n="nav.factory">Factory</a>
-      <a href="gallery.html" data-i18n="nav.gallery">Gallery</a>
       <a href="#contact" data-i18n="nav.contact">Contact</a>
     </nav>
     <div class="nav-right">
@@ -399,7 +407,11 @@ img{max-width:100%;display:block}
       </div>
       <p class="sub-lead" style="margin-top:0" data-i18n="certs.sub">Our products and factory are certified to international standards — ISO 9001, TÜV SÜD, CQC, and CE. Tap a certificate to enlarge.</p>
     </div>
-    <div class="cert-grid reveal" id="certGrid"></div>
+    <div class="cert-carousel">
+      <div class="cert-grid reveal" id="certGrid"></div>
+      <button type="button" class="cert-nav cert-nav--prev" id="certPrev" aria-label="Previous certificate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button type="button" class="cert-nav cert-nav--next" id="certNext" aria-label="Next certificate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
   </div>
 </section>
 <section class="section" id="about">
@@ -507,7 +519,6 @@ img{max-width:100%;display:block}
           <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
           <a href="https://www.restarsolar.com/faq/" target="_blank" rel="noopener" data-i18n="nav.faq">FAQ</a>
           <a href="https://www.restarsolar.com/about-us/" target="_blank" rel="noopener" data-i18n="nav.factory">Factory</a>
-          <a href="gallery.html" data-i18n="nav.gallery">Gallery</a>
           <a href="#contact" data-i18n="nav.contact">Contact</a>
         </div>
         <div>
@@ -598,7 +609,7 @@ const I18N = {
     "footer.tag":"Reliable solar power for Cameroon's homes, shops, and businesses.","footer.explore":"Explore","footer.contact":"Contact",
     "footer.rights":"© 2026 Restar Solar. All rights reserved.","footer.built":"Solar supply & installation · Cameroon",
     "price.contact":"Contact for price","stock.out":"Out of stock","stock.low":"Only {n} left",
-    "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory","nav.gallery":"Gallery",
+    "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory",
     "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, TÜV SÜD, CQC, and CE. Tap a certificate to enlarge.",
     "nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
   },
@@ -625,7 +636,7 @@ const I18N = {
     "footer.tag":"Énergie solaire fiable pour les maisons, boutiques et entreprises du Cameroun.","footer.explore":"Explorer","footer.contact":"Contact",
     "footer.rights":"© 2026 Restar Solar. Tous droits réservés.","footer.built":"Fourniture & installation solaire · Cameroun",
     "price.contact":"Prix sur demande","stock.out":"Rupture de stock","stock.low":"Plus que {n} en stock",
-    "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine","nav.gallery":"Galerie",
+    "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine",
     "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, TÜV SÜD, CQC et CE. Touchez un certificat pour l'agrandir.",
     "nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
   },
@@ -652,7 +663,7 @@ const I18N = {
     "footer.tag":"طاقة شمسية موثوقة للمنازل والمحلات والشركات في السودان.","footer.explore":"استكشف","footer.contact":"اتصل بنا",
     "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · السودان",
     "price.contact":"السعر عند الطلب","stock.out":"نفذ من المخزون","stock.low":"باقي {n} فقط",
-    "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع","nav.gallery":"معرض الصور",
+    "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع",
     "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وTÜV SÜD وCQC وCE. اضغط على شهادة لتكبيرها.",
     "nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
   }
@@ -848,6 +859,10 @@ function renderCerts(){
   const el=document.getElementById("certGrid"); if(!el) return;
   el.innerHTML = CERTS.map(c=>`<button class="cert" data-cert="assets/certs/${c.img}" aria-label="${tr(c.t)}"><span class="cert-img"><img src="assets/certs/${c.img}" alt="${tr(c.t)}" loading="lazy"></span><span class="cert-cap">${tr(c.t)}</span></button>`).join("");
   el.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>openLightbox(b.dataset.cert));
+  const prevBtn = document.getElementById("certPrev"), nextBtn = document.getElementById("certNext");
+  const scrollBy = dir => el.scrollBy({left: dir * (el.querySelector(".cert").offsetWidth + 16) * 2, behavior: "smooth"});
+  if(prevBtn) prevBtn.onclick = () => scrollBy(-1);
+  if(nextBtn) nextBtn.onclick = () => scrollBy(1);
 }
 function openLightbox(s){const lb=document.getElementById("lightbox");document.getElementById("lbImg").src=s;lb.classList.add("open");document.body.style.overflow="hidden";}
 function closeLightbox(){document.getElementById("lightbox").classList.remove("open");document.body.style.overflow="";}
