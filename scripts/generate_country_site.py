@@ -29,6 +29,8 @@ DROP_SALES_CONTACT = "drop"  # sentinel for apply_sales_contact — see below
 
 COUNTRIES = {
     "nigeria": {
+        # Matches app/countries.py COUNTRIES — the backend rejects anything else.
+        "code": "NG",
         "name_en": "Nigeria",
         "name_fr": "Nigeria",
         "default_lang": "en",
@@ -45,6 +47,8 @@ COUNTRIES = {
         "address": "RESTAR SOLAR ENERGY NIGERIA CO LTD, No 22 Olojo Drive, by Church Bus Stop, Ojo - Alaba International Market Road, Ojo Town, Ojo Local Government Area, Lagos State, Nigeria",
     },
     "mali": {
+        # Matches app/countries.py COUNTRIES — the backend rejects anything else.
+        "code": "ML",
         "name_en": "Mali",
         "name_fr": "Mali",
         "default_lang": "fr",
@@ -67,6 +71,8 @@ COUNTRIES = {
         "address": "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
     },
     "sudan": {
+        # Matches app/countries.py COUNTRIES — the backend rejects anything else.
+        "code": "SD",
         "name_en": "Sudan",
         "name_fr": "Sudan",
         "default_lang": "ar",
@@ -439,6 +445,18 @@ def apply_config_contact(html: str, country: dict) -> str:
     )
 
 
+def set_handoff_country(html: str, country: dict) -> str:
+    """RS_COUNTRY tells the chat widget which country's agents a live-handoff
+    request belongs to. app/api/ws.py broadcasts request_human only to admins
+    scoped to that country, so leaving Cameroon's 'CM' in a generated site
+    would queue its customers in the wrong country's console — visible to the
+    wrong staff, and invisible to the right ones."""
+    return html.replace(
+        "  var RS_COUNTRY = 'CM';",
+        f"  var RS_COUNTRY = '{country['code']}';",
+    )
+
+
 def generate_index_html(country_key: str) -> str:
     country = COUNTRIES[country_key]
     html = (REPO_ROOT / "index.html").read_text(encoding="utf-8")
@@ -450,6 +468,7 @@ def generate_index_html(country_key: str) -> str:
     html = set_cart_currency(html, country)
     html = apply_address(html, country)
     html = apply_config_contact(html, country)
+    html = set_handoff_country(html, country)
     return html
 
 

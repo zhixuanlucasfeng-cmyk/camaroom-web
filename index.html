@@ -910,6 +910,19 @@ observeReveals();
   var STREAM_API = 'https://rest-solar-agent.onrender.com/api/chat/stream';
   var SESSION = 'rs-' + Math.random().toString(36).slice(2);
 
+  // Country this site serves. The backend routes a handoff to that country's
+  // agents (broadcast_to_admins_in_country in app/api/ws.py), so a stale value
+  // would drop Nigerian customers into Cameroon's console. Patched per country
+  // by set_handoff_country() in scripts/generate_country_site.py.
+  var RS_COUNTRY = 'CM';
+  // Handoff runs over a websocket on the API origin. The AI path below keeps
+  // using plain HTTP streaming, untouched — the socket is only opened if the
+  // customer actually asks for a person.
+  var WS_ORIGIN = API.replace(/^http/, 'ws').replace(/\/api\/chat$/, '');
+  var CONV_ID = Math.floor(Math.random() * 1000000);
+  var ws = null;
+  var humanMode = false;
+
   // Build widget HTML
   var el = document.createElement('div');
   el.innerHTML = [
@@ -941,6 +954,12 @@ observeReveals();
     // Typing indicator
     '<div id="rs-typing" style="display:none;padding:0 18px 8px;',
     'font-size:12px;color:rgba(255,255,255,.4);">Thinking…</div>',
+
+    // Live-agent handoff
+    '<div style="padding:0 12px 6px;text-align:center;">',
+    '<button id="rs-human" style="background:none;border:none;color:rgba(255,255,255,.45);',
+    'font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:4px;">',
+    'Talk to a person</button></div>',
 
     // Input
     '<div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;">',
@@ -975,7 +994,48 @@ observeReveals();
     bubble.style.display = 'flex';
   };
   document.getElementById('rs-send').onclick = send;
+  document.getElementById('rs-human').onclick = requestHuman;
   input.addEventListener('keydown', function(e){ if(e.key==='Enter') send(); });
+
+  function connectWS(onOpen){
+    if (ws && ws.readyState === WebSocket.OPEN) { onOpen(); return; }
+    ws = new WebSocket(WS_ORIGIN + '/ws/' + CONV_ID + '?country=' + encodeURIComponent(RS_COUNTRY));
+    ws.onopen = onOpen;
+    ws.onmessage = function (ev) {
+      var d;
+      try { d = JSON.parse(ev.data); } catch (e) { return; }
+      if (d.type === 'status')        { typing.style.display = 'none'; addMsg('status', d.text); }
+      else if (d.type === 'agent_message') { typing.style.display = 'none'; addMsg('agent', d.text); }
+      else if (d.type === 'token')    { typing.style.display = 'none'; addMsg('assistant', d.text); }
+    };
+    // Fail back to the AI path rather than stranding the customer on a dead
+    // socket — losing the handoff is recoverable, a chat that eats messages is not.
+    ws.onclose = function () { humanMode = false; };
+    ws.onerror = function () {
+      humanMode = false;
+      typing.style.display = 'none';
+      addMsg('status', 'Could not reach our team right now — the assistant is still here to help.');
+    };
+  }
+
+  function requestHuman(){
+    if (humanMode) { addMsg('status', "You're already in the queue for our team."); return; }
+    typing.style.display = 'block';
+    connectWS(function () {
+      humanMode = true;
+      ws.send(JSON.stringify({ action: 'request_human' }));
+    });
+  }
+
+  function sendViaSocket(text){
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      humanMode = false;
+      addMsg('status', 'Connection to our team dropped — your message went to the assistant instead.');
+      return false;
+    }
+    ws.send(JSON.stringify({ message: text }));
+    return true;
+  }
 
   function greet(){
     addMsg('assistant', "Hello! I'm your Restar Solar assistant. How can I help you today?");
@@ -986,6 +1046,9 @@ observeReveals();
     if(!text) return;
     addMsg('user', text);
     input.value = '';
+    // In human mode the socket carries the message and the reply comes back as
+    // agent_message; only fall through to the AI path if the socket is gone.
+    if (humanMode && sendViaSocket(text)) return;
     typing.style.display = 'block';
 
     var liveBubble = null;
@@ -1103,12 +1166,27 @@ observeReveals();
   function addMsg(role, text){
     var d = document.createElement('div');
     var isUser = role==='user';
+
+    // Handoff states get their own look so the customer can tell a human from
+    // the assistant, and a queue notice from either.
+    if (role === 'status') {
+      d.style.cssText = 'align-self:center;font-size:12px;color:rgba(255,255,255,.45);' +
+        'font-family:Inter,system-ui,sans-serif;text-align:center;padding:2px 8px;';
+      d.textContent = text;
+      msgs.appendChild(d);
+      msgs.scrollTop = msgs.scrollHeight;
+      return;
+    }
+
+    var bg = isUser
+      ? 'align-self:flex-end;background:linear-gradient(180deg,#FFC24D,#F7A81B);color:#241500;border-bottom-right-radius:4px;'
+      : role === 'agent'
+        ? 'align-self:flex-start;background:rgba(37,211,102,.16);color:#ECE9F5;border-bottom-left-radius:4px;border:1px solid rgba(37,211,102,.35);'
+        : 'align-self:flex-start;background:rgba(255,255,255,.09);color:#ECE9F5;border-bottom-left-radius:4px;';
     d.style.cssText = [
       'max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;',
       'font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;word-break:break-word;',
-      isUser
-        ? 'align-self:flex-end;background:linear-gradient(180deg,#FFC24D,#F7A81B);color:#241500;border-bottom-right-radius:4px;'
-        : 'align-self:flex-start;background:rgba(255,255,255,.09);color:#ECE9F5;border-bottom-left-radius:4px;'
+      bg
     ].join('');
 
     // Check for WhatsApp order trigger
