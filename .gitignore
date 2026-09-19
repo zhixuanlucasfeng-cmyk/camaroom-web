@@ -16,3 +16,6 @@ watermark(2).zip
 backend/node_modules
 backend/.wrangler
 backend/.dev.vars
+
+# wrangler pages dev local state
+.wrangler/

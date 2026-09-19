@@ -77,6 +77,14 @@ export async function handleGetQuotePage(request, env, id) {
   const momoNumber = escapeHtml(env.MOMO_TRANSFER_NUMBER || '');
   const momoName = escapeHtml(env.MOMO_ACCOUNT_NAME || '');
   const momoNetworkLabel = escapeHtml(env.MOMO_NETWORK_LABEL || '');
+  // A deployment without a confirmed mobile-money account (Mali, until its
+  // real Orange Money / Moov Money details arrive) must not quote a number:
+  // the only one available is Cameroon's MTN account, and a transfer to it
+  // from Mali would fail while looking official. Say the team will follow up
+  // on WhatsApp instead.
+  const hasMomoAccount = Boolean(env.MOMO_TRANSFER_NUMBER && env.MOMO_ACCOUNT_NAME);
+  const noAccountText =
+    'Our team will send you the payment details on WhatsApp. Quote order';
 
   const allShipments = await listShipments(env.DB);
   const currentShipment = order.shipment_id ? await getShipment(env.DB, order.shipment_id) : null;
@@ -135,7 +143,11 @@ export async function handleGetQuotePage(request, env, id) {
             .then(function (data) {
               var resultEl = document.getElementById('result');
               if (data.quoted_price) {
-                var instructions = 'Please send ' + data.quoted_price + ' ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ' + data.id + ' as the transfer note/reference.';
+                var instructions = ${
+                  hasMomoAccount
+                    ? `'Please send ' + data.quoted_price + ' ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ' + data.id + ' as the transfer note/reference.'`
+                    : `'Your total is ' + data.quoted_price + ' ${escapeHtml(order.currency)}. ${noAccountText} ' + data.id + '.'`
+                };
                 var waText = encodeURIComponent(instructions);
                 var waUrl = 'https://wa.me/${digitsOnlyPhone}?text=' + waText;
                 resultEl.innerHTML =
@@ -153,7 +165,9 @@ export async function handleGetQuotePage(request, env, id) {
         });
       </script>`;
   } else if (order.status === 'quoted') {
-    const instructions = `Please send ${order.quoted_price} ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ${escapeHtml(order.id)} as the transfer note/reference.`;
+    const instructions = hasMomoAccount
+      ? `Please send ${order.quoted_price} ${escapeHtml(order.currency)} via ${momoNetworkLabel} to ${momoNumber} (${momoName}). Include order ${escapeHtml(order.id)} as the transfer note/reference.`
+      : `Your total is ${order.quoted_price} ${escapeHtml(order.currency)}. ${noAccountText} ${escapeHtml(order.id)}.`;
     const waText = encodeURIComponent(instructions);
     const waUrl = `https://wa.me/${digitsOnlyPhone}?text=${waText}`;
     actionHtml = `

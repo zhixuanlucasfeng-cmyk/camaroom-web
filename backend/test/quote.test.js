@@ -159,3 +159,44 @@ describe('handleGetQuotePage', () => {
     expect(html).not.toContain('MTN Mobile Money');
   });
 });
+
+describe('quote page payment instructions', () => {
+  async function quotePageFor(id) {
+    const res = await handleGetQuotePage(env.DB, env, id);
+    return res.text();
+  }
+
+  it('gives the mobile-money account when one is configured', async () => {
+    env.MOMO_TRANSFER_NUMBER = '681105611';
+    env.MOMO_ACCOUNT_NAME = 'su jiangmin';
+    const { id } = await makeOrder();
+    await submitQuote(env.DB, env, id, 150000);
+    const html = await quotePageFor(id);
+    expect(html).toContain('681105611');
+    expect(html).toContain('su jiangmin');
+  });
+
+  // Mali ships without a confirmed Orange Money / Moov Money account. Quoting
+  // Cameroon's MTN number there would look official and fail, so the page must
+  // fall back to "we'll send details on WhatsApp" and print no account at all.
+  it('falls back to WhatsApp and names no account when none is configured', async () => {
+    env.MOMO_TRANSFER_NUMBER = '';
+    env.MOMO_ACCOUNT_NAME = '';
+    const { id } = await makeOrder();
+    await submitQuote(env.DB, env, id, 150000);
+    const html = await quotePageFor(id);
+    expect(html).toContain('payment details on WhatsApp');
+    expect(html).not.toContain('681105611');
+    expect(html).not.toContain('su jiangmin');
+    expect(html).toContain('150000');
+  });
+
+  it('falls back on the not-yet-quoted page too, where the price is entered', async () => {
+    env.MOMO_TRANSFER_NUMBER = '';
+    env.MOMO_ACCOUNT_NAME = '';
+    const { id } = await makeOrder();
+    const html = await quotePageFor(id);
+    expect(html).toContain('payment details on WhatsApp');
+    expect(html).not.toContain('681105611');
+  });
+});

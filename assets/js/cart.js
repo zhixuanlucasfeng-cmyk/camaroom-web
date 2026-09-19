@@ -89,7 +89,11 @@
   }
 
   function renderContactForm(drawer) {
+    var countryLine = (typeof t === 'function')
+      ? '<p style="margin:0 0 10px;font-size:13px;color:#555">' + t('country.deliverTo') + '</p>'
+      : '';
     drawer.innerHTML =
+      countryLine +
       '<form id="cart-contact-form">' +
       '<input id="cart-name" placeholder="Name" required>' +
       '<input id="cart-phone" placeholder="WhatsApp number (with country code)" required>' +
@@ -137,13 +141,13 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     var toggle = document.getElementById('cart-toggle');
-    if (window.CART_ENABLED && toggle) {
-      toggle.style.display = '';
+    if (toggle) {
       toggle.addEventListener('click', function () {
         var drawer = document.getElementById('cart-drawer');
         drawer.classList.toggle('open');
       });
     }
+    if (typeof updateCartToggle === 'function') updateCartToggle();
     renderDrawer();
   });
 })();

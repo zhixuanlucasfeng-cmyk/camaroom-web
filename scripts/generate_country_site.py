@@ -18,7 +18,20 @@ Run: python3 scripts/generate_country_site.py --country nigeria --out /path/to/o
 """
 import argparse
 import re
+import sys
 from pathlib import Path
+
+# SUPERSEDED 2026-09-19 by the unified restarsolar.net site: index.html now
+# picks a country at runtime from assets/js/countries.js instead of being
+# regenerated per country. The regex anchors below (the Luc Su / Tom Yang
+# contact blocks, the AGENT_PHONE globals, the hardcoded CART_* values) no
+# longer exist in index.html, so this would silently emit a half-patched page.
+# Every country's data now lives in assets/js/countries.js. Kept only until
+# the old per-country sites are switched to redirects, then deleted.
+sys.exit(
+    "generate_country_site.py is superseded: country data lives in "
+    "assets/js/countries.js and index.html switches country at runtime."
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 

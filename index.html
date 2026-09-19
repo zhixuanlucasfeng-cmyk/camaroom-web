@@ -280,6 +280,16 @@ img{max-width:100%;display:block}
 .cart-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee}
 .cart-row-name{flex:1}
 .cart-row-remove{border:none;background:none;font-size:18px;cursor:pointer;color:#999}
+.util-country{background:transparent;border:1px solid rgba(255,255,255,.28);border-radius:6px;color:#fff;font:inherit;font-weight:600;font-size:12px;padding:3px 6px;cursor:pointer;max-width:150px}
+.util-country option{color:#111}
+.geo-banner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;padding:8px 16px;background:#FFF4DC;color:#3B2A05;font-size:13px;line-height:1.4;border-bottom:1px solid #F0DDB0}
+.geo-banner button{background:none;border:0;font:inherit;font-weight:700;color:#8A5A00;cursor:pointer;text-decoration:underline;padding:0}
+.geo-banner .geo-x{text-decoration:none;font-size:18px;line-height:1;color:#8A5A00}
+.switch-confirm{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px}
+.switch-confirm[hidden]{display:none}
+.switch-confirm .box{background:#fff;color:#111;border-radius:12px;padding:20px;max-width:380px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.switch-confirm p{margin:0 0 16px;font-size:14px;line-height:1.55}
+.switch-confirm .acts{display:flex;gap:10px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -298,6 +308,7 @@ img{max-width:100%;display:block}
       </a>
     </div>
     <div class="util-right">
+      <select id="countrySel" class="util-country" aria-label="Country"></select>
       <div class="lang" role="group" aria-label="Language">
         <button data-lang="en" class="on">EN</button>
         <button data-lang="fr">FR</button>
@@ -309,6 +320,11 @@ img{max-width:100%;display:block}
       </button>
     </div>
   </div>
+</div>
+<div class="geo-banner" id="geoBanner" hidden>
+  <span id="geoBannerText"></span>
+  <button type="button" id="geoBannerChange"></button>
+  <a href="#" class="geo-x" id="geoBannerClose" aria-label="Close" role="button">&times;</a>
 </div>
 <header class="header">
   <div class="wrap nav">
@@ -453,43 +469,21 @@ img{max-width:100%;display:block}
         <p class="form-note" data-i18n="form.note">No account needed — this opens WhatsApp with your message ready to send.</p>
       </div>
       <div class="contact-direct">
-        <span class="eyebrow" data-i18n="contact.or">Or reach us directly</span>
+        <span class="eyebrow" data-i18n="contact.or">Or reach us directly</span> <span class="eyebrow" id="contactCountry"></span>
         <div style="margin-top:18px">
-          <!-- Luc Su — Cameroon local -->
-          <div class="row">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg></div>
-            <div>
-              <div class="lbl">Luc Su · 🇨🇲 Cameroon</div>
-              <a class="val" href="https://wa.me/237681105611" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">+237 681 105 611</a>
-            </div>
-          </div>
-          <!-- Tom Yang — China sales -->
-          <div class="row">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg></div>
-            <div>
-              <div class="lbl">Tom Yang · 🇨🇳 China</div>
-              <a class="val" href="https://wa.me/8618707737002" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">+86 187 0773 7002</a>
-            </div>
-          </div>
+          <!-- Contacts for the selected country — rendered by
+               renderCountryContacts() from assets/js/countries.js. -->
+          <div id="contactRows"></div>
           <div class="row">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg></div>
             <div><div class="lbl" data-i18n="contact.email">Email</div><div class="val" id="cEmail">info@restarsolar.com</div></div>
           </div>
-          <div class="row">
+          <div class="row" id="cAddrRow">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
             <div><div class="lbl" data-i18n="contact.location">Location</div><div class="val" id="cAddr">Rue Léman, Douala, Cameroon</div></div>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
-          <a class="btn btn--sun wa-big" href="https://wa.me/237681105611" target="_blank" rel="noopener" style="width:100%;justify-content:center">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
-            <span>WhatsApp Luc Su (Cameroon)</span>
-          </a>
-          <a class="btn btn--ghost wa-big" href="https://wa.me/8618707737002" target="_blank" rel="noopener" style="width:100%;justify-content:center">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
-            <span>WhatsApp Tom Yang (China)</span>
-          </a>
-        </div>
+        <div id="contactBtns" style="display:flex;flex-direction:column;gap:10px;margin-top:16px"></div>
       </div>
     </div>
   </div>
@@ -560,6 +554,7 @@ img{max-width:100%;display:block}
   <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
   <img id="lbImg" class="lb-img" alt="Certificate">
 </div>
+<script src="assets/js/countries.js"></script>
 <script src="assets/data/products.js"></script>
 <script>
 const CONFIG = { whatsapp:"8618707737002", phone:"+86 187 0773 7002", email:"info@restarsolar.com", address:"Douala, Cameroon" };
@@ -584,22 +579,22 @@ const WHY = [
   {t:{en:"Genuine equipment",fr:"Matériel authentique",ar:"معدات أصلية"}, d:{en:"Brand-name panels, batteries, and inverters — not grey-market copies.",fr:"Panneaux, batteries et onduleurs de marque — pas de copies.",ar:"ألواح وبطاريات وعاكسات أصلية من علامات معروفة — ليست نسخًا مقلدة."}},
   {t:{en:"Right-sized systems",fr:"Systèmes bien dimensionnés",ar:"أنظمة بالحجم المناسب"}, d:{en:"We size to your real load, so you don't overpay or fall short.",fr:"Dimensionnés selon votre charge réelle, sans payer trop ni manquer.",ar:"نحدد الحجم وفق احتياجك الفعلي، دون دفع أكثر من اللازم أو نقص في الطاقة."}},
   {t:{en:"After-sales support",fr:"Service après-vente",ar:"دعم ما بعد البيع"}, d:{en:"Help after the sale, plus one month of free maintenance.",fr:"Assistance après l'achat et un mois de maintenance gratuite.",ar:"مساعدة بعد الشراء، مع شهر واحد من الصيانة المجانية."}},
-  {t:{en:"Delivery & install",fr:"Livraison et installation",ar:"التوصيل والتركيب"}, d:{en:"Delivery across Cameroon with installation support.",fr:"Livraison partout au Cameroun avec aide à l'installation.",ar:"التوصيل مع دعم التركيب."}}
+  {t:{en:"Delivery & install",fr:"Livraison et installation",ar:"التوصيل والتركيب"}, d:{en:"Delivery across {country} with installation support.",fr:"Livraison partout {inCountry} avec aide à l'installation.",ar:"التوصيل مع دعم التركيب."}}
 ];
 const I18N = {
   en:{
     "nav.products":"Products","nav.catalogue":"Catalogue","nav.about":"About","nav.contact":"Contact","nav.whatsapp":"WhatsApp",
-    "hero.eyebrow":"Solar energy · Cameroon","hero.title1":"Power that","hero.title2":"stays on.",
-    "hero.sub":"Restar Solar supplies and installs solar panels, batteries, and inverters built for Cameroon's homes, shops, and businesses — with sizing help, delivery, and after-sales support.",
+    "hero.eyebrow":"Solar energy · {country}","hero.title1":"Power that","hero.title2":"stays on.",
+    "hero.sub":"Restar Solar supplies and installs solar panels, batteries, and inverters built for {country}'s homes, shops, and businesses — with sizing help, delivery, and after-sales support.",
     "hero.cta1":"Browse products","hero.cta2":"Chat on WhatsApp",
-    "hero.t1":"Genuine, warrantied equipment","hero.t2":"Sizing & installation help","hero.t3":"Delivery across Cameroon",
+    "hero.t1":"Genuine, warrantied equipment","hero.t2":"Sizing & installation help","hero.t3":"Delivery across {country}",
     "offer.eyebrow":"What we supply","offer.title":"Everything to build a solar system","offer.sub":"From a single panel to a complete off-grid kit.",
     "products.eyebrow":"Catalogue","products.title":"Products & prices","products.sub":"Tap a product for full specifications. Prices in FCFA (XAF); contact us to confirm current pricing and availability.",
     "qnav.products":"Products","qnav.catalogue":"Catalogue","qnav.why":"Why Restar Solar","qnav.about":"About","qnav.contact":"Contact",
     "filter.all":"All","card.details":"Details","card.inquire":"Inquire",
     "why.eyebrow":"Why us","why.title":"Why Restar Solar",
-    "about.eyebrow":"About","about.title":"Built for how Cameroon actually uses power",
-    "about.body1":"Restar Solar helps homes and businesses across Cameroon stay powered when the grid can't. We supply and install solar panels, lithium and tubular batteries, inverters, charge controllers, and complete off-grid kits — choosing equipment that holds up to heat, dust, and daily use.",
+    "about.eyebrow":"About","about.title":"Built for how {country} actually uses power",
+    "about.body1":"Restar Solar helps homes and businesses across {country} stay powered when the grid can't. We supply and install solar panels, lithium and tubular batteries, inverters, charge controllers, and complete off-grid kits — choosing equipment that holds up to heat, dust, and daily use.",
     "about.body2":"Whether you need backup for a few lights and a fridge or a full system for a shop or borehole, we size it to your real needs, deliver it, and stay reachable afterwards.",
     "contact.eyebrow":"Get in touch","contact.title":"Tell us what you need","contact.sub":"Send your details and we'll reply on WhatsApp with sizing and a quote.",
     "contact.or":"Or reach us directly","contact.phone":"Phone","contact.email":"Email","contact.location":"Location","contact.start":"Start a WhatsApp chat",
@@ -607,26 +602,32 @@ const I18N = {
     "form.msgL":"What do you need?","form.msgP":"e.g. Solar backup for a 3-room house with a fridge and lights",
     "form.send":"Send on WhatsApp","form.note":"No account needed — this opens WhatsApp with your message ready to send.","form.ok":"Opening WhatsApp with your message…",
     "modal.specs":"Specifications","modal.inquire":"Inquire on WhatsApp","modal.price":"Price",
-    "footer.tag":"Reliable solar power for Cameroon's homes, shops, and businesses.","footer.explore":"Explore","footer.contact":"Contact",
-    "footer.rights":"© 2026 Restar Solar. All rights reserved.","footer.built":"Solar supply & installation · Cameroon",
+    "footer.tag":"Reliable solar power for {country}'s homes, shops, and businesses.","footer.explore":"Explore","footer.contact":"Contact",
+    "footer.rights":"© 2026 Restar Solar. All rights reserved.","footer.built":"Solar supply & installation · {country}",
     "price.contact":"Contact for price","stock.out":"Out of stock","stock.low":"Only {n} left",
     "nav.certs":"Certificates","qnav.certs":"Certificates","nav.factory":"Factory",
     "certs.eyebrow":"Trust","certs.title":"Certified quality","certs.sub":"Our products and factory are certified to international standards — ISO 9001, TÜV SÜD, CQC, and CE. Tap a certificate to enlarge.",
     "nav.download":"Download","nav.projects":"Projects","nav.news":"News","nav.faq":"FAQ",
+    "country.banner":"Showing contacts and ordering for {country}.","country.change":"Change","country.otherOption":"🌍 Other country","meta.title":"Restar Solar — Reliable solar power for {country}","meta.desc":"Restar Solar supplies and installs solar panels, batteries, and inverters for homes, shops, and businesses across {country}.",
+    "country.contactsFor":"for {country}","country.deliverTo":"Delivery country: {country}",
+    "country.connecting":"Connecting you to the {country} team…",
+    "country.switchWarn":"Switching to {country} will empty your cart ({n} items). Continue?",
+    "country.switchOk":"Switch","country.switchCancel":"Cancel",
+    "card.addToCart":"Add to cart","card.inquireWa":"WhatsApp inquiry",
   },
   fr:{
     "nav.products":"Produits","nav.catalogue":"Catalogue","nav.about":"À propos","nav.contact":"Contact","nav.whatsapp":"WhatsApp",
-    "hero.eyebrow":"Énergie solaire · Cameroun","hero.title1":"Une énergie qui","hero.title2":"ne s'arrête pas.",
-    "hero.sub":"Restar Solar fournit et installe panneaux solaires, batteries et onduleurs conçus pour les maisons, boutiques et entreprises du Cameroun — avec aide au dimensionnement, livraison et service après-vente.",
+    "hero.eyebrow":"Énergie solaire · {country}","hero.title1":"Une énergie qui","hero.title2":"ne s'arrête pas.",
+    "hero.sub":"Restar Solar fournit et installe panneaux solaires, batteries et onduleurs conçus pour les maisons, boutiques et entreprises {ofCountry} — avec aide au dimensionnement, livraison et service après-vente.",
     "hero.cta1":"Voir les produits","hero.cta2":"Discuter sur WhatsApp",
-    "hero.t1":"Matériel authentique et garanti","hero.t2":"Aide au dimensionnement","hero.t3":"Livraison partout au Cameroun",
+    "hero.t1":"Matériel authentique et garanti","hero.t2":"Aide au dimensionnement","hero.t3":"Livraison partout {inCountry}",
     "offer.eyebrow":"Ce que nous fournissons","offer.title":"Tout pour un système solaire","offer.sub":"D'un simple panneau à un kit autonome complet.",
     "products.eyebrow":"Catalogue","products.title":"Produits et prix","products.sub":"Touchez un produit pour voir les spécifications. Prix en FCFA (XAF) ; contactez-nous pour confirmer prix et disponibilité.",
     "qnav.products":"Produits","qnav.catalogue":"Catalogue","qnav.why":"Pourquoi Restar Solar","qnav.about":"À propos","qnav.contact":"Contact",
     "filter.all":"Tous","card.details":"Détails","card.inquire":"Demander",
     "why.eyebrow":"Pourquoi nous","why.title":"Pourquoi Restar Solar",
-    "about.eyebrow":"À propos","about.title":"Pensé pour l'usage réel de l'énergie au Cameroun",
-    "about.body1":"Restar Solar aide les foyers et entreprises du Cameroun à rester alimentés quand le réseau fait défaut. Nous fournissons et installons panneaux solaires, batteries lithium et tubulaires, onduleurs, régulateurs et kits autonomes complets — du matériel qui résiste à la chaleur, à la poussière et à l'usage quotidien.",
+    "about.eyebrow":"À propos","about.title":"Pensé pour l'usage réel de l'énergie {inCountry}",
+    "about.body1":"Restar Solar aide les foyers et entreprises {ofCountry} à rester alimentés quand le réseau fait défaut. Nous fournissons et installons panneaux solaires, batteries lithium et tubulaires, onduleurs, régulateurs et kits autonomes complets — du matériel qui résiste à la chaleur, à la poussière et à l'usage quotidien.",
     "about.body2":"Que vous ayez besoin d'un secours pour quelques lampes et un réfrigérateur ou d'un système complet pour une boutique ou un forage, nous le dimensionnons selon vos besoins réels, le livrons et restons joignables ensuite.",
     "contact.eyebrow":"Contactez-nous","contact.title":"Dites-nous ce qu'il vous faut","contact.sub":"Envoyez vos informations et nous répondrons sur WhatsApp avec un dimensionnement et un devis.",
     "contact.or":"Ou contactez-nous directement","contact.phone":"Téléphone","contact.email":"E-mail","contact.location":"Localisation","contact.start":"Démarrer une discussion WhatsApp",
@@ -634,26 +635,32 @@ const I18N = {
     "form.msgL":"De quoi avez-vous besoin ?","form.msgP":"ex. Solaire de secours pour une maison de 3 pièces avec frigo et lampes",
     "form.send":"Envoyer sur WhatsApp","form.note":"Aucun compte requis — ceci ouvre WhatsApp avec votre message prêt à envoyer.","form.ok":"Ouverture de WhatsApp avec votre message…",
     "modal.specs":"Spécifications","modal.inquire":"Demander sur WhatsApp","modal.price":"Prix",
-    "footer.tag":"Énergie solaire fiable pour les maisons, boutiques et entreprises du Cameroun.","footer.explore":"Explorer","footer.contact":"Contact",
-    "footer.rights":"© 2026 Restar Solar. Tous droits réservés.","footer.built":"Fourniture & installation solaire · Cameroun",
+    "footer.tag":"Énergie solaire fiable pour les maisons, boutiques et entreprises {ofCountry}.","footer.explore":"Explorer","footer.contact":"Contact",
+    "footer.rights":"© 2026 Restar Solar. Tous droits réservés.","footer.built":"Fourniture & installation solaire · {country}",
     "price.contact":"Prix sur demande","stock.out":"Rupture de stock","stock.low":"Plus que {n} en stock",
     "nav.certs":"Certificats","qnav.certs":"Certificats","nav.factory":"Usine",
     "certs.eyebrow":"Confiance","certs.title":"Qualité certifiée","certs.sub":"Nos produits et notre usine sont certifiés aux normes internationales — ISO 9001, TÜV SÜD, CQC et CE. Touchez un certificat pour l'agrandir.",
     "nav.download":"Télécharger","nav.projects":"Projets","nav.news":"Actualités","nav.faq":"FAQ",
+    "country.banner":"Contacts et commande affichés pour {country}.","country.change":"Changer","country.otherOption":"🌍 Autre pays","meta.title":"Restar Solar — Énergie solaire fiable {inCountry}","meta.desc":"Restar Solar fournit et installe panneaux solaires, batteries et onduleurs pour les maisons, boutiques et entreprises {ofCountry}.",
+    "country.contactsFor":"pour {country}","country.deliverTo":"Pays de livraison : {country}",
+    "country.connecting":"Mise en relation avec l'équipe {country}…",
+    "country.switchWarn":"Passer à {country} videra votre panier ({n} articles). Continuer ?",
+    "country.switchOk":"Changer","country.switchCancel":"Annuler",
+    "card.addToCart":"Ajouter au panier","card.inquireWa":"Devis WhatsApp",
   },
   ar:{
     "nav.products":"المنتجات","nav.catalogue":"الكتالوج","nav.about":"من نحن","nav.contact":"اتصل بنا","nav.whatsapp":"واتساب",
-    "hero.eyebrow":"الطاقة الشمسية · السودان","hero.title1":"طاقة","hero.title2":"لا تنقطع.",
-    "hero.sub":"تقوم ريستار سولار بتوريد وتركيب الألواح الشمسية والبطاريات والعاكسات المصممة للمنازل والمحلات والشركات في السودان — مع المساعدة في تحديد الحجم المناسب والتوصيل وخدمة ما بعد البيع.",
+    "hero.eyebrow":"الطاقة الشمسية · {country}","hero.title1":"طاقة","hero.title2":"لا تنقطع.",
+    "hero.sub":"تقوم ريستار سولار بتوريد وتركيب الألواح الشمسية والبطاريات والعاكسات المصممة للمنازل والمحلات والشركات في {country} — مع المساعدة في تحديد الحجم المناسب والتوصيل وخدمة ما بعد البيع.",
     "hero.cta1":"تصفح المنتجات","hero.cta2":"تحدث عبر واتساب",
-    "hero.t1":"معدات أصلية ومضمونة","hero.t2":"مساعدة في التحديد والتركيب","hero.t3":"التوصيل في جميع أنحاء السودان",
+    "hero.t1":"معدات أصلية ومضمونة","hero.t2":"مساعدة في التحديد والتركيب","hero.t3":"التوصيل في جميع أنحاء {country}",
     "offer.eyebrow":"ما نوفره","offer.title":"كل ما تحتاجه لبناء نظام شمسي","offer.sub":"من لوح واحد إلى طقم متكامل مستقل عن الشبكة.",
     "products.eyebrow":"الكتالوج","products.title":"المنتجات والأسعار","products.sub":"اضغط على منتج لعرض المواصفات الكاملة. الأسعار عند الطلب — تواصل معنا لتأكيد السعر والتوفر.",
     "qnav.products":"المنتجات","qnav.catalogue":"الكتالوج","qnav.why":"لماذا ريستار سولار","qnav.about":"من نحن","qnav.contact":"اتصل بنا",
     "filter.all":"الكل","card.details":"التفاصيل","card.inquire":"استفسار",
     "why.eyebrow":"لماذا نحن","why.title":"لماذا ريستار سولار",
-    "about.eyebrow":"من نحن","about.title":"مصممة لتلبية الاستخدام الحقيقي للطاقة في السودان",
-    "about.body1":"تساعد ريستار سولار المنازل والشركات في السودان على البقاء مزودة بالطاقة عندما تنقطع الشبكة الكهربائية. نقوم بتوريد وتركيب الألواح الشمسية، وبطاريات الليثيوم والأنبوبية، والعاكسات، ومنظمات الشحن، وأطقم مستقلة متكاملة — نختار معدات تتحمل الحرارة والغبار والاستخدام اليومي.",
+    "about.eyebrow":"من نحن","about.title":"مصممة لتلبية الاستخدام الحقيقي للطاقة في {country}",
+    "about.body1":"تساعد ريستار سولار المنازل والشركات في {country} على البقاء مزودة بالطاقة عندما تنقطع الشبكة الكهربائية. نقوم بتوريد وتركيب الألواح الشمسية، وبطاريات الليثيوم والأنبوبية، والعاكسات، ومنظمات الشحن، وأطقم مستقلة متكاملة — نختار معدات تتحمل الحرارة والغبار والاستخدام اليومي.",
     "about.body2":"سواء كنت بحاجة إلى طاقة احتياطية لبضعة مصابيح وثلاجة أو نظام كامل لمتجر أو بئر، فإننا نحدد الحجم المناسب لاحتياجاتك الفعلية، ونقوم بالتوصيل، ونبقى على تواصل بعد ذلك.",
     "contact.eyebrow":"تواصل معنا","contact.title":"أخبرنا بما تحتاجه","contact.sub":"أرسل بياناتك وسنرد عبر واتساب بتحديد الحجم المناسب وعرض سعر.",
     "contact.or":"أو تواصل معنا مباشرة","contact.phone":"الهاتف","contact.email":"البريد الإلكتروني","contact.location":"الموقع","contact.start":"ابدأ محادثة واتساب",
@@ -661,25 +668,53 @@ const I18N = {
     "form.msgL":"ما الذي تحتاجه؟","form.msgP":"مثال: طاقة احتياطية لمنزل من 3 غرف مع ثلاجة ومصابيح",
     "form.send":"إرسال عبر واتساب","form.note":"لا حاجة لحساب — سيؤدي هذا إلى فتح واتساب مع رسالتك جاهزة للإرسال.","form.ok":"جارٍ فتح واتساب برسالتك…",
     "modal.specs":"المواصفات","modal.inquire":"استفسار عبر واتساب","modal.price":"السعر",
-    "footer.tag":"طاقة شمسية موثوقة للمنازل والمحلات والشركات في السودان.","footer.explore":"استكشف","footer.contact":"اتصل بنا",
-    "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · السودان",
+    "footer.tag":"طاقة شمسية موثوقة للمنازل والمحلات والشركات في {country}.","footer.explore":"استكشف","footer.contact":"اتصل بنا",
+    "footer.rights":"© 2026 ريستار سولار. جميع الحقوق محفوظة.","footer.built":"توريد وتركيب الطاقة الشمسية · {country}",
     "price.contact":"السعر عند الطلب","stock.out":"نفذ من المخزون","stock.low":"باقي {n} فقط",
     "nav.certs":"الشهادات","qnav.certs":"الشهادات","nav.factory":"المصنع",
     "certs.eyebrow":"الثقة","certs.title":"جودة معتمدة","certs.sub":"منتجاتنا ومصنعنا معتمدون وفق المعايير الدولية — ISO 9001 وTÜV SÜD وCQC وCE. اضغط على شهادة لتكبيرها.",
     "nav.download":"تحميل","nav.projects":"المشاريع","nav.news":"الأخبار","nav.faq":"الأسئلة الشائعة",
+    "country.banner":"يتم عرض بيانات التواصل والطلب لـ {country}.","country.change":"تغيير","country.otherOption":"🌍 دول أخرى","meta.title":"ريستار سولار — طاقة شمسية موثوقة لـ {country}","meta.desc":"توفّر ريستار سولار وتركّب الألواح الشمسية والبطاريات والعواكس للمنازل والمحلات والشركات في {country}.",
+    "country.contactsFor":"لـ {country}","country.deliverTo":"بلد التسليم: {country}",
+    "country.connecting":"جارٍ توصيلك بفريق {country}…",
+    "country.switchWarn":"التبديل إلى {country} سيفرّغ سلتك ({n} من المنتجات). هل تريد المتابعة؟",
+    "country.switchOk":"تبديل","country.switchCancel":"إلغاء",
+    "card.addToCart":"أضف إلى السلة","card.inquireWa":"استفسار عبر واتساب",
   }
 };
 let lang = "en";
-const CART_ENABLED = true;
-window.CART_ENABLED = CART_ENABLED;
+// The country currently being served. Real value arrives from
+// RSCountries.resolveCountry() at the bottom of this page; until then the
+// page renders as OTHER, which is a valid state, not a placeholder.
+let COUNTRY = "OTHER";
+// True once the visitor picks a language themselves — after that, switching
+// country must not override their choice.
+let langChosen = false;
+// Online ordering exists only where a cart Worker is deployed; applyCountry()
+// sets this per country. cart.js and renderGrid() read window.CART_ENABLED.
+window.CART_ENABLED = false;
 // Populated after DOMContentLoaded once window.CART_API_BASE is set (that
 // happens in a later <script> block) — see the fetch below, near the bottom
 // of this file. sku -> stock_qty; a SKU absent from this object is
 // untracked (unlimited), matching the backend's inventory.js semantics.
 let INVENTORY = {};
 const LOW_STOCK_THRESHOLD = 5;
-const t = k => (I18N[lang][k] !== undefined ? I18N[lang][k] : k);
-const tr = o => (o[lang] !== undefined ? o[lang] : o.en);
+// Translated copy carries a {country} token instead of a baked-in country
+// name — the unified site swaps countries without a rebuild, which is what
+// scripts/generate_country_site.py used to do with a global find/replace.
+const countryName = () => COUNTRY_TOKENS.country(RSCountries.COUNTRIES[COUNTRY]);
+const COUNTRY_TOKENS = {
+  country: c => (lang === "fr" ? c.name_fr : lang === "ar" ? c.name_ar : c.name),
+  // French only: "au Mali" / "du Mali", but "en Afrique" / "d'Afrique".
+  inCountry: c => c.fr_in,
+  ofCountry: c => c.fr_of
+};
+const fill = (str, vars) => String(str).replace(/\{(\w+)\}/g, (m, k) => {
+  if (vars && vars[k] !== undefined) return vars[k];
+  return COUNTRY_TOKENS[k] ? COUNTRY_TOKENS[k](RSCountries.COUNTRIES[COUNTRY]) : m;
+});
+const t = (k, vars) => fill(I18N[lang][k] !== undefined ? I18N[lang][k] : k, vars);
+const tr = o => fill(o[lang] !== undefined ? o[lang] : o.en);
 const fmt = n => n.toLocaleString("fr-FR");
 const wa = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 function renderOffer(){
@@ -729,7 +764,9 @@ function renderGrid(){
           <a class="btn btn--dark" target="_blank" rel="noopener"
              href="${wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':lang==='ar'?'مرحبًا ريستار سولار، أنا مهتم بـ: ':'Hello Restar Solar, I am interested in: ')+p.name+'.')}">
              ${t('card.inquire')}</a>
-          ${window.CART_ENABLED ? `<button class="btn btn--ghost add-to-cart" data-sku="${p.id}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? t('stock.out') : 'Add to cart'}</button>` : ''}
+          ${window.CART_ENABLED
+            ? `<button class="btn btn--ghost add-to-cart" data-sku="${p.id}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? t('stock.out') : t('card.addToCart')}</button>`
+            : `<a class="btn btn--ghost" target="_blank" rel="noopener" href="${wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':lang==='ar'?'مرحبًا ريستار سولار، أرغب في عرض سعر لـ: ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.')}">${t('card.inquireWa')}</a>`}
         </div>
       </div>
     </article>`;
@@ -788,8 +825,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function applyI18n(){
   document.documentElement.lang = lang;
   document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
-  document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n"); if(I18N[lang][k]!==undefined) el.textContent=I18N[lang][k];});
-  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const k=el.getAttribute("data-i18n-ph"); if(I18N[lang][k]!==undefined) el.placeholder=I18N[lang][k];});
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n"); if(I18N[lang][k]!==undefined) el.textContent=t(k);});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const k=el.getAttribute("data-i18n-ph"); if(I18N[lang][k]!==undefined) el.placeholder=t(k);});
 }
 function wireContacts(){
   const hello = lang==='fr' ? "Bonjour Restar Solar, j'ai une question sur le solaire."
@@ -822,9 +859,34 @@ document.getElementById("formSend").onclick=()=>{
 };
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{
   lang=b.dataset.lang;
+  langChosen=true;
   document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));
   renderAll();
 });
+document.getElementById("countrySel").onchange = e => requestCountrySwitch(e.target.value);
+
+/* First-visit notice: says which country is being shown, because it was
+ * guessed from the visitor's IP rather than chosen. Never shown again once
+ * dismissed or once the visitor has picked a country themselves.
+ */
+const BANNER_KEY = "rs_country_banner_dismissed";
+function dismissBanner(){
+  document.getElementById("geoBanner").hidden = true;
+  RSCountries.storageSet(BANNER_KEY, "1");
+}
+function maybeShowBanner(){
+  const banner = document.getElementById("geoBanner");
+  if (RSCountries.storageGet(BANNER_KEY)) { banner.hidden = true; return; }
+  document.getElementById("geoBannerText").textContent = t("country.banner");
+  document.getElementById("geoBannerChange").textContent = t("country.change");
+  banner.hidden = false;
+}
+document.getElementById("geoBannerChange").onclick = () => {
+  dismissBanner();
+  document.getElementById("countrySel").focus();
+};
+document.getElementById("geoBannerClose").onclick = e => { e.preventDefault(); dismissBanner(); };
+
 const burger=document.getElementById("burger"), navLinks=document.getElementById("navLinks");
 burger.onclick=()=>{const o=navLinks.classList.toggle("open");burger.setAttribute("aria-expanded",o);};
 navLinks.querySelectorAll("a").forEach(a=>a.onclick=()=>{navLinks.classList.remove("open");burger.setAttribute("aria-expanded",false);});
@@ -873,6 +935,174 @@ function closeLightbox(){document.getElementById("lightbox").classList.remove("o
   document.getElementById("lbBg").onclick=closeLightbox;
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLightbox();});
 })();
+/* ===== Country switching ==================================================
+ * One site, five countries, chosen at runtime. applyCountry() is the single
+ * place that applies one — the first render and the header switcher both go
+ * through it, so the two can never drift apart.
+ */
+const WA_PATH = '<path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/>';
+const esc = v => String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+function countryOptionLabel(c){
+  return c.option_key ? t(c.option_key) : c.flag + " " + (lang==="fr"?c.name_fr:lang==="ar"?c.name_ar:c.name);
+}
+
+function renderCountryContacts(country){
+  document.getElementById("contactRows").innerHTML = country.contacts.map(c => `
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="currentColor">${WA_PATH}</svg></div>
+            <div>
+              <div class="lbl">${esc(c.name)} · ${c.flag} ${esc(c.label)}</div>
+              <a class="val" href="https://wa.me/${esc(c.phone)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${esc(c.phone_display)}</a>
+              ${c.secondary_display ? `<div class="val" style="font-weight:400;font-size:13px;color:var(--muted-2)">${esc(c.secondary_display)}</div>` : ""}
+            </div>
+          </div>`).join("");
+
+  // First contact gets the primary button; any others are secondary — the
+  // same hierarchy the generated per-country sites had.
+  document.getElementById("contactBtns").innerHTML = country.contacts.map((c,i) => `
+          <a class="btn ${i===0?"btn--sun":"btn--ghost"} wa-big" href="https://wa.me/${esc(c.phone)}" target="_blank" rel="noopener" style="width:100%;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${WA_PATH}</svg>
+            <span>WhatsApp ${esc(c.name)} (${esc(c.label)})</span>
+          </a>`).join("");
+
+  document.getElementById("contactCountry").textContent = t("country.contactsFor");
+  document.getElementById("cAddrRow").style.display = country.show_address === false ? "none" : "";
+}
+
+function renderCountrySelect(){
+  const sel = document.getElementById("countrySel");
+  sel.innerHTML = RSCountries.ORDER.map(code =>
+    `<option value="${code}">${esc(countryOptionLabel(RSCountries.COUNTRIES[code]))}</option>`).join("");
+  sel.value = COUNTRY;
+}
+
+function updateCartToggle(){
+  const toggle = document.getElementById("cart-toggle");
+  if (toggle) toggle.style.display = window.CART_ENABLED ? "" : "none";
+  if (!window.CART_ENABLED) document.getElementById("cart-drawer").classList.remove("open");
+}
+
+/* Stock levels and the session's assigned sales rep both come from the
+ * selected country's cart Worker. Answers that arrive after the visitor has
+ * switched again are dropped — otherwise Mali's rep could end up shown on
+ * Nigeria's page.
+ */
+function refreshCountryBackend(){
+  const base = window.CART_API_BASE;
+  const servedCountry = COUNTRY;
+  INVENTORY = {};
+  if (!base) { renderGrid(); return; }
+  renderGrid();
+  fetch(base + "/api/inventory")
+    .then(res => res.json())
+    .then(rows => {
+      if (COUNTRY !== servedCountry) return;
+      rows.forEach(row => { INVENTORY[row.sku] = row.stock_qty; });
+      renderGrid();
+    })
+    .catch(() => {});
+  // Session-consistent rep assignment, where a country has a seeded pool
+  // (Mali today; Cameroon's is intentionally empty). The assigned rep takes
+  // over the order/chat contact slot. Failure keeps the configured contact —
+  // this must never be able to break the page.
+  fetch(base + "/api/sales-rep?session=" + encodeURIComponent(window.CART_SESSION_ID || "") + "&source=page_load")
+    .then(res => { if (!res.ok) throw new Error("no_rep"); return res.json(); })
+    .then(rep => {
+      if (COUNTRY !== servedCountry || !rep || !rep.phone) return;
+      window.CART_WHATSAPP_NUMBER = rep.phone;
+      const targets = window.RS_CHAT_TARGETS.slice();
+      targets[targets.length - 1] = { phone: rep.phone, label: rep.name || targets[targets.length - 1].label };
+      window.RS_CHAT_TARGETS = targets;
+    })
+    .catch(() => {});
+}
+
+function applyCountry(code){
+  const country = RSCountries.COUNTRIES[RSCountries.normalize(code) || "OTHER"];
+  COUNTRY = country.code;
+
+  // A country's own language on first visit; the visitor's pick wins after that.
+  if (!langChosen) {
+    lang = country.lang;
+    document.querySelectorAll(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === lang));
+  }
+
+  // Top utility bar, footer, and the inquiry form's WhatsApp target.
+  const headline = country.contacts[country.config_contact];
+  CONFIG.whatsapp = headline.phone;
+  CONFIG.phone = headline.phone_display;
+  // No confirmed street address means the country name, never an invented one.
+  CONFIG.address = country.address || countryName();
+
+  window.CART_ENABLED = !!country.cart_backend;
+  window.CART_API_BASE = country.cart_backend || "";
+  window.CART_CURRENCY = country.currency || "";
+  window.CART_WHATSAPP_NUMBER = country.contacts[country.order_contact].phone;
+
+  // Chat widget: which country's agents own a handoff, and who the
+  // "Send to X" order buttons message.
+  window.RS_COUNTRY = country.code;
+  window.RS_CHAT_TARGETS = country.contacts.map(c => ({ phone: c.phone, label: c.name + " " + c.flag }));
+
+  RSCountries.storageSet(RSCountries.STORAGE_KEY, country.code);
+  renderAll();                 // applyI18n + grid + wireContacts, all country-aware
+  renderCountryContacts(country);
+  renderCountrySelect();
+  updateCartToggle();
+  document.title = t("meta.title");
+  const desc = document.querySelector('meta[name="description"]');
+  if (desc) desc.setAttribute("content", t("meta.desc"));
+  refreshCountryBackend();
+  if (!document.getElementById("geoBanner").hidden) maybeShowBanner();
+}
+
+/* A page-level confirm (never window.confirm, which blocks the browser and
+ * cannot be translated or styled). Resolves true if the visitor accepts.
+ */
+function confirmSwitch(message){
+  return new Promise(resolve => {
+    const wrap = document.createElement("div");
+    wrap.className = "switch-confirm";
+    wrap.innerHTML = `<div class="box" role="alertdialog" aria-modal="true">
+      <p></p>
+      <div class="acts">
+        <button type="button" class="btn btn--line" data-act="cancel"></button>
+        <button type="button" class="btn btn--sun" data-act="ok"></button>
+      </div></div>`;
+    wrap.querySelector("p").textContent = message;
+    wrap.querySelector('[data-act="cancel"]').textContent = t("country.switchCancel");
+    wrap.querySelector('[data-act="ok"]').textContent = t("country.switchOk");
+    const close = answer => { wrap.remove(); resolve(answer); };
+    wrap.querySelectorAll("[data-act]").forEach(b => b.onclick = () => close(b.dataset.act === "ok"));
+    wrap.onclick = e => { if (e.target === wrap) close(false); };
+    document.body.appendChild(wrap);
+    wrap.querySelector('[data-act="ok"]').focus();
+  });
+}
+
+/* Switcher entry point: warns before discarding a cart, since each country
+ * orders through its own backend and prices/stock do not carry over.
+ */
+function requestCountrySwitch(code){
+  const target = RSCountries.normalize(code);
+  if (!target || target === COUNTRY) return;
+  const inCart = (window.Cart && window.Cart.count()) || 0;
+  const targetCountry = RSCountries.COUNTRIES[target];
+  // langChosen is deliberately not set here: it tracks whether the visitor
+  // picked a *language*. Someone who has never touched the language buttons
+  // should follow the new country's default, not stay on Arabic after
+  // switching from Sudan to Cameroon.
+  if (inCart === 0) { applyCountry(target); return; }
+  const name = lang === "fr" ? targetCountry.name_fr : lang === "ar" ? targetCountry.name_ar : targetCountry.name;
+  confirmSwitch(t("country.switchWarn", { n: inCart, country: name }))
+    .then(ok => {
+      if (!ok) { document.getElementById("countrySel").value = COUNTRY; return; }
+      window.Cart.clear();
+      applyCountry(target);
+    });
+}
+
 function renderAll(){applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();}
 renderAll();
 observeReveals();
@@ -911,11 +1141,9 @@ observeReveals();
   var STREAM_API = 'https://rest-solar-agent.onrender.com/api/chat/stream';
   var SESSION = 'rs-' + Math.random().toString(36).slice(2);
 
-  // Country this site serves. The backend routes a handoff to that country's
-  // agents (broadcast_to_admins_in_country in app/api/ws.py), so a stale value
-  // would drop Nigerian customers into Cameroon's console. Patched per country
-  // by set_handoff_country() in scripts/generate_country_site.py.
-  var RS_COUNTRY = 'CM';
+  // Which country's agents own a handoff (broadcast_to_admins_in_country in
+  // app/api/ws.py) — read at connect time, not captured here, because the
+  // visitor can switch country mid-session. applyCountry() sets it.
   // Handoff runs over a websocket on the API origin. The AI path below keeps
   // using plain HTTP streaming, untouched — the socket is only opened if the
   // customer actually asks for a person.
@@ -1000,7 +1228,7 @@ observeReveals();
 
   function connectWS(onOpen){
     if (ws && ws.readyState === WebSocket.OPEN) { onOpen(); return; }
-    ws = new WebSocket(WS_ORIGIN + '/ws/' + CONV_ID + '?country=' + encodeURIComponent(RS_COUNTRY));
+    ws = new WebSocket(WS_ORIGIN + '/ws/' + CONV_ID + '?country=' + encodeURIComponent(window.RS_COUNTRY || 'CM'));
     ws.onopen = onOpen;
     ws.onmessage = function (ev) {
       var d;
@@ -1020,8 +1248,21 @@ observeReveals();
   }
 
   function requestHuman(){
+    // OTHER is not a country the backend has agents for (app/countries.py
+    // rejects it), so there is no queue to join — hand the customer straight
+    // to the sales contact on WhatsApp rather than open a socket that would
+    // be closed with code 4003.
+    if (window.RS_COUNTRY === 'OTHER') {
+      var targets = window.RS_CHAT_TARGETS || [];
+      if (targets.length) {
+        window.open('https://wa.me/' + targets[0].phone + '?text=' +
+          encodeURIComponent('Hello Restar Solar, I would like to speak to your team.'), '_blank', 'noopener');
+      }
+      return;
+    }
     if (humanMode) { addMsg('status', "You're already in the queue for our team."); return; }
     typing.style.display = 'block';
+    addMsg('status', t('country.connecting'));
     connectWS(function () {
       humanMode = true;
       ws.send(JSON.stringify({ action: 'request_human' }));
@@ -1112,57 +1353,12 @@ observeReveals();
     .catch(fallbackNonStreaming);
   }
 
-  var AGENT_PHONE = '8618707737002';   // Tom Yang (China)
-  var AGENT_LABEL = 'Tom Yang 🇨🇳';    // kept in sync with AGENT_PHONE below, incl. the sales-rep override
-  var AGENT_PHONE_2 = '237681105611'; // Luc Su (Cameroon)
-  window.CART_API_BASE = 'https://camaroom-cart-backend.zhixuanlucasfeng.workers.dev';
-  window.CART_CURRENCY = 'XAF';
-  // Stock badges: fetch once CART_API_BASE exists, then re-render the grid
-  // (INVENTORY/renderGrid are defined in the earlier <script> block — top-level
-  // let/const and function declarations are shared across inline scripts on
-  // the same page). Silently no-ops on failure — an unreachable inventory
-  // endpoint should never block the storefront from showing products.
-  if (window.CART_API_BASE) {
-    fetch(window.CART_API_BASE + '/api/inventory')
-      .then(function (res) { return res.json(); })
-      .then(function (rows) {
-        rows.forEach(function (row) { INVENTORY[row.sku] = row.stock_qty; });
-        if (typeof renderGrid === 'function') renderGrid();
-      })
-      .catch(function () {});
-  }
-  // Guarded: the country-site generator strips the AGENT_PHONE_2 declaration
-  // above for countries without a local rep (see strip_local_contact_block()
-  // in scripts/generate_country_site.py), which would otherwise leave this a
-  // dangling reference and throw a ReferenceError that aborts this whole
-  // script block (breaking the chat widget below it) on page load.
+  // The cart session id is generated here (it must match the chat session the
+  // customer is talking in); everything else country-dependent — CART_API_BASE,
+  // CART_CURRENCY, CART_WHATSAPP_NUMBER, RS_CHAT_TARGETS, and the inventory /
+  // sales-rep fetches — is set by applyCountry() so a country switch updates
+  // all of it at once instead of only on reload.
   window.CART_SESSION_ID = SESSION;
-  // Falls back to Tom Yang (real, shared contact — never a fabricated
-  // number, see SP-137 in generate_country_site.py) instead of an empty
-  // string, which previously produced a broken https://wa.me/?text=... link
-  // for any country without a local rep.
-  window.CART_WHATSAPP_NUMBER = (typeof AGENT_PHONE_2 !== 'undefined' ? AGENT_PHONE_2 : AGENT_PHONE);
-  // Session-consistent sales-rep override: if this country has a live cart
-  // backend with a real seeded rep pool (Mali today), replace the Tom Yang
-  // fallback with the customer's actually-assigned local rep. No-ops (keeps
-  // the fallback above) if CART_API_BASE is empty, the request fails, or the
-  // backend has no active reps (e.g. Cameroon's rep pool is intentionally
-  // empty — see schema.sql) — this must never be able to break page load.
-  if (window.CART_API_BASE) {
-    fetch(window.CART_API_BASE + '/api/sales-rep?session=' + encodeURIComponent(SESSION) + '&source=page_load')
-      .then(function (res) { if (!res.ok) throw new Error('no_rep'); return res.json(); })
-      .then(function (rep) {
-        if (rep && rep.phone) {
-          AGENT_PHONE = rep.phone;
-          window.CART_WHATSAPP_NUMBER = rep.phone;
-          // Keeps the chat widget's "Send to X" button label truthful —
-          // without this it would keep saying "Send to Tom Yang" while
-          // actually messaging whichever local rep the backend assigned.
-          if (rep.name) AGENT_LABEL = rep.name;
-        }
-      })
-      .catch(function () {});
-  }
 
   function addMsg(role, text){
     var d = document.createElement('div');
@@ -1196,8 +1392,6 @@ observeReveals();
       var before = parts[0].trim();
       var orderSummary = parts[1] ? parts[1].trim() : '';
       var waText = encodeURIComponent('🛒 New Order from Restar Solar website:\n\n' + orderSummary);
-      var waUrl1 = 'https://wa.me/' + AGENT_PHONE_2 + '?text=' + waText;
-      var waUrl2 = 'https://wa.me/' + AGENT_PHONE + '?text=' + waText;
       var btnStyle = 'display:inline-flex;align-items:center;gap:8px;margin-top:8px;' +
         'background:#25D366;color:#fff;text-decoration:none;' +
         'padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;';
@@ -1206,8 +1400,10 @@ observeReveals();
 
       d.innerHTML = (before ? before + '\n\n' : '') +
         '<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">' +
-        '<a href="' + waUrl1 + '" target="_blank" style="' + btnStyle + '">' + waIcon + 'Send to Luc Su 🇨🇲</a>' +
-        '<a href="' + waUrl2 + '" target="_blank" style="' + btnStyle + '">' + waIcon + 'Send to ' + AGENT_LABEL + '</a>' +
+        (window.RS_CHAT_TARGETS || []).map(function (target) {
+          return '<a href="https://wa.me/' + target.phone + '?text=' + waText + '" target="_blank" style="' +
+            btnStyle + '">' + waIcon + 'Send to ' + target.label + '</a>';
+        }).join('') +
         '</div>';
     } else {
       d.textContent = text;
@@ -1217,6 +1413,20 @@ observeReveals();
     msgs.scrollTop = msgs.scrollHeight;
   }
 })();
+</script>
+<script>
+/* Boot: resolve the visitor's country (URL > stored choice > IP > OTHER) and
+ * apply it. Runs last so window.CART_SESSION_ID from the chat widget exists
+ * before applyCountry() calls the cart backend with it.
+ */
+RSCountries.resolveCountry()
+  .then(function (resolved) {
+    applyCountry(resolved.code);
+    // Only a guess from the visitor's IP needs explaining — a country they
+    // linked to or chose before is not a surprise worth a banner.
+    if (resolved.source === 'geo') maybeShowBanner();
+  })
+  .catch(function () { applyCountry('OTHER'); });
 </script>
 <script src="assets/js/cart.js"></script>
 </body>
