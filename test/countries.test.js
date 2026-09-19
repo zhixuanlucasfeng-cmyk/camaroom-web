@@ -112,3 +112,25 @@ test('every phone number is digits only, so wa.me links cannot break', () => {
     }
   }
 });
+
+// Cloudflare's /cdn-cgi/trace is how the country is read when the site is not
+// hosted on Pages, so /api/geo does not exist to answer.
+test('the Cloudflare trace parser reads the country and ignores the rest', () => {
+  const trace = 'fl=123abc\nh=example.workers.dev\nip=2001:db8::1\nts=1758283200\ncolo=CDG\nloc=AE\ntls=TLSv1.3\n';
+  assert.equal(C.parseTrace(trace), 'AE');
+});
+
+test('the trace parser returns null rather than guessing', () => {
+  // No loc line at all (Cloudflare omits it for unknown/reserved addresses).
+  assert.equal(C.parseTrace('colo=CDG\nip=2001:db8::1\n'), null);
+  assert.equal(C.parseTrace(''), null);
+  // "loc" must be the whole key, not a suffix of another one.
+  assert.equal(C.parseTrace('xloc=ZZ\n'), null);
+  // An HTML error page must never read as a country.
+  assert.equal(C.parseTrace('<!DOCTYPE html><html><body>404</body></html>'), null);
+});
+
+test('a lowercase trace country still resolves to a served country', async () => {
+  assert.equal(C.parseTrace('loc=ml\n'), 'ML');
+  assert.equal(await resolve({ geo: C.parseTrace('loc=ml\n') }), 'ML');
+});

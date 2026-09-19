@@ -162,29 +162,63 @@
       .catch(function () { return { code: 'OTHER', source: 'geo' }; });
   }
 
-  /* Cloudflare Pages function at functions/api/geo.js returns the visiting
-   * IP's country. Capped at 1.5s so a slow or missing endpoint costs the
-   * visitor a brief OTHER render, never a hung page.
+  /* Cloudflare knows the visiting IP's country. Two sources, tried in order:
+   *
+   *   1. /api/geo — functions/api/geo.js, same-origin, but only runs when the
+   *      site is hosted on Cloudflare Pages.
+   *   2. the cart Worker's /cdn-cgi/trace — Cloudflare serves this on every
+   *      workers.dev host with an open CORS policy, so it answers from GitHub
+   *      Pages too. Still the account's own infrastructure, not a third-party
+   *      geolocation service, and it is sent no data about the visitor beyond
+   *      the request they are already making.
    */
+  var GEO_SOURCES = [
+    {
+      url: '/api/geo',
+      read: function (res) { return res.json().then(function (d) { return d && d.country; }); }
+    },
+    {
+      url: 'https://camaroom-cart-backend.zhixuanlucasfeng.workers.dev/cdn-cgi/trace',
+      read: function (res) { return res.text().then(parseTrace); }
+    }
+  ];
+
+  // Cloudflare's trace is plain "key=value" lines; loc is the country code.
+  function parseTrace(text) {
+    var match = /^loc=([A-Za-z]{2})$/m.exec(String(text));
+    return match ? match[1].toUpperCase() : null;
+  }
+
   function fetchGeoCountry() {
     if (typeof root.fetch !== 'function') return Promise.resolve(null);
-    var done = false;
+    var settled = false;
     return new Promise(function (resolve) {
-      var timer = root.setTimeout(function () {
-        if (!done) { done = true; resolve(null); }
-      }, 1500);
-      root.fetch('/api/geo')
-        .then(function (res) { return res.ok ? res.json() : null; })
-        .then(function (data) {
-          if (done) return;
-          done = true; root.clearTimeout(timer);
-          resolve(data && data.country ? data.country : null);
-        })
-        .catch(function () {
-          if (done) return;
-          done = true; root.clearTimeout(timer);
-          resolve(null);
-        });
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        root.clearTimeout(timer);
+        resolve(value || null);
+      }
+      // One budget for the whole lookup however many sources it tries: a slow
+      // edge costs the visitor a brief OTHER render, never a hung page. It is
+      // 3s rather than the 1.5s a same-origin /api/geo needed, because the
+      // fallback is a cross-origin request whose first TLS handshake measured
+      // over 1.5s on a cold connection — too tight a budget silently answered
+      // OTHER for exactly the first-time visitors this lookup exists for. The
+      // page is already interactive throughout; only the preselected country
+      // waits on this.
+      var timer = root.setTimeout(function () { finish(null); }, 3000);
+
+      function tryFrom(i) {
+        if (settled) return;
+        if (i >= GEO_SOURCES.length) { finish(null); return; }
+        var source = GEO_SOURCES[i];
+        root.fetch(source.url)
+          .then(function (res) { return res.ok ? source.read(res) : null; })
+          .then(function (code) { if (code) { finish(code); } else { tryFrom(i + 1); } })
+          .catch(function () { tryFrom(i + 1); });
+      }
+      tryFrom(0);
     });
   }
 
@@ -194,6 +228,7 @@
     STORAGE_KEY: STORAGE_KEY,
     normalize: normalize,
     resolveCountry: resolveCountry,
+    parseTrace: parseTrace,
     storageGet: storageGet,
     storageSet: storageSet
   };
