@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
+<script>
+// This repo serves restarsolar.net and the old zhixuanlucasfeng-cmyk.github.io
+// project page from the same files. Anyone arriving on the github.io URL
+// belongs on the domain, with Cameroon preselected — the same move the other
+// three country repos make from their own redirect pages. Runs before the
+// stylesheet so the old page never paints first.
+(function () {
+  if (/\.github\.io$/.test(location.hostname)) {
+    location.replace('https://restarsolar.net/?country=CM' + (location.hash || ''));
+  }
+})();
+</script>
 <title>Restar Solar — Reliable solar power for Cameroon</title>
 <meta name="description" content="Restar Solar supplies and installs solar panels, batteries, and inverters for homes, shops, and businesses across Cameroon.">
 <style>
@@ -710,7 +722,7 @@ let INVENTORY = {};
 const LOW_STOCK_THRESHOLD = 5;
 // Translated copy carries a {country} token instead of a baked-in country
 // name — the unified site swaps countries without a rebuild, which is what
-// scripts/generate_country_site.py used to do with a global find/replace.
+// the retired per-country site generator used to do with a find/replace.
 const countryName = () => COUNTRY_TOKENS.country(RSCountries.COUNTRIES[COUNTRY]);
 const COUNTRY_TOKENS = {
   country: c => (lang === "fr" ? c.name_fr : lang === "ar" ? c.name_ar : c.name),

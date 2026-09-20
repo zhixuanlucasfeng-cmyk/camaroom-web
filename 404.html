@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
+<script>
+// This repo serves restarsolar.net and the old zhixuanlucasfeng-cmyk.github.io
+// project page from the same files. Anyone arriving on the github.io URL
+// belongs on the domain, with Cameroon preselected — the same move the other
+// three country repos make from their own redirect pages. Runs before the
+// stylesheet so the old page never paints first.
+(function () {
+  if (/\.github\.io$/.test(location.hostname)) {
+    location.replace('https://restarsolar.net/?country=CM' + (location.hash || ''));
+  }
+})();
+</script>
 <title>Page not found — Restar Solar</title>
 <meta name="robots" content="noindex">
 <style>
