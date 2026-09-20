@@ -19,3 +19,7 @@ backend/.dev.vars
 
 # wrangler pages dev local state
 .wrangler/
+
+# Claude Code local worktrees — never part of the published site.
+# Committed by accident once as submodule gitlinks, which wedged the Pages build.
+.claude/
