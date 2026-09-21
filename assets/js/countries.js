@@ -121,6 +121,36 @@
     return Object.prototype.hasOwnProperty.call(COUNTRIES, upper) ? upper : null;
   }
 
+  /* The rungs that need no network: the URL parameter, then the visitor's
+   * remembered choice. Split out so the page can settle the country BEFORE
+   * its first render instead of painting one country and swapping to another
+   * a moment later. Returns null when only an IP lookup can answer.
+   */
+  function resolveCountrySync(deps) {
+    deps = deps || {};
+    var search = deps.search !== undefined ? deps.search : (root.location ? root.location.search : '');
+    var get = deps.storageGet || storageGet;
+    var set = deps.storageSet || storageSet;
+
+    var fromUrl = null;
+    try {
+      fromUrl = normalize(new URLSearchParams(search).get('country'));
+    } catch (e) { fromUrl = null; }
+    if (fromUrl) {
+      try { set(STORAGE_KEY, fromUrl); } catch (e) { /* storage blocked */ }
+      return { code: fromUrl, source: 'url' };
+    }
+
+    // Guarded here rather than only inside the default storageGet: an injected
+    // reader (tests, or any future caller) can throw too, and a blocked
+    // localStorage must cost us the stored preference, not the page.
+    var stored = null;
+    try { stored = normalize(get(STORAGE_KEY)); } catch (e) { stored = null; }
+    if (stored) return { code: stored, source: 'stored' };
+
+    return null;
+  }
+
   /* Resolves the country to render, first valid source wins:
    *   1. ?country=xx in the URL (also remembered for next time)
    *   2. the visitor's stored previous choice
@@ -140,21 +170,8 @@
     var set = deps.storageSet || storageSet;
     var geo = deps.geo || fetchGeoCountry;
 
-    var fromUrl = null;
-    try {
-      fromUrl = normalize(new URLSearchParams(search).get('country'));
-    } catch (e) { fromUrl = null; }
-    if (fromUrl) {
-      try { set(STORAGE_KEY, fromUrl); } catch (e) { /* storage blocked */ }
-      return Promise.resolve({ code: fromUrl, source: 'url' });
-    }
-
-    // Guarded here rather than only inside the default storageGet: an
-    // injected reader (tests, or any future caller) can throw too, and a
-    // blocked localStorage must cost us the stored preference, not the page.
-    var stored = null;
-    try { stored = normalize(get(STORAGE_KEY)); } catch (e) { stored = null; }
-    if (stored) return Promise.resolve({ code: stored, source: 'stored' });
+    var immediate = resolveCountrySync(deps);
+    if (immediate) return Promise.resolve(immediate);
 
     return Promise.resolve()
       .then(geo)
@@ -228,6 +245,7 @@
     STORAGE_KEY: STORAGE_KEY,
     normalize: normalize,
     resolveCountry: resolveCountry,
+    resolveCountrySync: resolveCountrySync,
     parseTrace: parseTrace,
     storageGet: storageGet,
     storageSet: storageSet

@@ -134,3 +134,40 @@ test('a lowercase trace country still resolves to a served country', async () =>
   assert.equal(C.parseTrace('loc=ml\n'), 'ML');
   assert.equal(await resolve({ geo: C.parseTrace('loc=ml\n') }), 'ML');
 });
+
+// The synchronous rungs exist so the page can settle its country before the
+// first render instead of painting one country and swapping to another.
+test('the sync resolver answers for a URL parameter and a stored choice', () => {
+  assert.deepEqual(
+    C.resolveCountrySync({ search: '?country=ml', storageGet: () => null, storageSet: () => {} }),
+    { code: 'ML', source: 'url' });
+  assert.deepEqual(
+    C.resolveCountrySync({ search: '', storageGet: () => 'SD', storageSet: () => {} }),
+    { code: 'SD', source: 'stored' });
+});
+
+test('the sync resolver returns null when only an IP lookup could answer', () => {
+  assert.equal(C.resolveCountrySync({ search: '', storageGet: () => null, storageSet: () => {} }), null);
+  // Unrecognised values are skipped at both rungs, not treated as answers.
+  assert.equal(C.resolveCountrySync({ search: '?country=zz', storageGet: () => 'nonsense', storageSet: () => {} }), null);
+});
+
+test('the sync resolver survives storage that throws', () => {
+  assert.equal(
+    C.resolveCountrySync({ search: '', storageGet: () => { throw new Error('blocked'); }, storageSet: () => {} }),
+    null);
+});
+
+test('sync and async resolution agree wherever sync has an answer', async () => {
+  for (const opts of [{ search: '?country=ng' }, { search: '', stored: 'CM' }]) {
+    const deps = {
+      search: opts.search || '',
+      storageGet: () => opts.stored || null,
+      storageSet: () => {},
+      geo: () => Promise.resolve('ML'),   // must be ignored when sync answers
+    };
+    const sync = C.resolveCountrySync(deps);
+    const async_ = await C.resolveCountry(deps);
+    assert.deepEqual(async_, sync);
+  }
+});

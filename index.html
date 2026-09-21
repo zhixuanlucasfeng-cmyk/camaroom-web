@@ -374,9 +374,30 @@ img{max-width:100%;display:block}
   </div>
 </header>
 <section class="hero" id="top">
-  <video autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
-    <source src="hero-bg.mp4" type="video/mp4">
+  <video id="heroVideo" autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
+    <source data-src="hero-bg.mp4" type="video/mp4">
   </video>
+  <script>
+  /* The hero video is 3.9MB — real money and real waiting on the mobile
+     networks most of our customers browse on, and it kept autoplaying even
+     for visitors who asked for less motion (the CSS rule below only stops
+     CSS animations, never a <video autoplay>). The poster image is 18KB and
+     already carries the design, so the video is treated as an enhancement:
+     the source stays unset — and therefore unfetched — unless the visitor's
+     settings and connection both welcome it. */
+  (function () {
+    var source = document.querySelector('#heroVideo source[data-src]');
+    if (!source) return;
+    var wantsLessMotion = window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var net = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+    var wantsLessData = net.saveData === true
+      || /^(slow-2g|2g|3g)$/.test(net.effectiveType || '');
+    if (wantsLessMotion || wantsLessData) return;
+    source.src = source.getAttribute('data-src');
+    source.parentNode.load();
+  })();
+  </script>
   <div class="hero-sky" data-depth="6" aria-hidden="true"></div>
   <div class="hero-motes" id="heroMotes" data-depth="30" aria-hidden="true"></div>
   <div class="hero-grid"></div>
@@ -708,6 +729,10 @@ let lang = "en";
 // RSCountries.resolveCountry() at the bottom of this page; until then the
 // page renders as OTHER, which is a valid state, not a placeholder.
 let COUNTRY = "OTHER";
+// One id ties a visitor's cart order to the chat session they are talking in
+// and to the sales rep assigned to them. Created here rather than in the chat
+// widget below, because applyCountry() now runs before that script and needs it.
+window.CART_SESSION_ID = 'rs-' + Math.random().toString(36).slice(2);
 // True once the visitor picks a language themselves — after that, switching
 // country must not override their choice.
 let langChosen = false;
@@ -1012,9 +1037,13 @@ function updateCartToggle(){
 function refreshCountryBackend(){
   const base = window.CART_API_BASE;
   const servedCountry = COUNTRY;
+  const hadStock = Object.keys(INVENTORY).length > 0;
   INVENTORY = {};
-  if (!base) { renderGrid(); return; }
-  renderGrid();
+  // Only repaint if stock badges were actually on screen — the caller has just
+  // rendered the grid, and a second identical rebuild costs ~50ms of blocked
+  // main thread for no visible change.
+  if (hadStock) renderGrid();
+  if (!base) return;
   fetch(base + "/api/inventory")
     .then(res => res.json())
     .then(rows => {
@@ -1067,7 +1096,16 @@ function applyCountry(code){
   window.RS_CHAT_TARGETS = country.contacts.map(c => ({ phone: c.phone, label: c.name + " " + c.flag }));
 
   RSCountries.storageSet(RSCountries.STORAGE_KEY, country.code);
-  renderAll();                 // applyI18n + grid + wireContacts, all country-aware
+  if (lang !== renderedLang) {
+    renderAll();
+  } else {
+    // Same language: only the {country} token, the product CTAs and the
+    // contact details differ. Leaving the offer/why/certs markup alone keeps
+    // their reveal animation intact and skips work that changes nothing.
+    applyI18n();
+    renderGrid();
+    wireContacts();
+  }
   renderCountryContacts(country);
   renderCountrySelect();
   updateCartToggle();
@@ -1124,8 +1162,17 @@ function requestCountrySwitch(code){
     });
 }
 
-function renderAll(){applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();}
-renderAll();
+// Which language the static sections were last built in. Their copy comes
+// from tr() at build time, so only a language change makes them stale.
+let renderedLang = null;
+function renderAll(){renderedLang=lang;applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();}
+// Settle the country before the first render when it needs no network (a
+// ?country= link or a remembered choice). That is one render instead of two,
+// and no visible flip from "other country" to theirs. An IP lookup cannot
+// answer in time, so those visitors still render once here and once when it
+// lands — see the boot block at the end of the page.
+const immediateCountry = RSCountries.resolveCountrySync();
+if (immediateCountry) applyCountry(immediateCountry.code); else renderAll();
 observeReveals();
 </script>
 <script>
@@ -1160,7 +1207,7 @@ observeReveals();
 (function(){
   var API = 'https://rest-solar-agent.onrender.com/api/chat';
   var STREAM_API = 'https://rest-solar-agent.onrender.com/api/chat/stream';
-  var SESSION = 'rs-' + Math.random().toString(36).slice(2);
+  var SESSION = window.CART_SESSION_ID;
 
   // Which country's agents own a handoff (broadcast_to_admins_in_country in
   // app/api/ws.py) — read at connect time, not captured here, because the
@@ -1374,12 +1421,10 @@ observeReveals();
     .catch(fallbackNonStreaming);
   }
 
-  // The cart session id is generated here (it must match the chat session the
-  // customer is talking in); everything else country-dependent — CART_API_BASE,
-  // CART_CURRENCY, CART_WHATSAPP_NUMBER, RS_CHAT_TARGETS, and the inventory /
-  // sales-rep fetches — is set by applyCountry() so a country switch updates
-  // all of it at once instead of only on reload.
-  window.CART_SESSION_ID = SESSION;
+  // Everything country-dependent — CART_API_BASE, CART_CURRENCY,
+  // CART_WHATSAPP_NUMBER, RS_CHAT_TARGETS, and the inventory / sales-rep
+  // fetches — is set by applyCountry(), so a country switch updates all of it
+  // at once instead of only on reload.
 
   function addMsg(role, text){
     var d = document.createElement('div');
@@ -1437,17 +1482,20 @@ observeReveals();
 </script>
 <script>
 /* Boot: resolve the visitor's country (URL > stored choice > IP > OTHER) and
- * apply it. Runs last so window.CART_SESSION_ID from the chat widget exists
- * before applyCountry() calls the cart backend with it.
+ * apply it.
  */
-RSCountries.resolveCountry()
-  .then(function (resolved) {
-    applyCountry(resolved.code);
-    // Only a guess from the visitor's IP needs explaining — a country they
-    // linked to or chose before is not a surprise worth a banner.
-    if (resolved.source === 'geo') maybeShowBanner();
-  })
-  .catch(function () { applyCountry('OTHER'); });
+// A ?country= link or a remembered choice was already applied before the
+// first render, further up the page. Only an IP lookup is left, and only it
+// needs the banner — a country the visitor linked to or chose before is not a
+// surprise worth explaining.
+if (!RSCountries.resolveCountrySync()) {
+  RSCountries.resolveCountry()
+    .then(function (resolved) {
+      applyCountry(resolved.code);
+      if (resolved.source === 'geo') maybeShowBanner();
+    })
+    .catch(function () { applyCountry('OTHER'); });
+}
 </script>
 <script src="assets/js/cart.js"></script>
 </body>
