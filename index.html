@@ -18,6 +18,19 @@
 </script>
 <title>Restar Solar — Reliable solar power for Cameroon</title>
 <meta name="description" content="Restar Solar supplies and installs solar panels, batteries, and inverters for homes, shops, and businesses across Cameroon.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Restar Solar">
+<meta property="og:url" content="https://restarsolar.net/">
+<meta property="og:title" content="Restar Solar — Reliable solar power across Africa">
+<meta property="og:description" content="Solar panels, batteries and inverters for homes, shops and businesses — with sizing help, delivery and after-sales support in Cameroon, Mali, Nigeria and Sudan.">
+<meta property="og:image" content="https://restarsolar.net/assets/video/poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="Restar Solar equipment">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Restar Solar — Reliable solar power across Africa">
+<meta name="twitter:description" content="Solar panels, batteries and inverters for homes, shops and businesses across Cameroon, Mali, Nigeria and Sudan.">
+<meta name="twitter:image" content="https://restarsolar.net/assets/video/poster.jpg">
 <style>
 :root{
   --bg:#FFFFFF;
@@ -1183,6 +1196,40 @@ function renderAll(){renderedLang=lang;applyI18n();renderOffer();renderWhy();ren
 const immediateCountry = RSCountries.resolveCountrySync();
 if (immediateCountry) applyCountry(immediateCountry.code); else renderAll();
 observeReveals();
+
+/* Re-honour the URL's #anchor now that its target exists. Without this every
+ * deep link — an ad pointing at #products, a redirect from an old country
+ * site, a link shared into WhatsApp — dropped the visitor at the top of the
+ * page. Runs once, before the visitor can have scrolled themselves.
+ */
+(function honourDeepLink(){
+  if (!location.hash || location.hash === "#top") return;
+  let target = null;
+  // An arbitrary fragment is not necessarily a valid selector ("#1", "#a b").
+  try { target = document.querySelector(location.hash); } catch (e) { return; }
+  if (!target) return;
+  // Jump rather than animate: the visitor asked for this section, and the
+  // page-wide smooth scrolling would otherwise crawl through the whole
+  // document. The CSS rule is switched off around the jump rather than
+  // relying on scrollIntoView's behavior option, which measurably did not
+  // override html{scroll-behavior:smooth} here — the page simply never moved.
+  function jump() {
+    var root = document.documentElement;
+    var previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, target.getBoundingClientRect().top + window.pageYOffset);
+    root.style.scrollBehavior = previous;
+  }
+
+  requestAnimationFrame(jump);
+  // Lazy images and the browser's own fragment handling both move the page
+  // around after that first frame, which left the early jump undone. Repeat
+  // once everything has settled — but never yank a visitor who has already
+  // started scrolling for themselves.
+  window.addEventListener("load", function () {
+    if (window.pageYOffset < 50) jump();
+  }, { once: true });
+})();
 </script>
 <script>
 (function cinema(){
