@@ -1,0 +1,162 @@
+[
+  {
+    "country": "cm",
+    "country_name": "Cameroon",
+    "material": "namecard",
+    "url": "https://restarsolar.net/?country=cm&utm_source=namecard&utm_medium=print&utm_campaign=cm_launch",
+    "svg": "svg/cm-namecard.svg",
+    "png": "png/cm-namecard.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "cm",
+    "country_name": "Cameroon",
+    "material": "flyer",
+    "url": "https://restarsolar.net/?country=cm&utm_source=flyer&utm_medium=print&utm_campaign=cm_launch",
+    "svg": "svg/cm-flyer.svg",
+    "png": "png/cm-flyer.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "cm",
+    "country_name": "Cameroon",
+    "material": "poster",
+    "url": "https://restarsolar.net/?country=cm&utm_source=poster&utm_medium=print&utm_campaign=cm_launch",
+    "svg": "svg/cm-poster.svg",
+    "png": "png/cm-poster.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "cm",
+    "country_name": "Cameroon",
+    "material": "showroom",
+    "url": "https://restarsolar.net/?country=cm&utm_source=showroom&utm_medium=display&utm_campaign=cm_launch",
+    "svg": "svg/cm-showroom.svg",
+    "png": "png/cm-showroom.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ml",
+    "country_name": "Mali",
+    "material": "namecard",
+    "url": "https://restarsolar.net/?country=ml&utm_source=namecard&utm_medium=print&utm_campaign=ml_launch",
+    "svg": "svg/ml-namecard.svg",
+    "png": "png/ml-namecard.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ml",
+    "country_name": "Mali",
+    "material": "flyer",
+    "url": "https://restarsolar.net/?country=ml&utm_source=flyer&utm_medium=print&utm_campaign=ml_launch",
+    "svg": "svg/ml-flyer.svg",
+    "png": "png/ml-flyer.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ml",
+    "country_name": "Mali",
+    "material": "poster",
+    "url": "https://restarsolar.net/?country=ml&utm_source=poster&utm_medium=print&utm_campaign=ml_launch",
+    "svg": "svg/ml-poster.svg",
+    "png": "png/ml-poster.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ml",
+    "country_name": "Mali",
+    "material": "showroom",
+    "url": "https://restarsolar.net/?country=ml&utm_source=showroom&utm_medium=display&utm_campaign=ml_launch",
+    "svg": "svg/ml-showroom.svg",
+    "png": "png/ml-showroom.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ng",
+    "country_name": "Nigeria",
+    "material": "namecard",
+    "url": "https://restarsolar.net/?country=ng&utm_source=namecard&utm_medium=print&utm_campaign=ng_launch",
+    "svg": "svg/ng-namecard.svg",
+    "png": "png/ng-namecard.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ng",
+    "country_name": "Nigeria",
+    "material": "flyer",
+    "url": "https://restarsolar.net/?country=ng&utm_source=flyer&utm_medium=print&utm_campaign=ng_launch",
+    "svg": "svg/ng-flyer.svg",
+    "png": "png/ng-flyer.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ng",
+    "country_name": "Nigeria",
+    "material": "poster",
+    "url": "https://restarsolar.net/?country=ng&utm_source=poster&utm_medium=print&utm_campaign=ng_launch",
+    "svg": "svg/ng-poster.svg",
+    "png": "png/ng-poster.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "ng",
+    "country_name": "Nigeria",
+    "material": "showroom",
+    "url": "https://restarsolar.net/?country=ng&utm_source=showroom&utm_medium=display&utm_campaign=ng_launch",
+    "svg": "svg/ng-showroom.svg",
+    "png": "png/ng-showroom.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "sd",
+    "country_name": "Sudan",
+    "material": "namecard",
+    "url": "https://restarsolar.net/?country=sd&utm_source=namecard&utm_medium=print&utm_campaign=sd_launch",
+    "svg": "svg/sd-namecard.svg",
+    "png": "png/sd-namecard.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "sd",
+    "country_name": "Sudan",
+    "material": "flyer",
+    "url": "https://restarsolar.net/?country=sd&utm_source=flyer&utm_medium=print&utm_campaign=sd_launch",
+    "svg": "svg/sd-flyer.svg",
+    "png": "png/sd-flyer.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "sd",
+    "country_name": "Sudan",
+    "material": "poster",
+    "url": "https://restarsolar.net/?country=sd&utm_source=poster&utm_medium=print&utm_campaign=sd_launch",
+    "svg": "svg/sd-poster.svg",
+    "png": "png/sd-poster.png",
+    "version": 8,
+    "error": "Q"
+  },
+  {
+    "country": "sd",
+    "country_name": "Sudan",
+    "material": "showroom",
+    "url": "https://restarsolar.net/?country=sd&utm_source=showroom&utm_medium=display&utm_campaign=sd_launch",
+    "svg": "svg/sd-showroom.svg",
+    "png": "png/sd-showroom.png",
+    "version": 8,
+    "error": "Q"
+  }
+]
