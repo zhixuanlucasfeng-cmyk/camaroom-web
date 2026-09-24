@@ -800,10 +800,16 @@ const COUNTRY_TOKENS = {
   inCountry: c => c.fr_in,
   ofCountry: c => c.fr_of
 };
-const fill = (str, vars) => String(str).replace(/\{(\w+)\}/g, (m, k) => {
-  if (vars && vars[k] !== undefined) return vars[k];
-  return COUNTRY_TOKENS[k] ? COUNTRY_TOKENS[k](RSCountries.COUNTRIES[COUNTRY]) : m;
-});
+// Only strings carry tokens. tr() also passes structured values through here
+// — a product's specs are a {label: value} object — and stringifying one
+// turned every specification table into fifteen rows of "[object Object]"
+// spelled out a character at a time. Anything that is not a string is
+// returned untouched.
+const fill = (value, vars) => (typeof value !== "string" ? value
+  : value.replace(/\{(\w+)\}/g, (m, k) => {
+      if (vars && vars[k] !== undefined) return vars[k];
+      return COUNTRY_TOKENS[k] ? COUNTRY_TOKENS[k](RSCountries.COUNTRIES[COUNTRY]) : m;
+    }));
 const t = (k, vars) => fill(I18N[lang][k] !== undefined ? I18N[lang][k] : k, vars);
 const tr = o => fill(o[lang] !== undefined ? o[lang] : o.en);
 const fmt = n => n.toLocaleString("fr-FR");
