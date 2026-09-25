@@ -173,3 +173,33 @@ test('loader requests the selected country from the central product endpoint', a
   await loader.load('SD');
   assert.equal(requested, 'https://rest-solar-agent-cm.onrender.com/api/products?country=SD');
 });
+
+test('remote catalog text is escaped before it enters HTML markup', () => {
+  assert.equal(typeof Catalog.escapeHTML, 'function', 'catalog renderer needs one text escaping boundary');
+  const payload = '<img src=x onerror="alert(1)">&"\'';
+  const escaped = Catalog.escapeHTML(payload);
+
+  assert.equal(
+    escaped,
+    '&lt;img src=x onerror=&quot;alert(1)&quot;&gt;&amp;&quot;&#39;'
+  );
+  assert.equal(`<h3>${escaped}</h3>`.includes('<img'), false);
+});
+
+test('remote catalog attributes cannot break out through quotes', () => {
+  assert.equal(typeof Catalog.escapeAttr, 'function', 'catalog renderer needs one attribute escaping boundary');
+  const payload = 'SP-1" autofocus onfocus="alert(1)';
+  const escaped = Catalog.escapeAttr(payload);
+
+  assert.equal(escaped, 'SP-1&quot; autofocus onfocus=&quot;alert(1)');
+  assert.equal(`<button data-sku="${escaped}">`.includes('data-sku="SP-1"'), false);
+});
+
+test('remote media accepts HTTP URLs but rejects executable URL schemes', () => {
+  assert.equal(
+    Catalog.assetUrl({ remote: true }, 'https://rest-solar-agent-cm.onrender.com/media/1'),
+    'https://rest-solar-agent-cm.onrender.com/media/1'
+  );
+  assert.equal(Catalog.assetUrl({ remote: true }, 'javascript:alert(1)'), '');
+  assert.equal(Catalog.assetUrl({ remote: true }, 'data:image/svg+xml,<svg onload=alert(1)>'), '');
+});

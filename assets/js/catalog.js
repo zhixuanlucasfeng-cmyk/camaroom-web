@@ -125,11 +125,29 @@
     };
   }
 
+  function escapeHTML(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Quoting every generated attribute and encoding the five HTML metacharacters
+  // gives text and attribute interpolation one consistent trust boundary.
+  function escapeAttr(value) {
+    return escapeHTML(value);
+  }
+
   function assetUrl(product, path) {
     if (!path) return '';
-    if ((product && product.remote) || /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(path)) return path;
-    if (path.indexOf('assets/products/') === 0) return path;
-    return 'assets/products/' + path;
+    var value = String(path).trim();
+    if (/^https?:\/\//i.test(value)) return value;
+    if (product && product.remote) return '';
+    if (value.charAt(0) === '/') return value;
+    if (value.indexOf('assets/products/') === 0) return value;
+    return 'assets/products/' + value;
   }
 
   function createLoader(options) {
@@ -174,6 +192,8 @@
     adaptProduct: adaptProduct,
     adaptCatalog: adaptCatalog,
     fallbackCatalog: fallbackCatalog,
+    escapeHTML: escapeHTML,
+    escapeAttr: escapeAttr,
     assetUrl: assetUrl,
     createLoader: createLoader
   };

@@ -655,6 +655,8 @@ const catalogLoader = RSCatalog.createLoader({
   fallbackProducts: STATIC_PRODUCTS,
   fetch: url => fetch(url)
 });
+const catalogHTML = RSCatalog.escapeHTML;
+const catalogAttr = RSCatalog.escapeAttr;
 const ICON = {
   panel:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M3 8h18M3 12h18M9 4v12M15 4v12M12 16v4M9 20h6"/></svg>`,
   battery:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="16" height="11" rx="2"/><path d="M19 11h2v3h-2M7 12l3-3-1 3h2l-3 3 1-3z" stroke-linejoin="round"/></svg>`,
@@ -838,7 +840,7 @@ function catLabel(cat){
 function renderFilters(){
   const cats = ["all", ...Array.from(new Set(CATALOG_PRODUCTS.filter(p=>!p.hidden).map(p=>p.cat)))];
   if (!cats.includes(activeCat)) activeCat = "all";
-  document.getElementById("filters").innerHTML = cats.map(c=>`<button class="chip ${c===activeCat?'on':''}" data-cat="${c}">${c==='all'?t('filter.all'):catLabel(c)}</button>`).join("");
+  document.getElementById("filters").innerHTML = cats.map(c=>`<button class="chip ${c===activeCat?'on':''}" data-cat="${catalogAttr(c)}">${catalogHTML(c==='all'?t('filter.all'):catLabel(c))}</button>`).join("");
   document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{activeCat=ch.dataset.cat;renderFilters();renderGrid();});
 }
 function renderGrid(){
@@ -851,27 +853,31 @@ function renderGrid(){
     const stockBadge = outOfStock ? `<span class="stock-badge stock-badge--out">${t('stock.out')}</span>`
       : (typeof stock === "number" && stock <= LOW_STOCK_THRESHOLD) ? `<span class="stock-badge stock-badge--low">${t('stock.low').replace('{n}', stock)}</span>`
       : "";
+    const imageUrl = RSCatalog.assetUrl(p,(p.gallery&&p.gallery[0])||p.img);
+    const productName = catalogHTML(p.name);
+    const productNameAttr = catalogAttr(p.name);
+    const productIdAttr = catalogAttr(p.id);
     return `<article class="card" style="--cat:${col}">
       <div class="card-art">
         <div class="sheen"></div>
-        <img class="card-photo" src="${RSCatalog.assetUrl(p,(p.gallery&&p.gallery[0])||p.img)}" alt="${p.name}" loading="lazy"
+        <img class="card-photo" src="${catalogAttr(imageUrl)}" alt="${productNameAttr}" loading="lazy"
              onerror="this.remove();this.parentElement.classList.add('noimg')">
         <div class="art-fallback">${ic}</div>
       </div>
       <div class="card-body">
-        <span class="cat-tag">${catLabel(p.cat)}</span>
-        <h3>${p.name}</h3>
+        <span class="cat-tag">${catalogHTML(catLabel(p.cat))}</span>
+        <h3>${productName}</h3>
         <div class="price">${p.price?fmt(p.price)+' <small>FCFA</small>':t('price.contact')}</div>
         ${stockBadge}
-        <p class="desc">${tr(p.desc)}</p>
+        <p class="desc">${catalogHTML(tr(p.desc))}</p>
         <div class="card-actions">
-          <button class="btn btn--line" data-open="${p.id}">${t('card.details')}</button>
+          <button class="btn btn--line" data-open="${productIdAttr}">${t('card.details')}</button>
           <a class="btn btn--dark" target="_blank" rel="noopener"
-             href="${wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':lang==='ar'?'مرحبًا ريستار سولار، أنا مهتم بـ: ':'Hello Restar Solar, I am interested in: ')+p.name+'.')}">
+             href="${catalogAttr(wa((lang==='fr'?'Bonjour Restar Solar, je suis intéressé par : ':lang==='ar'?'مرحبًا ريستار سولار، أنا مهتم بـ: ':'Hello Restar Solar, I am interested in: ')+p.name+'.'))}">
              ${t('card.inquire')}</a>
           ${window.CART_ENABLED
-            ? `<button class="btn btn--ghost add-to-cart" data-sku="${p.id}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? t('stock.out') : t('card.addToCart')}</button>`
-            : `<a class="btn btn--ghost" target="_blank" rel="noopener" href="${wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':lang==='ar'?'مرحبًا ريستار سولار، أرغب في عرض سعر لـ: ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.')}">${t('card.inquireWa')}</a>`}
+            ? `<button class="btn btn--ghost add-to-cart" data-sku="${productIdAttr}" data-name="${productNameAttr}" type="button" ${outOfStock ? 'disabled' : ''}>${outOfStock ? t('stock.out') : t('card.addToCart')}</button>`
+            : `<a class="btn btn--ghost" target="_blank" rel="noopener" href="${catalogAttr(wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':lang==='ar'?'مرحبًا ريستار سولار، أرغب في عرض سعر لـ: ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.'))}">${t('card.inquireWa')}</a>`}
         </div>
       </div>
     </article>`;
@@ -894,7 +900,7 @@ function openModal(id){
   const navArrows = gallery.length>1 ? `
     <button type="button" class="modal-nav modal-nav--prev" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <button type="button" class="modal-nav modal-nav--next" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>` : '';
-  art.innerHTML = `<img class="modal-photo" id="mMainPhoto" src="${RSCatalog.assetUrl(p,gallery[0])}" alt="${p.name}" onerror="this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='${(ICON[p.cat]||ICON.kit).replace(/'/g,"&#39;")}'">${navArrows}`;
+  art.innerHTML = `<img class="modal-photo" id="mMainPhoto" src="${catalogAttr(RSCatalog.assetUrl(p,gallery[0]))}" alt="${catalogAttr(p.name)}" onerror="this.parentElement.classList.remove('has-photo');this.parentElement.innerHTML='${(ICON[p.cat]||ICON.kit).replace(/'/g,"&#39;")}'">${navArrows}`;
   const thumbs = document.getElementById("mThumbs");
   let mIdx = 0;
   function showImage(i){
@@ -904,7 +910,7 @@ function openModal(id){
   }
   if(gallery.length>1){
     thumbs.style.display="flex";
-    thumbs.innerHTML = gallery.map((src,i)=>`<img class="mthumb${i===0?' on':''}" src="${RSCatalog.assetUrl(p,src)}" alt="" loading="lazy" data-src="${src}" onerror="this.remove()">`).join("");
+    thumbs.innerHTML = gallery.map((src,i)=>`<img class="mthumb${i===0?' on':''}" src="${catalogAttr(RSCatalog.assetUrl(p,src))}" alt="" loading="lazy" data-src="${catalogAttr(src)}" onerror="this.remove()">`).join("");
     thumbs.querySelectorAll(".mthumb").forEach((im,i)=>im.onclick=()=>showImage(i));
     const prevBtn = art.querySelector(".modal-nav--prev");
     const nextBtn = art.querySelector(".modal-nav--next");
@@ -917,7 +923,7 @@ function openModal(id){
   document.getElementById("mPrice").innerHTML = p.price?`${fmt(p.price)} <small>FCFA</small>`:t('price.contact');
   document.getElementById("mSpecH").textContent = t('modal.specs');
   const specs = tr(p.specs);
-  document.getElementById("mSpecs").innerHTML = Object.entries(specs).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+  document.getElementById("mSpecs").innerHTML = Object.entries(specs).map(([k,v])=>`<tr><td>${catalogHTML(k)}</td><td>${catalogHTML(v)}</td></tr>`).join("");
   const mWa = document.getElementById("mWa");
   mWa.href = wa((lang==='fr'?'Bonjour Restar Solar, je voudrais un devis pour : ':lang==='ar'?'مرحبًا ريستار سولار، أرغب في عرض سعر لـ: ':'Hello Restar Solar, I would like a quote for: ')+p.name+'.');
   document.getElementById("mWaText").textContent = t('modal.inquire');
