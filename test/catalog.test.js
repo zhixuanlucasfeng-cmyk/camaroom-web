@@ -94,7 +94,7 @@ test('only Cameroon exposes XAF prices; every other country remains price-on-req
   assert.equal(Catalog.assetUrl(staticProduct, staticProduct.img), 'assets/products/SP-LOCAL.jpg');
 });
 
-test('country-owned numeric stock is tracked while shared zero stock remains untracked', () => {
+test('only country-owned numeric stock is tracked; shared stock is always untracked', () => {
   const shared = { ...API_PRODUCT, id: 1, sku: 'SHARED-0', country: null, stock: 0 };
   const own = { ...API_PRODUCT, id: 2, sku: 'NG-0', country: 'NG', stock: 0 };
   const sharedTracked = { ...API_PRODUCT, id: 3, sku: 'SHARED-3', country: null, stock: 3 };
@@ -102,7 +102,7 @@ test('country-owned numeric stock is tracked while shared zero stock remains unt
 
   assert.equal(Object.hasOwn(result.inventory, 'SHARED-0'), false);
   assert.equal(result.inventory['NG-0'], 0);
-  assert.equal(result.inventory['SHARED-3'], 3);
+  assert.equal(Object.hasOwn(result.inventory, 'SHARED-3'), false);
 });
 
 test('a successful empty response is authoritative and never replaced by static products', async () => {

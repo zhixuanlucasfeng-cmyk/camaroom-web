@@ -105,9 +105,11 @@
     var products = rows.map(function (row) { return adaptProduct(row, country); });
     var inventory = {};
     rows.forEach(function (row, index) {
+      // Shared catalog rows are available in every country, but their stock is
+      // not owned by any one country and is therefore never locally tracked.
+      if (row.country == null) return;
       var stock = finiteNumber(row.stock);
       if (stock === null) return;
-      if (row.country == null && stock === 0) return;
       inventory[products[index].id] = stock;
     });
     return { products: products, inventory: inventory };

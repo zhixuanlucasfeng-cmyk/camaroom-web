@@ -655,6 +655,7 @@ const catalogLoader = RSCatalog.createLoader({
   fallbackProducts: STATIC_PRODUCTS,
   fetch: url => fetch(url)
 });
+const salesRepLoader = RSCountries.createSalesRepLoader({ fetch: url => fetch(url) });
 const catalogHTML = RSCatalog.escapeHTML;
 const catalogAttr = RSCatalog.escapeAttr;
 const ICON = {
@@ -1109,6 +1110,28 @@ function refreshCountryCatalog(){
   });
 }
 
+/* Sales-rep assignment is deliberately separate from the central product,
+ * inventory and order backend. Mali keeps its existing session-based rep
+ * pool; other countries retain their configured contact without a request.
+ */
+function refreshCountrySalesRep(country){
+  const servedCountry = country.code;
+  const servedBase = country.sales_rep_backend;
+  const fallbackPhone = window.CART_WHATSAPP_NUMBER;
+  const fallbackTargets = window.RS_CHAT_TARGETS;
+  return salesRepLoader.load(
+    country,
+    window.CART_SESSION_ID,
+    fallbackPhone,
+    fallbackTargets
+  ).then(result => {
+    const current = RSCountries.COUNTRIES[COUNTRY];
+    if (result.stale || COUNTRY !== servedCountry || current.sales_rep_backend !== servedBase) return;
+    window.CART_WHATSAPP_NUMBER = result.phone;
+    window.RS_CHAT_TARGETS = result.targets;
+  });
+}
+
 function applyCountry(code){
   const country = RSCountries.COUNTRIES[RSCountries.normalize(code) || "OTHER"];
   COUNTRY = country.code;
@@ -1158,6 +1181,7 @@ function applyCountry(code){
   const desc = document.querySelector('meta[name="description"]');
   if (desc) desc.setAttribute("content", t("meta.desc"));
   refreshCountryCatalog();
+  refreshCountrySalesRep(country);
   if (!document.getElementById("geoBanner").hidden) maybeShowBanner();
 }
 
@@ -1501,7 +1525,7 @@ observeReveals();
   }
 
   // Everything country-dependent — CART_API_BASE, CART_CURRENCY,
-  // CART_WHATSAPP_NUMBER, RS_CHAT_TARGETS, and the public catalog load — is
+  // CART_WHATSAPP_NUMBER, RS_CHAT_TARGETS, catalog and sales-rep loads — is
   // set by applyCountry(), so switching updates all of it without a reload.
 
   function addMsg(role, text){

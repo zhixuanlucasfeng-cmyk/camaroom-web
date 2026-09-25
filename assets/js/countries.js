@@ -23,7 +23,7 @@
       code: 'CM', name: 'Cameroon', name_fr: 'Cameroun', name_ar: 'الكاميرون', fr_in: "au Cameroun", fr_of: "du Cameroun", flag: '🇨🇲',
       lang: 'en', currency: 'XAF',
       address: 'Rue Léman, Douala, Cameroon',
-      cart_backend: 'https://camaroom-cart-backend.zhixuanlucasfeng.workers.dev',
+      sales_rep_backend: null,
       contacts: [
         { name: 'Luc Su', flag: '🇨🇲', label: 'Cameroon', phone: '237681105611', phone_display: '+237 681 105 611' },
         TOM_YANG
@@ -40,7 +40,7 @@
       code: 'ML', name: 'Mali', name_fr: 'Mali', name_ar: 'مالي', fr_in: "au Mali", fr_of: "du Mali", flag: '🇲🇱',
       lang: 'fr', currency: 'XOF',
       address: "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
-      cart_backend: 'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev',
+      sales_rep_backend: 'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev',
       // Mali's local side is a 5-person rep pool assigned per session by
       // /api/sales-rep (seeded in backend/scripts/seed_mali_sales_reps.sql),
       // not a single named badge — so only Elena is listed statically.
@@ -54,7 +54,7 @@
       code: 'NG', name: 'Nigeria', name_fr: 'Nigeria', name_ar: 'نيجيريا', fr_in: "au Nigeria", fr_of: "du Nigeria", flag: '🇳🇬',
       lang: 'en', currency: 'NGN',
       address: 'RESTAR SOLAR ENERGY NIGERIA CO LTD, No 22 Olojo Drive, by Church Bus Stop, Ojo - Alaba International Market Road, Ojo Town, Ojo Local Government Area, Lagos State, Nigeria',
-      cart_backend: null,
+      sales_rep_backend: null,
       contacts: [
         { name: 'Bright', flag: '🇳🇬', label: 'Nigeria', phone: '2349063612011', phone_display: '+234 906 361 2011' },
         { name: 'James', flag: '🇨🇳', label: 'China sales', phone: '2349161101749', phone_display: '+234 916 110 1749' }
@@ -69,7 +69,7 @@
       // No store yet — the contact section shows the country name instead of
       // inventing a street address.
       address: null,
-      cart_backend: null,
+      sales_rep_backend: null,
       // 2026-08-13: Tom Yang was removed from Sudan ("Tom is Cameroon's").
       contacts: [
         {
@@ -94,7 +94,7 @@
       option_key: 'country.otherOption',
       lang: 'en', currency: null,
       address: null,
-      cart_backend: null,
+      sales_rep_backend: null,
       contacts: [TOM_YANG],
       config_contact: 0,
       order_contact: 0
@@ -239,6 +239,59 @@
     });
   }
 
+  /* Mali's existing Worker owns only its session-consistent sales-rep pool.
+   * Product, inventory and order traffic stays on the central agent backend.
+   * Starting any newer country load invalidates an older response, including
+   * a switch to a country that has no sales-rep backend and makes no request.
+   */
+  function createSalesRepLoader(options) {
+    options = options || {};
+    var request = options.fetch;
+    var generation = 0;
+
+    function load(country, session, fallbackPhone, fallbackTargets) {
+      var mine = ++generation;
+      var base = String((country && country.sales_rep_backend) || '').replace(/\/$/, '');
+      var fallback = {
+        stale: false,
+        phone: fallbackPhone,
+        targets: fallbackTargets,
+        source: 'fallback'
+      };
+      if (!base || typeof request !== 'function') return Promise.resolve(fallback);
+
+      var url = base + '/api/sales-rep?session=' + encodeURIComponent(session || '') + '&source=page_load';
+      return Promise.resolve()
+        .then(function () { return request(url); })
+        .then(function (response) {
+          if (!response || !response.ok) throw new Error('sales_rep_http_' + (response && response.status));
+          return response.json();
+        })
+        .then(function (rep) {
+          if (mine !== generation) return { stale: true };
+          if (!rep || !rep.phone) return fallback;
+          var targets = (fallbackTargets || []).slice();
+          if (targets.length) {
+            targets[targets.length - 1] = {
+              phone: String(rep.phone),
+              label: rep.name || targets[targets.length - 1].label
+            };
+          }
+          return {
+            stale: false,
+            phone: String(rep.phone),
+            targets: targets,
+            source: 'remote'
+          };
+        })
+        .catch(function () {
+          return mine !== generation ? { stale: true } : fallback;
+        });
+    }
+
+    return { load: load };
+  }
+
   var API = {
     COUNTRIES: COUNTRIES,
     ORDER: ORDER,
@@ -246,6 +299,7 @@
     normalize: normalize,
     resolveCountry: resolveCountry,
     resolveCountrySync: resolveCountrySync,
+    createSalesRepLoader: createSalesRepLoader,
     parseTrace: parseTrace,
     storageGet: storageGet,
     storageSet: storageSet

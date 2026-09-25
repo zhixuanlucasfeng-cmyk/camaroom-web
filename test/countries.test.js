@@ -92,8 +92,67 @@ test('every country has a flag, a name, a default language and a contact', () =>
 test('a country that can take online orders has a currency', () => {
   for (const code of C.ORDER) {
     const c = C.COUNTRIES[code];
-    if (c.cart_backend) assert.ok(c.currency, `${code} sells online but has no currency`);
+    if (['CM', 'ML', 'NG', 'SD'].includes(code)) assert.ok(c.currency, `${code} sells online but has no currency`);
   }
+});
+
+test('only Mali has a dedicated sales-rep assignment backend', () => {
+  assert.equal(
+    C.COUNTRIES.ML.sales_rep_backend,
+    'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev'
+  );
+  for (const code of ['CM', 'NG', 'SD', 'OTHER']) {
+    assert.equal(C.COUNTRIES[code].sales_rep_backend, null, code);
+  }
+});
+
+test('sales-rep assignment requests Mali only and applies the assigned contact', async () => {
+  const requested = [];
+  const loader = C.createSalesRepLoader({
+    fetch: async url => {
+      requested.push(url);
+      return { ok: true, json: async () => ({ phone: '22370001122', name: 'Awa' }) };
+    },
+  });
+  const fallbackTargets = [{ phone: '8615851496160', label: 'Elena 🇨🇳' }];
+
+  const mali = await loader.load(C.COUNTRIES.ML, 'rs-a/b', '8615851496160', fallbackTargets);
+  const nigeria = await loader.load(C.COUNTRIES.NG, 'rs-other', '2349063612011', []);
+
+  assert.deepEqual(requested, [
+    'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev/api/sales-rep?session=rs-a%2Fb&source=page_load',
+  ]);
+  assert.equal(mali.phone, '22370001122');
+  assert.deepEqual(mali.targets, [{ phone: '22370001122', label: 'Awa' }]);
+  assert.equal(mali.stale, false);
+  assert.equal(nigeria.phone, '2349063612011');
+});
+
+test('a sales-rep response is stale after a newer country load starts', async () => {
+  let finishMali;
+  const loader = C.createSalesRepLoader({
+    fetch: () => new Promise(resolve => { finishMali = resolve; }),
+  });
+
+  const mali = loader.load(C.COUNTRIES.ML, 'rs-1', '8615851496160', []);
+  await Promise.resolve();
+  await loader.load(C.COUNTRIES.NG, 'rs-1', '2349063612011', []);
+  finishMali({ ok: true, json: async () => ({ phone: '22370001122', name: 'Awa' }) });
+
+  assert.deepEqual(await mali, { stale: true });
+});
+
+test('a failed sales-rep request keeps the configured contact', async () => {
+  const fallbackTargets = [{ phone: '8615851496160', label: 'Elena 🇨🇳' }];
+  const loader = C.createSalesRepLoader({
+    fetch: async () => ({ ok: false, status: 503, json: async () => ({}) }),
+  });
+
+  const result = await loader.load(C.COUNTRIES.ML, 'rs-1', '8615851496160', fallbackTargets);
+
+  assert.equal(result.phone, '8615851496160');
+  assert.deepEqual(result.targets, fallbackTargets);
+  assert.equal(result.stale, false);
 });
 
 test('config_contact and order_contact point at real contacts', () => {
