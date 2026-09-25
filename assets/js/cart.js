@@ -1,22 +1,27 @@
 (function () {
   var STORAGE_KEY = 'restar_cart';
+  var Checkout = window.RSCartCheckout;
 
   function load() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
+    return Checkout.loadCountryCart(localStorage, window.RS_COUNTRY);
   }
 
   function save(items) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      country: window.RS_COUNTRY,
+      items: items
+    }));
   }
 
   var items = load();
 
   function add(item) {
+    var storedItems = load();
+    if (storedItems.length !== items.length || storedItems.some(function (saved, index) {
+      return !items[index] || saved.sku !== items[index].sku || saved.qty !== items[index].qty;
+    })) {
+      items = storedItems;
+    }
     var existing = items.find(function (i) { return i.sku === item.sku; });
     if (existing) {
       existing.qty += item.qty || 1;
@@ -61,10 +66,10 @@
     var rows = items
       .map(function (i) {
         return (
-          '<li class="cart-row" data-sku="' + i.sku + '">' +
-          '<span class="cart-row-name">' + i.name + '</span>' +
+          '<li class="cart-row" data-sku="' + Checkout.escapeHTML(i.sku) + '">' +
+          '<span class="cart-row-name">' + Checkout.escapeHTML(i.name) + '</span>' +
           '<span class="cart-row-qty">x' + i.qty + '</span>' +
-          '<button class="cart-row-remove" data-sku="' + i.sku + '" type="button">&times;</button>' +
+          '<button class="cart-row-remove" data-sku="' + Checkout.escapeHTML(i.sku) + '" type="button">&times;</button>' +
           '</li>'
         );
       })
@@ -100,41 +105,43 @@
       '<button type="submit" class="btn btn--sun">Submit</button>' +
       '</form><p id="cart-submit-error"></p>';
 
-    document.getElementById('cart-contact-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      submitOrder({
-        customer_name: document.getElementById('cart-name').value,
-        customer_phone: document.getElementById('cart-phone').value,
-        currency: window.CART_CURRENCY || 'XAF',
-        items: items,
-        session_id: window.CART_SESSION_ID || undefined,
-      });
-    });
-  }
-
-  function submitOrder(payload) {
-    var base = window.CART_API_BASE || '';
-    fetch(base + '/api/orders', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
-      .then(function (result) {
-        if (!result.ok) {
-          document.getElementById('cart-submit-error').textContent = 'Error: ' + result.data.error;
-          return;
-        }
-        var summary = payload.items.map(function (i) { return i.qty + 'x ' + i.name; }).join(', ');
+    var form = document.getElementById('cart-contact-form');
+    var submitButton = form.querySelector('button[type="submit"]');
+    var originalButtonText = submitButton.textContent;
+    var submitter = Checkout.createSubmitter({
+      fetch: window.fetch.bind(window),
+      onPending: function (pending) {
+        submitButton.disabled = pending;
+        submitButton.textContent = pending ? 'Submitting…' : originalButtonText;
+      },
+      onError: function (message) {
+        var errorEl = document.getElementById('cart-submit-error');
+        if (errorEl) errorEl.textContent = 'Error: ' + message;
+      },
+      onSuccess: function (data, input) {
+        var summary = input.items.map(function (i) { return i.qty + 'x ' + i.name; }).join(', ');
         var waText = encodeURIComponent(
-          'Hello Restar Solar, I would like a quote for: ' + summary + ' (order ' + result.data.id + ')'
+          'Hello Restar Solar, I would like a quote for: ' + summary + ' (order ' + data.order_number + ')'
         );
-        window.open('https://wa.me/' + window.CART_WHATSAPP_NUMBER + '?text=' + waText, '_blank');
-        clear();
-      })
-      .catch(function () {
-        document.getElementById('cart-submit-error').textContent = 'Network error, please try again.';
-      });
+        if (window.RS_COUNTRY === input.country) clear();
+        try {
+          window.open('https://wa.me/' + input.whatsappNumber + '?text=' + waText, '_blank');
+        } catch (error) {
+          // The order is already recorded even if the browser blocks WhatsApp.
+        }
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('cart-submit-error').textContent = '';
+      submitter.submit(Checkout.runtimeOrderInput(
+        window,
+        document.getElementById('cart-name').value,
+        document.getElementById('cart-phone').value,
+        items.slice()
+      ));
+    });
   }
 
   window.Cart = { add: add, remove: remove, list: list, clear: clear, count: count, renderDrawer: renderDrawer };
