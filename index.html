@@ -23,9 +23,14 @@
 <meta property="og:url" content="https://restarsolar.net/">
 <meta property="og:title" content="Restar Solar — Reliable solar power across Africa">
 <meta property="og:description" content="Solar panels, batteries and inverters for homes, shops and businesses — with sizing help, delivery and after-sales support in Cameroon, Mali, Nigeria and Sudan.">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://restarsolar.net/assets/video/poster.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="Restar Solar equipment">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Restar Solar — Reliable solar power across Africa">
 <meta name="twitter:description" content="Solar panels, batteries and inverters for homes, shops and businesses across Cameroon, Mali, Nigeria and Sudan.">
+<meta name="twitter:image" content="https://restarsolar.net/assets/video/poster.jpg">
 <style>
 :root{
   --bg:#FFFFFF;
@@ -80,8 +85,8 @@ img{max-width:100%;display:block}
 .glass,.ocard,.why-card,.card,.qcard,.form,.contact-direct,.modal-card,.about-panel{background:var(--panel);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);}
 .btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--body);font-weight:700;font-size:14px;padding:12px 22px;border-radius:4px;cursor:pointer;border:1px solid transparent;transition:transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;white-space:nowrap;position:relative;}
 .btn svg{width:18px;height:18px}
-.btn--sun{background:var(--sun);color:#241500;}
-.btn--sun:hover{background:var(--ember)}
+.btn--sun{background:var(--sun);color:#fff;box-shadow:0 4px 14px -4px rgba(255,150,0,.6);}
+.btn--sun:hover{transform:translateY(-2px);background:var(--ember);box-shadow:0 8px 20px -6px rgba(255,150,0,.7)}
 .btn--ghost{background:transparent;color:var(--text);border-color:var(--line-2);}
 .hero .btn--ghost{color:#fff;border-color:rgba(255,255,255,.55)}
 .btn--ghost:hover{transform:translateY(-2px);border-color:var(--navy);color:var(--navy)}
@@ -113,9 +118,15 @@ img{max-width:100%;display:block}
 .burger{display:none;background:transparent;border:0;cursor:pointer;padding:6px}
 .burger span{display:block;width:24px;height:2px;background:var(--navy);margin:5px 0;transition:.25s}
 .hero{position:relative;color:#fff;overflow:hidden;isolation:isolate}
+.hero-sky{position:absolute;inset:0;z-index:-3;pointer-events:none;background:radial-gradient(70% 55% at 80% 16%,rgba(255,150,0,.20),transparent 60%),radial-gradient(90% 70% at 18% 10%,rgba(0,69,152,.35),transparent 60%);animation:dawn 2.6s ease-out both}
+@keyframes dawn{0%{filter:brightness(.4) saturate(.6)}100%{filter:brightness(1) saturate(1)}}
+.hero-motes{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.mote{position:absolute;border-radius:50%;opacity:0;background:radial-gradient(circle,#FFE7AC,rgba(255,201,110,.3) 45%,transparent 70%);filter:blur(.4px);will-change:transform,opacity;animation:moteFloat linear infinite}
+@keyframes moteFloat{0%{opacity:0;transform:translateY(24px) scale(.5)}12%{opacity:.85}88%{opacity:.7}100%{opacity:0;transform:translateY(-150px) scale(1.1)}}
+.hero-grid{position:absolute;inset:0;z-index:-2;opacity:.4;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent)}
 .hero-inner{padding:clamp(80px,13vw,150px) 0 clamp(64px,9vw,104px);max-width:780px}
 .hero h1{font-size:clamp(44px,7.5vw,84px);line-height:1;letter-spacing:-.03em;font-weight:600}
-.hero h1 .accent{color:var(--navy)}
+.hero h1 .accent{background:linear-gradient(100deg,#fff 6%,var(--sun-light) 40%,var(--sky) 72%,var(--navy) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero .sub-lead{max-width:56ch}
 .hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
 .hero-trust{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:54px;padding-top:26px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
@@ -151,6 +162,7 @@ img{max-width:100%;display:block}
 .card{border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;position:relative;transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s ease,border-color .3s ease;--cat:var(--navy)}
 .card:hover{transform:translateY(-8px);border-color:color-mix(in srgb,var(--cat) 55%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--cat) 40%,transparent),0 36px 70px -28px rgba(0,0,0,.85)}
 .card-art{position:relative;aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden;background:var(--bg-2)}
+.card-art::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--cat)}
 .card-art svg{width:62px;height:62px;color:#fff;opacity:.92;position:relative;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
 .card-art .sheen{position:absolute;top:-40%;left:-30%;width:55%;height:180%;transform:rotate(16deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);transition:transform .7s ease}
 .card:hover .card-art .sheen{transform:rotate(16deg) translateX(360%)}
@@ -174,6 +186,7 @@ img{max-width:100%;display:block}
 .about{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
 .about-copy p{color:var(--muted);margin-top:18px}
 .about-panel{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;background:radial-gradient(120% 120% at 70% 10%,rgba(247,168,27,.2),transparent 55%),rgba(255,255,255,.03)}
+.about-panel .cells{position:absolute;inset:0;opacity:.55;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:40px 40px}
 .about-panel .sun2{position:absolute;right:14%;top:16%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFE6A8,var(--sun) 60%,var(--ember));box-shadow:0 0 70px 6px rgba(247,168,27,.5);animation:float 6s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .contact{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
@@ -200,7 +213,7 @@ img{max-width:100%;display:block}
 .footer .brand{margin-bottom:14px}
 .footer-tag{color:var(--muted);max-width:42ch;font-size:14.5px}
 .foot-cols{display:flex;gap:64px}
-.foot-cols h3{font-family:var(--mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-2);margin:0 0 14px}
+.foot-cols h4{font-family:var(--mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-2);margin:0 0 14px}
 .foot-cols a{display:block;color:var(--muted);font-size:14.5px;padding:5px 0;transition:color .2s}
 .foot-cols a:hover{color:var(--text)}
 /* Brand-coloured squares in the header strip, mirroring restarsolar.com's
@@ -215,7 +228,7 @@ img{max-width:100%;display:block}
    the language buttons and the cart — the labelled footer block covers these
    there instead. */
 @media(max-width:860px){.util-social{display:none}}
-.footer-social h3{font-family:var(--mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-2);margin:0 0 12px}
+.footer-social h4{font-family:var(--mono);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-2);margin:0 0 12px}
 .footer-social .row{display:flex;gap:10px}
 .social-link{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:10px;color:var(--muted);transition:color .2s,border-color .2s,background .2s}
 .social-link svg{width:19px;height:19px}
@@ -284,6 +297,7 @@ img{max-width:100%;display:block}
 .lb-img{position:relative;z-index:1;max-width:min(92vw,820px);max-height:88vh;border-radius:10px;box-shadow:0 30px 80px -20px rgba(0,0,0,.9);background:#fff}
 .lb-close{position:absolute;top:18px;right:22px;z-index:2;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:26px;line-height:1;cursor:pointer}
 .lb-close:hover{background:rgba(0,0,0,.75)}
+#about .about-panel{background-image:linear-gradient(180deg,rgba(9,6,15,.1),rgba(9,6,15,.45)),url('assets/farm/farm3.jpg');background-size:cover;background-position:center}
 #about .about-panel .cells{opacity:.25}
 .modal-thumbs{display:none;gap:8px;flex-wrap:wrap;padding:12px 16px;background:rgba(0,0,0,.28);border-bottom:1px solid var(--line)}
 .modal-thumbs .mthumb{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:8px;cursor:pointer;border:2px solid transparent;opacity:.7;transition:opacity .15s,border-color .15s;padding:3px}
@@ -329,7 +343,6 @@ img{max-width:100%;display:block}
 .switch-confirm p{margin:0 0 16px;font-size:14px;line-height:1.55}
 .switch-confirm .acts{display:flex;gap:10px;justify-content:flex-end}
 </style>
-<link rel="stylesheet" href="assets/css/restar-record.css">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -386,6 +399,11 @@ img{max-width:100%;display:block}
       <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
       <a href="#about" data-i18n="nav.about">About</a>
       <a href="#certs" data-i18n="nav.certs">Certificates</a>
+      <a href="https://www.restarsolar.com/product-catalogue/" target="_blank" rel="noopener" data-i18n="nav.download">Download</a>
+      <a href="https://www.restarsolar.com/projects/" target="_blank" rel="noopener" data-i18n="nav.projects">Projects</a>
+      <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
+      <a href="https://www.restarsolar.com/faq/" target="_blank" rel="noopener" data-i18n="nav.faq">FAQ</a>
+      <a href="https://www.restarsolar.com/about-us/" target="_blank" rel="noopener" data-i18n="nav.factory">Factory</a>
       <a href="#contact" data-i18n="nav.contact">Contact</a>
     </nav>
     <div class="nav-right">
@@ -397,38 +415,52 @@ img{max-width:100%;display:block}
     </div>
   </div>
 </header>
-<section class="hero record-hero" id="top">
-  <div class="wrap record-hero__layout" id="proofRecord">
-    <div class="record-hero__copy">
-      <div class="record-reference">
-        <span>RESTAR SOLAR / SERVICE RECORD</span>
-        <span id="heroCountryRecord">CM · Cameroon</span>
-      </div>
-      <h1><span data-i18n="hero.title1">Power that</span> <span data-i18n="hero.title2">stays on.</span></h1>
-      <p class="sub-lead" data-i18n="hero.sub">Restar Solar supplies and installs solar panels, batteries, and inverters built for Cameroon's homes, shops, and businesses — with sizing help, delivery, and after-sales support.</p>
-      <div class="hero-cta">
-        <a href="#products" class="btn btn--sun"><span data-i18n="hero.cta1">Browse products</span></a>
-        <a class="btn btn--ghost" id="heroWa" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
-          <span data-i18n="hero.cta2">Chat on WhatsApp</span>
-        </a>
-      </div>
+<section class="hero" id="top">
+  <video id="heroVideo" autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
+    <source data-src="hero-bg.mp4" type="video/mp4">
+  </video>
+  <script>
+  /* The hero video is 3.9MB — real money and real waiting on the mobile
+     networks most of our customers browse on, and it kept autoplaying even
+     for visitors who asked for less motion (the CSS rule below only stops
+     CSS animations, never a <video autoplay>). The poster image is 18KB and
+     already carries the design, so the video is treated as an enhancement:
+     the source stays unset — and therefore unfetched — unless the visitor's
+     settings and connection both welcome it. */
+  (function () {
+    var source = document.querySelector('#heroVideo source[data-src]');
+    if (!source) return;
+    var wantsLessMotion = window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var net = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+    var wantsLessData = net.saveData === true
+      || /^(slow-2g|2g|3g)$/.test(net.effectiveType || '');
+    if (wantsLessMotion || wantsLessData) return;
+    source.src = source.getAttribute('data-src');
+    source.parentNode.load();
+  })();
+  </script>
+  <div class="hero-sky" data-depth="6" aria-hidden="true"></div>
+  <div class="hero-motes" id="heroMotes" data-depth="30" aria-hidden="true"></div>
+  <div class="hero-grid"></div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow" data-i18n="hero.eyebrow">Solar energy · Cameroon</span>
+    <h1><span data-i18n="hero.title1">Power that</span> <span class="accent" data-i18n="hero.title2">stays on.</span></h1>
+    <p class="sub-lead" data-i18n="hero.sub">Restar Solar supplies and installs solar panels, batteries, and inverters built for Cameroon's homes, shops, and businesses — with sizing help, delivery, and after-sales support.</p>
+    <div class="hero-cta">
+      <a href="#products" class="btn btn--sun"><span data-i18n="hero.cta1">Browse products</span></a>
+      <a class="btn btn--ghost" id="heroWa" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
+        <span data-i18n="hero.cta2">Chat on WhatsApp</span>
+      </a>
     </div>
-    <div class="record-index" aria-label="Product families">
-      <div class="record-index__head">
-        <span>PRODUCT INDEX</span>
-        <span>SELECT A SYSTEM</span>
-      </div>
-      <a href="#products" data-family="panel"><span>01</span><strong>Solar panels</strong><small>Modules for residential and commercial systems</small></a>
-      <a href="#products" data-family="battery"><span>02</span><strong>Batteries</strong><small>Lithium and tubular energy storage</small></a>
-      <a href="#products" data-family="inverter"><span>03</span><strong>Inverters</strong><small>Hybrid conversion and system control</small></a>
-      <a href="#products" data-family="kit"><span>04</span><strong>Complete systems</strong><small>Equipment selected for a defined load</small></a>
-      <div class="record-index__proof">
-        <span>DOCUMENTED SUPPORT</span>
-        <strong>Datasheets · Certificates · Local team</strong>
-      </div>
+    <div class="hero-trust">
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"/></svg><span data-i18n="hero.t1">Genuine, warrantied equipment</span></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg><span data-i18n="hero.t2">Sizing & installation help</span></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg><span data-i18n="hero.t3">Delivery across Cameroon</span></div>
     </div>
   </div>
+  <div class="horizon"></div>
 </section>
 <nav class="quick-nav" aria-label="Jump to section">
   <div class="wrap">
@@ -491,15 +523,7 @@ img{max-width:100%;display:block}
       <p data-i18n="about.body1">Restar Solar helps homes and businesses across Cameroon stay powered when the grid can't. We supply and install solar panels, lithium and tubular batteries, inverters, charge controllers, and complete off-grid kits — choosing equipment that holds up to heat, dust, and daily use.</p>
       <p data-i18n="about.body2">Whether you need backup for a few lights and a fridge or a full system for a shop or borehole, we size it to your real needs, deliver it, and stay reachable afterwards.</p>
     </div>
-    <div class="about-panel evidence-panel reveal">
-      <div class="evidence-panel__head"><span>WHAT WE DOCUMENT</span><span>BEFORE SUPPLY</span></div>
-      <dl>
-        <div><dt>01 · Load</dt><dd>The appliances and hours you need to power.</dd></div>
-        <div><dt>02 · Equipment</dt><dd>The panel, battery and inverter models in the proposed system.</dd></div>
-        <div><dt>03 · Delivery</dt><dd>The destination, responsible country team and current availability.</dd></div>
-        <div><dt>04 · Support</dt><dd>The datasheets, certificates and contact route available after supply.</dd></div>
-      </dl>
-    </div>
+    <div class="about-panel reveal" aria-hidden="true"><div class="cells"></div><div class="sun2"></div></div>
   </div>
 </section>
 <section class="section section--mist" id="contact">
@@ -557,7 +581,7 @@ img{max-width:100%;display:block}
         </div>
         <p class="footer-tag" data-i18n="footer.tag">Reliable solar power for Cameroon's homes, shops, and businesses.</p>
         <div class="footer-social" style="margin-top:20px">
-          <h3 data-i18n="footer.follow">Follow us</h3>
+          <h4 data-i18n="footer.follow">Follow us</h4>
           <div class="row">
           <a href="https://www.facebook.com/profile.php?id=100091151491190" target="_blank" rel="noopener" aria-label="Facebook" class="social-link"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#ico-facebook"/></svg></a>
           <a href="https://www.linkedin.com/company/resun-group-solar-energy-co-ltd/" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-link"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#ico-linkedin"/></svg></a>
@@ -567,7 +591,7 @@ img{max-width:100%;display:block}
       </div>
       <div class="foot-cols">
         <div>
-          <h3 data-i18n="footer.explore">Explore</h3>
+          <h4 data-i18n="footer.explore">Explore</h4>
           <a href="#offer" data-i18n="nav.products">Products</a>
           <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
           <a href="#about" data-i18n="nav.about">About</a>
@@ -580,7 +604,7 @@ img{max-width:100%;display:block}
           <a href="#contact" data-i18n="nav.contact">Contact</a>
         </div>
         <div>
-          <h3 data-i18n="footer.contact">Contact</h3>
+          <h4 data-i18n="footer.contact">Contact</h4>
           <a id="fWa" target="_blank" rel="noopener">WhatsApp</a>
           <a id="fPhone">+237 6 00 00 00 00</a>
           <a id="fEmail">info@restarsolar.com</a>
@@ -615,7 +639,7 @@ img{max-width:100%;display:block}
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Certificate">
   <div class="lb-bg" id="lbBg"></div>
   <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
-  <img id="lbImg" class="lb-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="Certificate">
+  <img id="lbImg" class="lb-img" alt="Certificate">
 </div>
 <script src="assets/js/countries.js"></script>
 <script src="assets/data/products.js"></script>
@@ -1035,13 +1059,6 @@ function countryOptionLabel(c){
   return c.option_key ? t(c.option_key) : c.flag + " " + (lang==="fr"?c.name_fr:lang==="ar"?c.name_ar:c.name);
 }
 
-function renderCountryRecord(country){
-  const record = document.getElementById("heroCountryRecord");
-  if (!record || !country) return;
-  const name = lang==="fr" ? country.name_fr : lang==="ar" ? country.name_ar : country.name;
-  record.textContent = country.code + " · " + name;
-}
-
 function renderCountryContacts(country){
   document.getElementById("contactRows").innerHTML = country.contacts.map(c => `
           <div class="row">
@@ -1158,7 +1175,6 @@ function applyCountry(code){
     wireContacts();
   }
   renderCountryContacts(country);
-  renderCountryRecord(country);
   renderCountrySelect();
   updateCartToggle();
   document.title = t("meta.title");
@@ -1218,7 +1234,7 @@ function requestCountrySwitch(code){
 // Which language the static sections were last built in. Their copy comes
 // from tr() at build time, so only a language change makes them stale.
 let renderedLang = null;
-function renderAll(){renderedLang=lang;applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();renderCountryRecord(RSCountries.COUNTRIES[COUNTRY]);}
+function renderAll(){renderedLang=lang;applyI18n();renderOffer();renderWhy();renderFilters();renderGrid();renderCerts();wireContacts();}
 // Settle the country before the first render when it needs no network (a
 // ?country= link or a remembered choice). That is one render instead of two,
 // and no visible flip from "other country" to theirs. An IP lookup cannot
@@ -1262,6 +1278,33 @@ observeReveals();
   }, { once: true });
 })();
 </script>
+<script>
+(function cinema(){
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prog = document.getElementById("fxProgress");
+  if(prog){
+    const onScroll = ()=>{const h=document.documentElement; const max=h.scrollHeight-h.clientHeight; prog.style.width=(max>0?(h.scrollTop/max)*100:0)+"%";};
+    addEventListener("scroll", onScroll, {passive:true}); addEventListener("resize", onScroll); onScroll();
+  }
+  if(reduce) return;
+  const box = document.getElementById("heroMotes");
+  if(box){
+    const N = innerWidth < 640 ? 16 : 30; let html = "";
+    for(let i=0;i<N;i++){
+      const s=(Math.random()*3+1.5).toFixed(1); const left=(Math.random()*100).toFixed(2);
+      const dur=(Math.random()*9+7).toFixed(1); const delay=(-Math.random()*16).toFixed(1); const top=(Math.random()*100).toFixed(1);
+      html += `<span class="mote" style="left:${left}%;top:${top}%;width:${s}px;height:${s}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`;
+    }
+    box.innerHTML = html;
+  }
+  const layers = [...document.querySelectorAll("#top [data-depth]")];
+  let mx=0,my=0,sy=0,raf=null;
+  const apply=()=>{raf=null;for(const el of layers){const d=+el.dataset.depth;const px=mx*d*0.55;const py=my*d*0.55+sy*(d*0.04);el.style.translate=px.toFixed(1)+"px "+py.toFixed(1)+"px";}};
+  const schedule=()=>{ if(!raf) raf=requestAnimationFrame(apply); };
+  addEventListener("pointermove", e=>{ if(e.pointerType==="touch") return; mx=(e.clientX/innerWidth-0.5)*2; my=(e.clientY/innerHeight-0.5)*2; schedule(); }, {passive:true});
+  addEventListener("scroll", ()=>{ if(window.scrollY<innerHeight){ sy=window.scrollY; schedule(); } }, {passive:true});
+})();
+</script>
 <!-- AI Customer Service Widget -->
 <script>
 (function(){
@@ -1283,21 +1326,50 @@ observeReveals();
   // Build widget HTML
   var el = document.createElement('div');
   el.innerHTML = [
-    '<div class="rs-assistant">',
-    '<button id="rs-bubble" class="rs-assistant__bubble" aria-label="Open Restar Solar support">',
-    '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">',
-    '<path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg>',
-    '<span>Support</span></button>',
-    '<section id="rs-win" class="rs-assistant__window" aria-label="Restar Solar support">',
-    '<header class="rs-assistant__header"><div><strong>Restar Solar support</strong>',
-    '<small>AI assistant · human team available</small></div>',
-    '<button id="rs-close" aria-label="Close support">&#x2715;</button></header>',
-    '<div id="rs-msgs" class="rs-assistant__messages" aria-live="polite"></div>',
-    '<div id="rs-typing" class="rs-assistant__typing">Preparing a reply…</div>',
-    '<div class="rs-assistant__handoff"><button id="rs-human" class="rs-assistant__human">Talk to a person</button></div>',
-    '<div class="rs-assistant__composer">',
-    '<input id="rs-input" type="text" aria-label="Message" placeholder="Ask about products or support">',
-    '<button id="rs-send">Send</button></div></section></div>'
+    '<div id="rs-bubble" style="position:fixed;bottom:24px;right:24px;width:58px;height:58px;',
+    'background:linear-gradient(180deg,#FFC24D,#F7A81B);border-radius:50%;display:flex;',
+    'align-items:center;justify-content:center;cursor:pointer;',
+    'box-shadow:0 4px 20px rgba(247,168,27,.5);z-index:9999;transition:transform .2s;">',
+    '<svg width="26" height="26" fill="#241500" viewBox="0 0 24 24">',
+    '<path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg></div>',
+
+    '<div id="rs-win" style="display:none;position:fixed;z-index:9998;',
+    'bottom:92px;right:24px;width:360px;height:520px;',
+    'background:#09060F;border-radius:20px;flex-direction:column;overflow:hidden;',
+    'box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);">',
+
+    // Header
+    '<div style="background:linear-gradient(180deg,#FFC24D,#F7A81B);padding:16px 18px;',
+    'display:flex;justify-content:space-between;align-items:center;">',
+    '<div style="display:flex;align-items:center;gap:10px;">',
+    '<div style="width:9px;height:9px;background:#241500;border-radius:50%;opacity:.6;"></div>',
+    '<span style="font-weight:700;font-size:15px;color:#241500;">Restar Solar Assistant</span></div>',
+    '<button id="rs-close" style="background:none;border:none;color:#241500;font-size:22px;',
+    'cursor:pointer;line-height:1;opacity:.7;">&#x2715;</button></div>',
+
+    // Messages
+    '<div id="rs-msgs" style="flex:1;overflow-y:auto;padding:16px;display:flex;',
+    'flex-direction:column;gap:10px;"></div>',
+
+    // Typing indicator
+    '<div id="rs-typing" style="display:none;padding:0 18px 8px;',
+    'font-size:12px;color:rgba(255,255,255,.4);">Thinking…</div>',
+
+    // Live-agent handoff
+    '<div style="padding:0 12px 6px;text-align:center;">',
+    '<button id="rs-human" style="background:none;border:none;color:rgba(255,255,255,.45);',
+    'font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:4px;">',
+    'Talk to a person</button></div>',
+
+    // Input
+    '<div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;">',
+    '<input id="rs-input" type="text" placeholder="Ask about products, prices…"',
+    'style="flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);',
+    'border-radius:10px;padding:10px 14px;font-size:14px;color:#fff;outline:none;',
+    'font-family:inherit;" />',
+    '<button id="rs-send" style="background:linear-gradient(180deg,#FFC24D,#F7A81B);',
+    'color:#241500;border:none;border-radius:10px;padding:10px 16px;',
+    'cursor:pointer;font-size:13px;font-weight:700;">Send</button></div></div>'
   ].join('');
   document.body.appendChild(el);
 
@@ -1307,6 +1379,9 @@ observeReveals();
   var input  = document.getElementById('rs-input');
   var typing = document.getElementById('rs-typing');
   var opened = false;
+
+  bubble.onmouseenter = function(){ bubble.style.transform='scale(1.1)'; };
+  bubble.onmouseleave = function(){ bubble.style.transform='scale(1)'; };
 
   bubble.onclick = function(){
     win.style.display = 'flex';
@@ -1437,7 +1512,11 @@ observeReveals();
           typing.style.display = 'none';
           if(!liveBubble){
             liveBubble = document.createElement('div');
-        liveBubble.className = 'rs-message rs-message--assistant';
+            liveBubble.style.cssText = [
+              'max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;',
+              'font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;word-break:break-word;',
+              'align-self:flex-start;background:rgba(255,255,255,.09);color:#ECE9F5;border-bottom-left-radius:4px;'
+            ].join('');
             msgs.appendChild(liveBubble);
           }
           liveBubble.textContent = buffer.length > SAFE_LOOKBACK ? buffer.slice(0, buffer.length - SAFE_LOOKBACK) : '';
@@ -1461,14 +1540,24 @@ observeReveals();
     // Handoff states get their own look so the customer can tell a human from
     // the assistant, and a queue notice from either.
     if (role === 'status') {
-      d.className = 'rs-message rs-message--status';
+      d.style.cssText = 'align-self:center;font-size:12px;color:rgba(255,255,255,.45);' +
+        'font-family:Inter,system-ui,sans-serif;text-align:center;padding:2px 8px;';
       d.textContent = text;
       msgs.appendChild(d);
       msgs.scrollTop = msgs.scrollHeight;
       return;
     }
 
-    d.className = 'rs-message ' + (isUser ? 'rs-message--user' : role === 'agent' ? 'rs-message--agent' : 'rs-message--assistant');
+    var bg = isUser
+      ? 'align-self:flex-end;background:linear-gradient(180deg,#FFC24D,#F7A81B);color:#241500;border-bottom-right-radius:4px;'
+      : role === 'agent'
+        ? 'align-self:flex-start;background:rgba(37,211,102,.16);color:#ECE9F5;border-bottom-left-radius:4px;border:1px solid rgba(37,211,102,.35);'
+        : 'align-self:flex-start;background:rgba(255,255,255,.09);color:#ECE9F5;border-bottom-left-radius:4px;';
+    d.style.cssText = [
+      'max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;',
+      'font-family:Inter,system-ui,sans-serif;white-space:pre-wrap;word-break:break-word;',
+      bg
+    ].join('');
 
     // Check for WhatsApp order trigger
     if(!isUser && text.indexOf('WHATSAPP_ORDER::') !== -1) {
