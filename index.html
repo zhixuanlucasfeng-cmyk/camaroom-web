@@ -368,6 +368,10 @@ img{max-width:100%;display:block}
         <a class="util-social-link" style="background:#1877F2" href="https://www.facebook.com/profile.php?id=100091151491190" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#ico-facebook"/></svg></a>
         <a class="util-social-link" style="background:#0A66C2" href="https://www.linkedin.com/company/resun-group-solar-energy-co-ltd/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#ico-linkedin"/></svg></a>
         <a class="util-social-link" style="background:#E4405F" href="https://www.instagram.com/restarsolar_/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#ico-instagram"/></svg></a>
+        <span class="util-social-link" style="background:#BD081C" aria-label="Pinterest — official profile not published" title="Pinterest — official profile not published">P</span>
+        <a class="util-social-link" id="utilWaSocial" style="background:#25D366" target="_blank" rel="noopener" aria-label="WhatsApp">W</a>
+        <a class="util-social-link" style="background:#07C160" href="https://www.restarsolar.com/themes/simplebootx/picbanners/ewm.png" target="_blank" rel="noopener" aria-label="WeChat">微</a>
+        <a class="util-social-link" style="background:#004598" href="mailto:sales@restarsolar.com" aria-label="Email">@</a>
       </div>
     </div>
     <div class="util-right">
@@ -395,16 +399,15 @@ img{max-width:100%;display:block}
       <img src="logo.webp" alt="Restar Solar" style="height:44px;width:auto;object-fit:contain;">
     </a>
     <nav class="nav-links" id="navLinks">
-      <a href="#offer" data-i18n="nav.products">Products</a>
+      <a href="products.html" data-i18n="nav.products">Products</a>
       <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
       <a href="#about" data-i18n="nav.about">About</a>
       <a href="#certs" data-i18n="nav.certs">Certificates</a>
-      <a href="https://www.restarsolar.com/product-catalogue/" target="_blank" rel="noopener" data-i18n="nav.download">Download</a>
-      <a href="https://www.restarsolar.com/projects/" target="_blank" rel="noopener" data-i18n="nav.projects">Projects</a>
-      <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
-      <a href="https://www.restarsolar.com/faq/" target="_blank" rel="noopener" data-i18n="nav.faq">FAQ</a>
-      <a href="https://www.restarsolar.com/about-us/" target="_blank" rel="noopener" data-i18n="nav.factory">Factory</a>
-      <a href="#contact" data-i18n="nav.contact">Contact</a>
+      <a href="downloads.html" data-i18n="nav.download">Download</a>
+      <a href="projects.html" data-i18n="nav.projects">Projects</a>
+      <a href="news.html" data-i18n="nav.news">News</a>
+      <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+      <a href="contact.html" data-i18n="nav.contact">Contact</a>
     </nav>
     <div class="nav-right">
       <a class="btn btn--sun" id="navWa" target="_blank" rel="noopener">
@@ -592,16 +595,15 @@ img{max-width:100%;display:block}
       <div class="foot-cols">
         <div>
           <h4 data-i18n="footer.explore">Explore</h4>
-          <a href="#offer" data-i18n="nav.products">Products</a>
+          <a href="products.html" data-i18n="nav.products">Products</a>
           <a href="#products" data-i18n="nav.catalogue">Catalogue</a>
           <a href="#about" data-i18n="nav.about">About</a>
           <a href="#certs" data-i18n="nav.certs">Certificates</a>
-          <a href="https://www.restarsolar.com/product-catalogue/" target="_blank" rel="noopener" data-i18n="nav.download">Download</a>
-          <a href="https://www.restarsolar.com/projects/" target="_blank" rel="noopener" data-i18n="nav.projects">Projects</a>
-          <a href="https://www.restarsolar.com/news/" target="_blank" rel="noopener" data-i18n="nav.news">News</a>
-          <a href="https://www.restarsolar.com/faq/" target="_blank" rel="noopener" data-i18n="nav.faq">FAQ</a>
-          <a href="https://www.restarsolar.com/about-us/" target="_blank" rel="noopener" data-i18n="nav.factory">Factory</a>
-          <a href="#contact" data-i18n="nav.contact">Contact</a>
+          <a href="downloads.html" data-i18n="nav.download">Download</a>
+          <a href="projects.html" data-i18n="nav.projects">Projects</a>
+          <a href="news.html" data-i18n="nav.news">News</a>
+          <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+          <a href="contact.html" data-i18n="nav.contact">Contact</a>
         </div>
         <div>
           <h4 data-i18n="footer.contact">Contact</h4>
@@ -944,7 +946,7 @@ function wireContacts(){
   const hello = lang==='fr' ? "Bonjour Restar Solar, j'ai une question sur le solaire."
     : lang==='ar' ? "مرحبًا ريستار سولار، لدي سؤال حول الطاقة الشمسية."
     : "Hello Restar Solar, I have a question about solar.";
-  ["navWa","heroWa","directWa","fWa"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=wa(hello);});
+  ["navWa","heroWa","directWa","fWa","utilWaSocial"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=wa(hello);});
   document.getElementById("cEmail").textContent = CONFIG.email;
   document.getElementById("cAddr").textContent = CONFIG.address;
   document.getElementById("fPhone").textContent = CONFIG.phone;
