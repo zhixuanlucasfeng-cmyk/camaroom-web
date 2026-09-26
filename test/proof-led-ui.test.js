@@ -26,3 +26,31 @@ test('the first response presents a usable product record without autoplay media
 test('the initial document loads the proof-led visual system', () => {
   assert.match(html, /assets\/css\/restar-record\.css/);
 });
+
+test('the public page does not present unverified promotional media as proof', () => {
+  assert.doesNotMatch(html, /hero-bg\.mp4|assets\/video\/poster\.jpg|assets\/farm\//);
+  assert.doesNotMatch(html, /function cinema|heroMotes|moteFloat/);
+});
+
+test('unapproved synthetic hero files are not shipped', () => {
+  assert.equal(fs.existsSync(path.join(__dirname, '..', 'hero-bg.mp4')), false);
+  assert.equal(fs.existsSync(path.join(__dirname, '..', 'assets', 'video', 'poster.jpg')), false);
+});
+
+test('the first viewport offers all four primary equipment paths', () => {
+  const firstViewport = firstViewportMarkup(html);
+  for (const family of ['panel', 'battery', 'inverter', 'kit']) {
+    assert.match(firstViewport, new RegExp(`data-family="${family}"`));
+  }
+});
+
+test('the customer assistant uses the same restrained operational visual system', () => {
+  const start = html.indexOf('<!-- AI Customer Service Widget -->');
+  const end = html.indexOf('/* Boot:', start);
+  const widget = html.slice(start, end);
+
+  assert.match(widget, /class="rs-assistant"/);
+  assert.match(widget, /class="rs-assistant__human"/);
+  assert.match(widget, /!e\.isComposing/);
+  assert.doesNotMatch(widget, /linear-gradient/);
+});
