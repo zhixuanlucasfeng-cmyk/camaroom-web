@@ -1,0 +1,105 @@
+:root {
+  --record-paper: #f3efe6;
+  --record-paper-light: #fbf9f4;
+  --record-navy: #0b2e4f;
+  --record-ink: #252b31;
+  --record-muted: #59636d;
+  --record-rule: #b9c1c7;
+  --record-orange: #e86f1c;
+}
+
+::selection { background: #f4b789; color: var(--record-ink); }
+
+.record-hero {
+  color: var(--record-ink);
+  background: var(--record-paper);
+  border-bottom: 1px solid var(--record-navy);
+}
+
+.record-hero__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+  gap: clamp(44px, 7vw, 96px);
+  align-items: stretch;
+  padding-top: clamp(64px, 9vw, 112px);
+  padding-bottom: clamp(64px, 9vw, 112px);
+}
+
+.record-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.record-reference,
+.record-index__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--record-navy);
+  color: var(--record-navy);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.record-hero h1 {
+  max-width: 10ch;
+  margin-top: 28px;
+  color: var(--record-navy);
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 700;
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+
+.record-hero .sub-lead {
+  max-width: 60ch;
+  color: var(--record-muted);
+}
+
+.record-hero .btn--ghost {
+  color: var(--record-navy);
+  border-color: var(--record-navy);
+}
+
+.record-index {
+  align-self: stretch;
+  padding: 24px;
+  background: var(--record-paper-light);
+  border: 1px solid var(--record-navy);
+}
+
+.record-index > a {
+  display: grid;
+  grid-template-columns: 40px minmax(120px, .7fr) 1.3fr;
+  gap: 16px;
+  align-items: baseline;
+  min-height: 74px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--record-rule);
+  color: var(--record-ink);
+}
+
+.record-index > a:hover,
+.record-index > a:focus-visible { color: var(--record-orange); }
+.record-index > a span { font-variant-numeric: tabular-nums; color: var(--record-orange); font-weight: 800; }
+.record-index > a strong { font-size: 17px; }
+.record-index > a small { color: var(--record-muted); font-size: 13px; line-height: 1.45; }
+
+.record-index__proof {
+  display: grid;
+  gap: 6px;
+  padding-top: 22px;
+  color: var(--record-navy);
+}
+.record-index__proof span { font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.record-index__proof strong { font-size: 14px; }
+
+@media (max-width: 820px) {
+  .record-hero__layout { grid-template-columns: 1fr; gap: 36px; padding-top: 52px; padding-bottom: 52px; }
+  .record-index { padding: 18px; }
+  .record-index > a { grid-template-columns: 34px 1fr; }
+  .record-index > a small { grid-column: 2; }
+}

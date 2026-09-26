@@ -343,6 +343,7 @@ img{max-width:100%;display:block}
 .switch-confirm p{margin:0 0 16px;font-size:14px;line-height:1.55}
 .switch-confirm .acts{display:flex;gap:10px;justify-content:flex-end}
 </style>
+<link rel="stylesheet" href="assets/css/restar-record.css">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -415,52 +416,38 @@ img{max-width:100%;display:block}
     </div>
   </div>
 </header>
-<section class="hero" id="top">
-  <video id="heroVideo" autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
-    <source data-src="hero-bg.mp4" type="video/mp4">
-  </video>
-  <script>
-  /* The hero video is 3.9MB — real money and real waiting on the mobile
-     networks most of our customers browse on, and it kept autoplaying even
-     for visitors who asked for less motion (the CSS rule below only stops
-     CSS animations, never a <video autoplay>). The poster image is 18KB and
-     already carries the design, so the video is treated as an enhancement:
-     the source stays unset — and therefore unfetched — unless the visitor's
-     settings and connection both welcome it. */
-  (function () {
-    var source = document.querySelector('#heroVideo source[data-src]');
-    if (!source) return;
-    var wantsLessMotion = window.matchMedia
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var net = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
-    var wantsLessData = net.saveData === true
-      || /^(slow-2g|2g|3g)$/.test(net.effectiveType || '');
-    if (wantsLessMotion || wantsLessData) return;
-    source.src = source.getAttribute('data-src');
-    source.parentNode.load();
-  })();
-  </script>
-  <div class="hero-sky" data-depth="6" aria-hidden="true"></div>
-  <div class="hero-motes" id="heroMotes" data-depth="30" aria-hidden="true"></div>
-  <div class="hero-grid"></div>
-  <div class="wrap hero-inner">
-    <span class="eyebrow" data-i18n="hero.eyebrow">Solar energy · Cameroon</span>
-    <h1><span data-i18n="hero.title1">Power that</span> <span class="accent" data-i18n="hero.title2">stays on.</span></h1>
-    <p class="sub-lead" data-i18n="hero.sub">Restar Solar supplies and installs solar panels, batteries, and inverters built for Cameroon's homes, shops, and businesses — with sizing help, delivery, and after-sales support.</p>
-    <div class="hero-cta">
-      <a href="#products" class="btn btn--sun"><span data-i18n="hero.cta1">Browse products</span></a>
-      <a class="btn btn--ghost" id="heroWa" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
-        <span data-i18n="hero.cta2">Chat on WhatsApp</span>
-      </a>
+<section class="hero record-hero" id="top">
+  <div class="wrap record-hero__layout" id="proofRecord">
+    <div class="record-hero__copy">
+      <div class="record-reference">
+        <span>RESTAR SOLAR / SERVICE RECORD</span>
+        <span id="heroCountryRecord">CM · Cameroon</span>
+      </div>
+      <h1><span data-i18n="hero.title1">Power that</span> <span data-i18n="hero.title2">stays on.</span></h1>
+      <p class="sub-lead" data-i18n="hero.sub">Restar Solar supplies and installs solar panels, batteries, and inverters built for Cameroon's homes, shops, and businesses — with sizing help, delivery, and after-sales support.</p>
+      <div class="hero-cta">
+        <a href="#products" class="btn btn--sun"><span data-i18n="hero.cta1">Browse products</span></a>
+        <a class="btn btn--ghost" id="heroWa" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
+          <span data-i18n="hero.cta2">Chat on WhatsApp</span>
+        </a>
+      </div>
     </div>
-    <div class="hero-trust">
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"/></svg><span data-i18n="hero.t1">Genuine, warrantied equipment</span></div>
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg><span data-i18n="hero.t2">Sizing & installation help</span></div>
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg><span data-i18n="hero.t3">Delivery across Cameroon</span></div>
+    <div class="record-index" aria-label="Product families">
+      <div class="record-index__head">
+        <span>PRODUCT INDEX</span>
+        <span>SELECT A SYSTEM</span>
+      </div>
+      <a href="#products" data-family="panel"><span>01</span><strong>Solar panels</strong><small>Modules for residential and commercial systems</small></a>
+      <a href="#products" data-family="battery"><span>02</span><strong>Batteries</strong><small>Lithium and tubular energy storage</small></a>
+      <a href="#products" data-family="inverter"><span>03</span><strong>Inverters</strong><small>Hybrid conversion and system control</small></a>
+      <a href="#products" data-family="kit"><span>04</span><strong>Complete systems</strong><small>Equipment selected for a defined load</small></a>
+      <div class="record-index__proof">
+        <span>DOCUMENTED SUPPORT</span>
+        <strong>Datasheets · Certificates · Local team</strong>
+      </div>
     </div>
   </div>
-  <div class="horizon"></div>
 </section>
 <nav class="quick-nav" aria-label="Jump to section">
   <div class="wrap">
