@@ -89,3 +89,34 @@ test('official social links are available without fake accounts', () => {
   assert.match(html, /instagram\.com\/restarsolar_/);
   assert.match(html, /mailto:sales@restarsolar\.com/);
 });
+
+test('social icons keep the homepage artwork and order on every content page', () => {
+  const expectedIcons = [
+    ['Facebook', 'ico-facebook'],
+    ['LinkedIn', 'ico-linkedin'],
+    ['Instagram', 'ico-instagram'],
+    ['Pinterest', 'ico-pinterest'],
+    ['Email', 'ico-email'],
+    ['WhatsApp', 'ico-whatsapp'],
+    ['WeChat', 'ico-wechat'],
+  ];
+
+  for (const page of PAGES) {
+    const html = read(page);
+    const socialBlock = html.match(/<div class="socials"[^>]*>([\s\S]*?)<\/div>/)?.[1] || '';
+    let previousIndex = -1;
+
+    for (const [label, icon] of expectedIcons) {
+      const labelIndex = socialBlock.indexOf(`aria-label="${label}"`);
+      assert.ok(labelIndex > previousIndex, `${page} must keep ${label} in the homepage order`);
+      assert.match(
+        socialBlock,
+        new RegExp(`aria-label="${label}"[^>]*>[\\s\\S]*?<use href="assets/icons/social-icons\\.svg#${icon}"`),
+        `${page} must use the shared ${label} SVG`,
+      );
+      previousIndex = labelIndex;
+    }
+
+    assert.doesNotMatch(socialBlock, />\s*(?:f|ig|wc|wa|@)\s*</i, `${page} must not fall back to text initials`);
+  }
+});
