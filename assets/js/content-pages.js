@@ -40,6 +40,12 @@
 
   var productGrid = document.getElementById('product-grid');
   var productFilters = document.getElementById('product-filters');
+  var catalogNotice = document.getElementById('catalog-notice');
+  var PRODUCT_API_ORIGIN = 'https://rest-solar-agent-cm.onrender.com';
+  var catalog = window.RSCatalog;
+  var catalogProducts = [];
+  var inventory = {};
+  var activeCategory = 'all';
   var categoryNames = {
     all: 'All Products', panel: 'Solar Panel', battery: 'Solar Battery', inverter: 'Solar Inverter',
     ess: 'ESS', controller: 'Solar Charge Controller', light: 'Solar Street Light',
@@ -53,38 +59,99 @@
     });
   }
 
-  function visibleProducts() {
-    return typeof PRODUCTS === 'undefined' ? [] : PRODUCTS.filter(function (product) { return !product.hidden; });
+  function productText(key) {
+    var lang = countries && countries.COUNTRIES[countryCode] && countries.COUNTRIES[countryCode].lang;
+    var messages = {
+      loading: { en: 'Loading products…', fr: 'Chargement des produits…', ar: 'جارٍ تحميل المنتجات…' },
+      empty: { en: 'No products', fr: 'Aucun produit', ar: 'لا توجد منتجات' },
+      quote: { en: 'Request a quote', fr: 'Demander un devis', ar: 'اطلب عرض سعر' },
+      available: { en: 'Available', fr: 'Disponible', ar: 'متوفر' },
+      out: { en: 'Out of stock', fr: 'Rupture de stock', ar: 'نفد من المخزون' },
+      unavailable: {
+        en: 'Product catalog temporarily unavailable. Showing saved products.',
+        fr: 'Catalogue temporairement indisponible. Produits enregistrés affichés.',
+        ar: 'كتالوج المنتجات غير متاح مؤقتًا. يتم عرض المنتجات المحفوظة.'
+      }
+    };
+    return messages[key][lang] || messages[key].en;
   }
 
-  function renderProducts(category) {
+  function visibleProducts() {
+    return catalogProducts.filter(function (product) { return !product.hidden; });
+  }
+
+  function renderProducts() {
     if (!productGrid) return;
-    var rows = visibleProducts().filter(function (product) { return category === 'all' || product.cat === category; });
+    var rows = visibleProducts().filter(function (product) { return activeCategory === 'all' || product.cat === activeCategory; });
     productGrid.innerHTML = rows.map(function (product) {
       var spec = product.specs && product.specs.en ? product.specs.en : {};
-      var detail = spec.Power || spec.Capacity || spec.Voltage || '';
+      var detail = spec.Power || spec.Wattage || spec.Capacity || spec.Voltage || '';
+      var imageUrl = catalog.assetUrl(product, product.img);
+      var price = typeof product.price === 'number' && Number.isFinite(product.price)
+        ? product.price.toLocaleString('fr-FR') + (product.currency || (!product.remote && countries && countries.COUNTRIES[countryCode] && countries.COUNTRIES[countryCode].currency)
+          ? ' ' + safe(product.currency || countries.COUNTRIES[countryCode].currency) : '')
+        : productText('quote');
+      var stock = inventory[product.id];
+      var stockStatus = stock === 0 ? productText('out') : typeof stock === 'number' && stock > 0 ? productText('available') : '';
       return '<article class="content-card product-card">' +
-        '<img loading="lazy" src="assets/products/' + safe(product.img) + '" alt="' + safe(product.name) + '">' +
+        (imageUrl ? '<img loading="lazy" src="' + catalog.escapeAttr(imageUrl) + '" alt="' + catalog.escapeAttr(product.name) + '">' : '') +
         '<div class="content-card-body"><div class="meta">' + safe(categoryNames[product.cat] || categoryNames.other) + '</div>' +
         '<h2>' + safe(product.name) + '</h2>' +
         (detail ? '<p>' + safe(detail) + '</p>' : '') +
+        '<p class="product-price">' + price + '</p>' +
+        (stockStatus ? '<span class="stock-status' + (stock === 0 ? ' stock-status--out' : '') + '">' + stockStatus + '</span>' : '') +
         '<a class="action" data-local-link href="index.html?country=' + encodeURIComponent(countryCode) + '#products">Inquire Now →</a></div></article>';
-    }).join('') || '<p class="empty">No products</p>';
+    }).join('') || '<p class="empty">' + productText('empty') + '</p>';
   }
 
   if (productGrid && productFilters) {
-    var categories = ['all'].concat(Array.from(new Set(visibleProducts().map(function (product) { return product.cat; }))));
-    productFilters.innerHTML = categories.map(function (category, index) {
-      return '<button type="button" data-category="' + safe(category) + '" class="' + (index === 0 ? 'active' : '') + '">' + safe(categoryNames[category] || categoryNames.other) + '</button>';
-    }).join('');
+    var loader = catalog.createLoader({
+      baseUrl: PRODUCT_API_ORIGIN,
+      fetch: window.fetch.bind(window),
+      fallbackProducts: typeof PRODUCTS === 'undefined' ? [] : PRODUCTS
+    });
+
+    function renderFilters() {
+      var categories = ['all'].concat(Array.from(new Set(visibleProducts().map(function (product) { return product.cat; }))));
+      if (categories.indexOf(activeCategory) === -1) activeCategory = 'all';
+      productFilters.innerHTML = categories.map(function (category) {
+        return '<button type="button" data-category="' + safe(category) + '" class="' + (category === activeCategory ? 'active' : '') + '">' + safe(categoryNames[category] || categoryNames.other) + '</button>';
+      }).join('');
+    }
+
     productFilters.addEventListener('click', function (event) {
       var button = event.target.closest('button[data-category]');
       if (!button) return;
       productFilters.querySelectorAll('button').forEach(function (item) { item.classList.remove('active'); });
       button.classList.add('active');
-      renderProducts(button.dataset.category);
+      activeCategory = button.dataset.category;
+      renderProducts();
     });
-    renderProducts('all');
+
+    function loadProducts() {
+      var requestedCountry = countryCode;
+      productGrid.innerHTML = '<p class="empty">' + productText('loading') + '</p>';
+      if (catalogNotice) catalogNotice.hidden = true;
+      return loader.load(requestedCountry).then(function (result) {
+        if (result.stale || countryCode !== requestedCountry) return;
+        catalogProducts = result.products;
+        inventory = result.inventory;
+        if (catalogNotice) {
+          catalogNotice.hidden = result.source !== 'fallback';
+          catalogNotice.textContent = result.source === 'fallback' ? productText('unavailable') : '';
+        }
+        renderFilters();
+        renderProducts();
+      });
+    }
+
+    window.addEventListener('popstate', function () {
+      var nextCountry = countries && countries.normalize && countries.normalize(new URLSearchParams(window.location.search).get('country'));
+      if (!nextCountry || nextCountry === countryCode) return;
+      countryCode = nextCountry;
+      loadProducts();
+    });
+    loadProducts();
   }
 
   var quoteForm = document.getElementById('quote-form');

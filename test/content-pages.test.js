@@ -2,6 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
+const Catalog = require('../assets/js/catalog.js');
 
 const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -74,13 +76,120 @@ test('contact page includes the official office list and a country-routed quote 
   assert.match(script, /socialWhatsapp\.href = 'https:\/\/wa\.me\/'/);
 });
 
-test('products page renders the local catalogue while preserving official product categories', () => {
+test('products page loads the shared catalog before its page script and keeps official categories', () => {
   const html = read('products.html');
   for (const category of ['Solar Panel', 'Solar Battery', 'Solar Inverter', 'ESS', 'Solar Charge Controller', 'Other Solar Products']) {
     assert.match(html, new RegExp(category));
   }
-  assert.match(html, /assets\/data\/products\.js/);
+  const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(scripts, [
+    'assets/js/countries.js',
+    'assets/data/products.js',
+    'assets/js/catalog.js',
+    'assets/js/content-pages.js',
+  ]);
   assert.match(html, /id="product-grid"/);
+});
+
+const remoteRow = {
+  id: 12, sku: 'NG-12', country: 'NG', name: '<Panel & Battery>', category: 'solar_panels',
+  image: 'https://example.com/a?x="bad"&y=1', price_local: 850000, currency: 'NGN', stock: 3,
+};
+
+function productPage(fetch, country = 'NG') {
+  const grid = { innerHTML: '' };
+  const notice = { textContent: '', hidden: true };
+  const filters = {
+    innerHTML: '',
+    addEventListener(type, callback) { if (type === 'click') this.click = callback; },
+    querySelectorAll() { return []; },
+  };
+  const nodes = { 'product-grid': grid, 'product-filters': filters, 'catalog-notice': notice };
+  const document = {
+    querySelector(selector) { return selector.startsWith('#') ? nodes[selector.slice(1)] : null; },
+    querySelectorAll() { return []; },
+    getElementById(id) { return nodes[id] || null; },
+  };
+  const location = { search: `?country=${country}`, href: `https://example.com/products.html?country=${country}` };
+  const countries = {
+    COUNTRIES: { NG: { lang: 'en', currency: 'NGN' }, CM: { lang: 'en', currency: 'XAF' } },
+    resolveCountrySync: () => ({ code: country }),
+    normalize: code => code === 'NG' || code === 'CM' ? code : null,
+  };
+  const window = { location, RSCountries: countries, RSCatalog: Catalog, fetch,
+    addEventListener(type, callback) { if (type === 'popstate') this.popstate = callback; } };
+  const context = {
+    document, URL, URLSearchParams, PRODUCTS: [{ id: 'STATIC-1', name: 'Bundled panel', cat: 'panel', img: 'fallback.jpg' }],
+    window,
+  };
+  vm.runInNewContext(read('assets/js/content-pages.js'), context);
+  return { grid, notice, filters, location, window };
+}
+
+const settle = () => new Promise(resolve => setImmediate(resolve));
+
+test('products page loads current country and renders live price, stock, and escaped remote media', async () => {
+  const urls = [];
+  const page = productPage(async url => {
+    urls.push(url);
+    return { ok: true, json: async () => [remoteRow] };
+  });
+  assert.match(page.grid.innerHTML, /Loading products/);
+  await settle();
+  assert.deepEqual(urls, ['https://rest-solar-agent-cm.onrender.com/api/products?country=NG']);
+  assert.match(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
+  assert.match(page.grid.innerHTML, /850[\s\u202f]000[^<]*NGN/);
+  assert.match(page.grid.innerHTML, /Available/);
+  assert.match(page.grid.innerHTML, /src="https:\/\/example\.com\/a\?x=&quot;bad&quot;&amp;y=1"/);
+  assert.doesNotMatch(page.grid.innerHTML, /assets\/products\/https:/);
+  assert.equal(page.notice.hidden, true);
+});
+
+test('successful empty feed stays empty and does not show bundled products', async () => {
+  const page = productPage(async () => ({ ok: true, json: async () => [] }));
+  await settle();
+  assert.match(page.grid.innerHTML, /No products/);
+  assert.doesNotMatch(page.grid.innerHTML, /Bundled panel/);
+  assert.equal(page.notice.hidden, true);
+});
+
+test('catalog failure shows bundled products with a nonblocking notice', async () => {
+  const page = productPage(async () => { throw new Error('network'); });
+  await settle();
+  assert.match(page.grid.innerHTML, /Bundled panel/);
+  assert.match(page.grid.innerHTML, /Request a quote/);
+  assert.doesNotMatch(page.grid.innerHTML, /stock-status/);
+  assert.equal(page.notice.hidden, false);
+  assert.match(page.notice.textContent, /catalog.*unavailable/i);
+});
+
+test('zero stock is out of stock and filters still work after the async load', async () => {
+  const page = productPage(async () => ({ ok: true, json: async () => [
+    { ...remoteRow, stock: 0 },
+    { ...remoteRow, id: 13, sku: 'NG-13', name: 'Battery', category: 'batteries', price_local: null, currency: null, stock: null },
+  ] }));
+  await settle();
+  assert.match(page.grid.innerHTML, /Out of stock/);
+  assert.match(page.grid.innerHTML, /Request a quote/);
+  assert.match(page.filters.innerHTML, /data-category="battery"/);
+  page.filters.click({ target: { closest: () => ({ dataset: { category: 'battery' }, classList: { add() {} } }) } });
+  assert.match(page.grid.innerHTML, /Battery/);
+  assert.doesNotMatch(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
+});
+
+test('an older country response cannot replace a newer country catalog', async () => {
+  const responses = {};
+  const page = productPage(url => new Promise(resolve => { responses[new URL(url).searchParams.get('country')] = resolve; }));
+  await settle();
+  page.location.search = '?country=CM';
+  page.window.popstate();
+  await settle();
+  responses.CM({ ok: true, json: async () => [{ ...remoteRow, country: 'CM', sku: 'CM-1', name: 'Cameroon item' }] });
+  await settle();
+  responses.NG({ ok: true, json: async () => [remoteRow] });
+  await settle();
+  assert.match(page.grid.innerHTML, /Cameroon item/);
+  assert.doesNotMatch(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
 });
 
 test('official social links are available without fake accounts', () => {
