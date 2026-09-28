@@ -67,9 +67,9 @@
       available: { en: 'Available', fr: 'Disponible', ar: 'متوفر' },
       out: { en: 'Out of stock', fr: 'Rupture de stock', ar: 'نفد من المخزون' },
       unavailable: {
-        en: 'Product catalog temporarily unavailable. Showing saved products.',
-        fr: 'Catalogue temporairement indisponible. Produits enregistrés affichés.',
-        ar: 'كتالوج المنتجات غير متاح مؤقتًا. يتم عرض المنتجات المحفوظة.'
+        en: 'Product catalog temporarily unavailable. Showing saved products; prices require confirmation.',
+        fr: 'Catalogue temporairement indisponible. Produits enregistrés affichés ; les prix doivent être confirmés.',
+        ar: 'كتالوج المنتجات غير متاح مؤقتًا. يتم عرض المنتجات المحفوظة؛ الأسعار تحتاج إلى تأكيد.'
       }
     };
     return messages[key][lang] || messages[key].en;

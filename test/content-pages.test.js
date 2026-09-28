@@ -173,6 +173,7 @@ test('catalog failure shows bundled products with a nonblocking notice', async (
   assert.doesNotMatch(page.grid.innerHTML, /stock-status/);
   assert.equal(page.notice.hidden, false);
   assert.match(page.notice.textContent, /catalog.*unavailable/i);
+  assert.match(page.notice.textContent, /saved products.*prices.*(?:require|need).*confirmation/i);
 });
 
 test('zero stock is out of stock and filters still work after the async load', async () => {

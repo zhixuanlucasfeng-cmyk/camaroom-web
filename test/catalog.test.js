@@ -100,7 +100,7 @@ test('API local prices and currencies are used for each country', () => {
 });
 
 test('legacy XAF price is used only for Cameroon, without inventing prices for shared rows', () => {
-  const legacy = { ...API_PRODUCT, price_local: null, currency: null };
+  const { price_local, ...legacy } = { ...API_PRODUCT, currency: null };
   assert.equal(Catalog.adaptCatalog([legacy], 'CM').products[0].price, 25000);
   for (const country of ['ML', 'NG', 'SD']) {
     assert.equal(Catalog.adaptCatalog([legacy], country).products[0].price, null, country);
@@ -114,6 +114,23 @@ test('legacy XAF price is used only for Cameroon, without inventing prices for s
   assert.equal(Catalog.fallbackCatalog([staticProduct], 'CM').products[0].price, 60000);
   assert.equal(Catalog.fallbackCatalog([staticProduct], 'NG').products[0].price, null);
   assert.equal(Catalog.assetUrl(staticProduct, staticProduct.img), 'assets/products/SP-LOCAL.jpg');
+});
+
+test('an explicitly cleared local price never falls back to legacy XAF', () => {
+  const product = Catalog.adaptProduct({ ...API_PRODUCT, price_local: null }, 'CM');
+  assert.equal(product.price, null);
+  assert.equal(product.currency, 'XAF');
+});
+
+test('shared rows suppress local and legacy prices in every country', () => {
+  const { price_local, ...legacy } = API_PRODUCT;
+  for (const country of ['CM', 'NG', 'ML', 'SD']) {
+    for (const row of [API_PRODUCT, legacy, { ...API_PRODUCT, price_local: null }]) {
+      const product = Catalog.adaptProduct({ ...row, country: null }, country);
+      assert.equal(product.price, null, country);
+      assert.equal(product.currency, null, country);
+    }
+  }
 });
 
 test('only country-owned numeric stock is tracked; shared stock is always untracked', () => {
