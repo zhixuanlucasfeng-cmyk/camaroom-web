@@ -99,20 +99,32 @@ const remoteRow = {
 function productPage(fetch, country = 'NG') {
   const grid = { innerHTML: '' };
   const notice = { textContent: '', hidden: true };
+  const countryLabel = { textContent: '' };
+  const socialWhatsapp = {
+    href: 'index.html#contact',
+    getAttribute(name) { return name === 'href' ? this.href : null; },
+  };
+  const homeLink = {
+    href: 'index.html?source=nav#products',
+    getAttribute(name) { return name === 'href' ? this.href : null; },
+  };
   const filters = {
     innerHTML: '',
     addEventListener(type, callback) { if (type === 'click') this.click = callback; },
     querySelectorAll() { return []; },
   };
-  const nodes = { 'product-grid': grid, 'product-filters': filters, 'catalog-notice': notice };
+  const nodes = { 'product-grid': grid, 'product-filters': filters, 'catalog-notice': notice, 'social-whatsapp': socialWhatsapp };
   const document = {
-    querySelector(selector) { return selector.startsWith('#') ? nodes[selector.slice(1)] : null; },
-    querySelectorAll() { return []; },
+    querySelector(selector) { return selector === '[data-country-label]' ? countryLabel : selector.startsWith('#') ? nodes[selector.slice(1)] : null; },
+    querySelectorAll(selector) { return selector === 'a[data-local-link]' ? [homeLink, socialWhatsapp] : []; },
     getElementById(id) { return nodes[id] || null; },
   };
   const location = { search: `?country=${country}`, href: `https://example.com/products.html?country=${country}` };
   const countries = {
-    COUNTRIES: { NG: { lang: 'en', currency: 'NGN' }, CM: { lang: 'en', currency: 'XAF' } },
+    COUNTRIES: {
+      NG: { lang: 'en', currency: 'NGN', flag: '🇳🇬', name: 'Nigeria', order_contact: 0, contacts: [{ phone: '234111' }] },
+      CM: { lang: 'en', currency: 'XAF', flag: '🇨🇲', name: 'Cameroon', order_contact: 0, contacts: [{ phone: '237222' }] },
+    },
     resolveCountrySync: () => ({ code: country }),
     normalize: code => code === 'NG' || code === 'CM' ? code : null,
   };
@@ -123,7 +135,7 @@ function productPage(fetch, country = 'NG') {
     window,
   };
   vm.runInNewContext(read('assets/js/content-pages.js'), context);
-  return { grid, notice, filters, location, window };
+  return { grid, notice, filters, location, window, countryLabel, socialWhatsapp, homeLink };
 }
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
@@ -190,6 +202,53 @@ test('an older country response cannot replace a newer country catalog', async (
   await settle();
   assert.match(page.grid.innerHTML, /Cameroon item/);
   assert.doesNotMatch(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
+});
+
+test('country reload keeps the loading state when an old filter is clicked', async () => {
+  let finishCM;
+  const page = productPage(url => new URL(url).searchParams.get('country') === 'NG'
+    ? Promise.resolve({ ok: true, json: async () => [remoteRow] })
+    : new Promise(resolve => { finishCM = resolve; }));
+  await settle();
+  assert.match(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
+  const oldButton = { dataset: { category: 'panel' }, classList: { add() {} } };
+  page.location.search = '?country=CM';
+  page.window.popstate();
+  await settle();
+  assert.match(page.grid.innerHTML, /Loading products/);
+  assert.doesNotMatch(page.filters.innerHTML, /data-category="panel"/);
+  page.filters.click({ target: { closest: () => oldButton } });
+  assert.match(page.grid.innerHTML, /Loading products/);
+  assert.doesNotMatch(page.grid.innerHTML, /&lt;Panel &amp; Battery&gt;/);
+  finishCM({ ok: true, json: async () => [{ ...remoteRow, country: 'CM', sku: 'CM-1', name: 'Cameroon item' }] });
+  await settle();
+  assert.match(page.grid.innerHTML, /Cameroon item/);
+});
+
+test('popstate refreshes country label, local links, WhatsApp, and catalog together', async () => {
+  const page = productPage(async url => ({ ok: true, json: async () => [{
+    ...remoteRow, country: new URL(url).searchParams.get('country'), name: new URL(url).searchParams.get('country') + ' item',
+  }] }));
+  await settle();
+  assert.equal(page.countryLabel.textContent, '🇳🇬 Nigeria');
+  assert.equal(page.homeLink.href, '/index.html?source=nav&country=NG#products');
+  assert.equal(page.socialWhatsapp.href, 'https://wa.me/234111');
+
+  page.location.search = '?country=CM';
+  page.window.popstate();
+  await settle();
+  assert.equal(page.countryLabel.textContent, '🇨🇲 Cameroon');
+  assert.equal(page.homeLink.href, '/index.html?source=nav&country=CM#products');
+  assert.equal(page.socialWhatsapp.href, 'https://wa.me/237222');
+  assert.match(page.grid.innerHTML, /CM item/);
+  assert.doesNotMatch(page.grid.innerHTML, /NG item/);
+
+  page.location.search = '?country=NG';
+  page.window.popstate();
+  await settle();
+  assert.equal(page.homeLink.href, '/index.html?source=nav&country=NG#products');
+  assert.equal(page.socialWhatsapp.href, 'https://wa.me/234111');
+  assert.match(page.grid.innerHTML, /NG item/);
 });
 
 test('official social links are available without fake accounts', () => {

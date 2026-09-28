@@ -17,26 +17,24 @@
   var explicit = countries && countries.normalize ? countries.normalize(params.get('country')) : null;
   if (explicit) countryCode = explicit;
 
-  document.querySelectorAll('a[data-local-link]').forEach(function (link) {
-    var url = new URL(link.getAttribute('href'), window.location.href);
-    url.searchParams.set('country', countryCode);
-    link.href = url.pathname + url.search + url.hash;
-  });
-
   var countryLabel = document.querySelector('[data-country-label]');
-  if (countryLabel && countries && countries.COUNTRIES[countryCode]) {
-    var current = countries.COUNTRIES[countryCode];
-    countryLabel.textContent = current.flag + ' ' + current.name;
-  }
-
   var socialWhatsapp = document.getElementById('social-whatsapp');
-  if (socialWhatsapp && countries && countries.COUNTRIES[countryCode]) {
-    var socialCountry = countries.COUNTRIES[countryCode];
-    var socialContact = socialCountry.contacts[socialCountry.order_contact] || socialCountry.contacts[0];
-    if (socialContact && socialContact.phone) {
-      socialWhatsapp.href = 'https://wa.me/' + socialContact.phone;
+
+  function updateCountryUI() {
+    document.querySelectorAll('a[data-local-link]').forEach(function (link) {
+      var url = new URL(link.getAttribute('href'), window.location.href);
+      url.searchParams.set('country', countryCode);
+      link.href = url.pathname + url.search + url.hash;
+    });
+
+    var country = countries && countries.COUNTRIES[countryCode];
+    if (countryLabel && country) countryLabel.textContent = country.flag + ' ' + country.name;
+    if (socialWhatsapp && country) {
+      var contact = country.contacts[country.order_contact] || country.contacts[0];
+      if (contact && contact.phone) socialWhatsapp.href = 'https://wa.me/' + contact.phone;
     }
   }
+  updateCountryUI();
 
   var productGrid = document.getElementById('product-grid');
   var productFilters = document.getElementById('product-filters');
@@ -46,6 +44,7 @@
   var catalogProducts = [];
   var inventory = {};
   var activeCategory = 'all';
+  var catalogLoading = false;
   var categoryNames = {
     all: 'All Products', panel: 'Solar Panel', battery: 'Solar Battery', inverter: 'Solar Inverter',
     ess: 'ESS', controller: 'Solar Charge Controller', light: 'Solar Street Light',
@@ -120,6 +119,7 @@
     }
 
     productFilters.addEventListener('click', function (event) {
+      if (catalogLoading) return;
       var button = event.target.closest('button[data-category]');
       if (!button) return;
       productFilters.querySelectorAll('button').forEach(function (item) { item.classList.remove('active'); });
@@ -130,12 +130,18 @@
 
     function loadProducts() {
       var requestedCountry = countryCode;
+      catalogLoading = true;
+      catalogProducts = [];
+      inventory = {};
+      activeCategory = 'all';
+      productFilters.innerHTML = '';
       productGrid.innerHTML = '<p class="empty">' + productText('loading') + '</p>';
       if (catalogNotice) catalogNotice.hidden = true;
       return loader.load(requestedCountry).then(function (result) {
         if (result.stale || countryCode !== requestedCountry) return;
         catalogProducts = result.products;
         inventory = result.inventory;
+        catalogLoading = false;
         if (catalogNotice) {
           catalogNotice.hidden = result.source !== 'fallback';
           catalogNotice.textContent = result.source === 'fallback' ? productText('unavailable') : '';
@@ -149,6 +155,7 @@
       var nextCountry = countries && countries.normalize && countries.normalize(new URLSearchParams(window.location.search).get('country'));
       if (!nextCountry || nextCountry === countryCode) return;
       countryCode = nextCountry;
+      updateCountryUI();
       loadProducts();
     });
     loadProducts();
