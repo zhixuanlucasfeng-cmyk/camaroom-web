@@ -23,8 +23,11 @@ const API_PRODUCT = {
   voltage: '24V',
   dimensions: '1650x990x35mm',
   price_cny: 210,
+  price_local: 26000,
+  currency: 'XAF',
   price_xaf: 25000,
   stock: 4,
+  status: 'active',
   featured: true,
   features: 'TOPCon\nBifacial',
   use_cases: 'Homes\nShops',
@@ -48,7 +51,9 @@ test('public feed products map to the card shape without rewriting remote media 
   assert.equal(product.backendId, 91);
   assert.equal(product.cat, 'panel');
   assert.equal(product.name, 'RTM300 300W');
-  assert.equal(product.price, 25000);
+  assert.equal(product.price, 26000);
+  assert.equal(product.currency, 'XAF');
+  assert.equal(product.stock, 4);
   assert.equal(product.remote, true);
   assert.equal(product.img, API_PRODUCT.image);
   assert.deepEqual(product.gallery, [API_PRODUCT.image, ...API_PRODUCT.images]);
@@ -82,11 +87,28 @@ test('API categories map onto the categories understood by existing cards', () =
   assert.equal(Catalog.mapCategory('other', 'refrigerators'), 'fridge');
 });
 
-test('only Cameroon exposes XAF prices; every other country remains price-on-request', () => {
-  assert.equal(Catalog.adaptCatalog([API_PRODUCT], 'CM').products[0].price, 25000);
+test('API local prices and currencies are used for each country', () => {
+  const ng = Catalog.adaptCatalog([{ ...API_PRODUCT, country: 'NG', price_local: 850000, currency: 'NGN', stock: 7 }], 'NG');
+  assert.equal(ng.products[0].price, 850000);
+  assert.equal(ng.products[0].currency, 'NGN');
+  assert.equal(ng.products[0].stock, 7);
+  assert.equal(ng.inventory['SP-API-1'], 7);
+
+  const cm = Catalog.adaptCatalog([API_PRODUCT], 'CM');
+  assert.equal(cm.products[0].price, 26000);
+  assert.equal(cm.products[0].currency, 'XAF');
+});
+
+test('legacy XAF price is used only for Cameroon, without inventing prices for shared rows', () => {
+  const legacy = { ...API_PRODUCT, price_local: null, currency: null };
+  assert.equal(Catalog.adaptCatalog([legacy], 'CM').products[0].price, 25000);
   for (const country of ['ML', 'NG', 'SD']) {
-    assert.equal(Catalog.adaptCatalog([API_PRODUCT], country).products[0].price, null, country);
+    assert.equal(Catalog.adaptCatalog([legacy], country).products[0].price, null, country);
   }
+  const shared = { ...legacy, country: null };
+  const sharedProduct = Catalog.adaptCatalog([shared], 'NG').products[0];
+  assert.equal(sharedProduct.price, null);
+  assert.equal(sharedProduct.currency, null);
 
   const staticProduct = { id: 'SP-LOCAL', price: 60000, img: 'SP-LOCAL.jpg' };
   assert.equal(Catalog.fallbackCatalog([staticProduct], 'CM').products[0].price, 60000);

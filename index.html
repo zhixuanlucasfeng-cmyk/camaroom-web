@@ -494,7 +494,7 @@ img{max-width:100%;display:block}
         <span class="eyebrow" data-i18n="products.eyebrow">Catalogue</span>
         <h2 class="h-lead" data-i18n="products.title">Products & prices</h2>
       </div>
-      <p class="sub-lead" style="margin-top:0" data-i18n="products.sub">Tap a product for full specifications. Prices in FCFA (XAF); contact us to confirm current pricing and availability.</p>
+      <p class="sub-lead" style="margin-top:0" data-i18n="products.sub">Tap a product for full specifications. Prices use the selected country's local currency; contact us to confirm current pricing and availability.</p>
     </div>
     <div class="filters" id="filters"></div>
     <div class="grid" id="grid"></div>
@@ -696,7 +696,7 @@ const I18N = {
     "hero.cta1":"Browse products","hero.cta2":"Chat on WhatsApp",
     "hero.t1":"Genuine, warrantied equipment","hero.t2":"Sizing & installation help","hero.t3":"Delivery across {country}",
     "offer.eyebrow":"What we supply","offer.title":"Everything to build a solar system","offer.sub":"From a single panel to a complete off-grid kit.",
-    "products.eyebrow":"Catalogue","products.title":"Products & prices","products.sub":"Tap a product for full specifications. Prices in FCFA (XAF); contact us to confirm current pricing and availability.",
+    "products.eyebrow":"Catalogue","products.title":"Products & prices","products.sub":"Tap a product for full specifications. Prices use the selected country's local currency; contact us to confirm current pricing and availability.",
     "qnav.products":"Products","qnav.catalogue":"Catalogue","qnav.why":"Why Restar Solar","qnav.about":"About","qnav.contact":"Contact",
     "filter.all":"All","card.details":"Details","card.inquire":"Inquire",
     "why.eyebrow":"Why us","why.title":"Why Restar Solar",
@@ -729,7 +729,7 @@ const I18N = {
     "hero.cta1":"Voir les produits","hero.cta2":"Discuter sur WhatsApp",
     "hero.t1":"Matériel authentique et garanti","hero.t2":"Aide au dimensionnement","hero.t3":"Livraison partout {inCountry}",
     "offer.eyebrow":"Ce que nous fournissons","offer.title":"Tout pour un système solaire","offer.sub":"D'un simple panneau à un kit autonome complet.",
-    "products.eyebrow":"Catalogue","products.title":"Produits et prix","products.sub":"Touchez un produit pour voir les spécifications. Prix en FCFA (XAF) ; contactez-nous pour confirmer prix et disponibilité.",
+    "products.eyebrow":"Catalogue","products.title":"Produits et prix","products.sub":"Touchez un produit pour voir les spécifications. Les prix utilisent la monnaie locale du pays sélectionné ; contactez-nous pour confirmer le prix et la disponibilité.",
     "qnav.products":"Produits","qnav.catalogue":"Catalogue","qnav.why":"Pourquoi Restar Solar","qnav.about":"À propos","qnav.contact":"Contact",
     "filter.all":"Tous","card.details":"Détails","card.inquire":"Demander",
     "why.eyebrow":"Pourquoi nous","why.title":"Pourquoi Restar Solar",
@@ -762,7 +762,7 @@ const I18N = {
     "hero.cta1":"تصفح المنتجات","hero.cta2":"تحدث عبر واتساب",
     "hero.t1":"معدات أصلية ومضمونة","hero.t2":"مساعدة في التحديد والتركيب","hero.t3":"التوصيل في جميع أنحاء {country}",
     "offer.eyebrow":"ما نوفره","offer.title":"كل ما تحتاجه لبناء نظام شمسي","offer.sub":"من لوح واحد إلى طقم متكامل مستقل عن الشبكة.",
-    "products.eyebrow":"الكتالوج","products.title":"المنتجات والأسعار","products.sub":"اضغط على منتج لعرض المواصفات الكاملة. الأسعار عند الطلب — تواصل معنا لتأكيد السعر والتوفر.",
+    "products.eyebrow":"الكتالوج","products.title":"المنتجات والأسعار","products.sub":"اضغط على منتج لعرض المواصفات الكاملة. الأسعار بالعملة المحلية للبلد المحدد؛ تواصل معنا لتأكيد السعر والتوفر.",
     "qnav.products":"المنتجات","qnav.catalogue":"الكتالوج","qnav.why":"لماذا ريستار سولار","qnav.about":"من نحن","qnav.contact":"اتصل بنا",
     "filter.all":"الكل","card.details":"التفاصيل","card.inquire":"استفسار",
     "why.eyebrow":"لماذا نحن","why.title":"لماذا ريستار سولار",
@@ -830,6 +830,11 @@ const fill = (value, vars) => (typeof value !== "string" ? value
 const t = (k, vars) => fill(I18N[lang][k] !== undefined ? I18N[lang][k] : k, vars);
 const tr = o => fill(o[lang] !== undefined ? o[lang] : o.en);
 const fmt = n => n.toLocaleString("fr-FR");
+const priceHTML = p => {
+  if (p.price === null || p.price === undefined) return t('price.contact');
+  const currency = p.currency || (!p.remote && RSCountries.COUNTRIES[COUNTRY].currency);
+  return fmt(p.price) + (currency ? ` <small>${catalogHTML(currency)}</small>` : '');
+};
 const wa = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 function renderOffer(){
   document.getElementById("offerGrid").innerHTML = OFFER.map(o=>`<div class="ocard"><div class="ic" style="color:${CAT_COLOR[o.icon]}">${ICON[o.icon]}</div><h3>${tr(o.t)}</h3><p>${tr(o.d)}</p></div>`).join("");
@@ -875,7 +880,7 @@ function renderGrid(){
       <div class="card-body">
         <span class="cat-tag">${catalogHTML(catLabel(p.cat))}</span>
         <h3>${productName}</h3>
-        <div class="price">${p.price?fmt(p.price)+' <small>FCFA</small>':t('price.contact')}</div>
+        <div class="price">${priceHTML(p)}</div>
         ${stockBadge}
         <p class="desc">${catalogHTML(tr(p.desc))}</p>
         <div class="card-actions">
@@ -928,7 +933,7 @@ function openModal(id){
   document.getElementById("mCat").textContent = catLabel(p.cat);
   document.getElementById("mCat").style.color = col;
   document.getElementById("mName").textContent = p.name;
-  document.getElementById("mPrice").innerHTML = p.price?`${fmt(p.price)} <small>FCFA</small>`:t('price.contact');
+  document.getElementById("mPrice").innerHTML = priceHTML(p);
   document.getElementById("mSpecH").textContent = t('modal.specs');
   const specs = tr(p.specs);
   document.getElementById("mSpecs").innerHTML = Object.entries(specs).map(([k,v])=>`<tr><td>${catalogHTML(k)}</td><td>${catalogHTML(v)}</td></tr>`).join("");

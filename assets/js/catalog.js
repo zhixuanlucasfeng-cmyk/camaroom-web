@@ -80,7 +80,10 @@
       if (url && gallery.indexOf(url) === -1) gallery.push(url);
     });
     var description = compactText(row.use_cases) || compactText(row.features) || compactText(row.subcategory) || '';
-    var xaf = finiteNumber(row.price_xaf);
+    var localPrice = finiteNumber(row.price_local);
+    var legacyXaf = String(country || '').toUpperCase() === 'CM' ? finiteNumber(row.price_xaf) : null;
+    var useLegacyXaf = localPrice === null && legacyXaf !== null;
+    var currency = typeof row.currency === 'string' ? row.currency : null;
 
     return {
       id: sku,
@@ -92,7 +95,9 @@
       img: primaryImage || gallery[0] || '',
       gallery: gallery,
       name: row.name || row.model || sku,
-      price: String(country || '').toUpperCase() === 'CM' ? xaf : null,
+      price: localPrice === null ? legacyXaf : localPrice,
+      currency: useLegacyXaf ? 'XAF' : currency,
+      stock: finiteNumber(row.stock),
       desc: { en: description, fr: description, ar: description },
       specs: buildSpecs(row),
       featured: !!row.featured,
