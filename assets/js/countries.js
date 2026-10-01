@@ -25,11 +25,10 @@
       address: 'Rue Léman, Douala, Cameroon',
       sales_rep_backend: null,
       contacts: [
-        { name: 'Luc Su', flag: '🇨🇲', label: 'Cameroon', phone: '237681105611', phone_display: '+237 681 105 611' },
         { name: 'Tom', flag: '🇨🇲', label: 'Cameroon', phone: '237681129183', phone_display: '+237 681 129 183' }
       ],
       // Index into contacts[] for the top utility bar / footer phone.
-      config_contact: 1,
+      config_contact: 0,
       // The wa.me target for cart orders and the chat's first "Send to X"
       // button. Overridden at runtime by /api/sales-rep where a rep pool
       // exists (see applyCountry in index.html).
@@ -39,15 +38,12 @@
       code: 'ML', name: 'Mali', name_fr: 'Mali', name_ar: 'مالي', fr_in: "au Mali", fr_of: "du Mali", flag: '🇲🇱',
       lang: 'fr', currency: 'XOF',
       address: "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
-      sales_rep_backend: 'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev',
-      // Mali's local side also has a rep pool assigned per session by
-      // /api/sales-rep (seeded in backend/scripts/seed_mali_sales_reps.sql).
-      // Kate is the confirmed public contact shown in the utility bar.
+      sales_rep_backend: null,
+      // Kate is the confirmed public phone and WhatsApp contact for Mali.
       contacts: [
-        { name: 'Elena', flag: '🇨🇳', label: 'China sales', phone: '8615851496160', phone_display: '+86 158 5149 6160' },
         { name: 'Kate', flag: '🇲🇱', label: 'Mali', phone: '22372593539', phone_display: '+223 72 593 539' }
       ],
-      config_contact: 1,
+      config_contact: 0,
       order_contact: 0
     },
     NG: {
@@ -56,11 +52,9 @@
       address: 'RESTAR SOLAR ENERGY NIGERIA CO LTD, No 22 Olojo Drive, by Church Bus Stop, Ojo - Alaba International Market Road, Ojo Town, Ojo Local Government Area, Lagos State, Nigeria',
       sales_rep_backend: null,
       contacts: [
-        { name: 'Bright', flag: '🇳🇬', label: 'Nigeria', phone: '2349063612011', phone_display: '+234 906 361 2011' },
         { name: 'James', flag: '🇨🇳', label: 'China sales', phone: '2349161101749', phone_display: '+234 916 110 1749' }
       ],
-      // 2026-08-14: the top bar shows James, not Bright.
-      config_contact: 1,
+      config_contact: 0,
       order_contact: 0
     },
     SD: {
@@ -70,14 +64,10 @@
       // inventing a street address.
       address: null,
       sales_rep_backend: null,
-      // 2026-08-13: Tom Yang was removed from Sudan ("Tom is Cameroon's").
       contacts: [
         {
           name: 'Zhang Gang', flag: '🇸🇩', label: 'Sudan',
-          phone: '8618825187185', phone_display: '+86 188 2518 7185',
-          // Confirmed line, but not confirmed as WhatsApp-reachable — shown
-          // as plain text, never as a wa.me link.
-          secondary_display: '+249 91 534 8323'
+          phone: '249915348323', phone_display: '+249 91 534 8323'
         }
       ],
       config_contact: 0,

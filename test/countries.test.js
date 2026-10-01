@@ -96,17 +96,13 @@ test('a country that can take online orders has a currency', () => {
   }
 });
 
-test('only Mali has a dedicated sales-rep assignment backend', () => {
-  assert.equal(
-    C.COUNTRIES.ML.sales_rep_backend,
-    'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev'
-  );
-  for (const code of ['CM', 'NG', 'SD', 'OTHER']) {
+test('confirmed country WhatsApp contacts are not replaced by a rep pool', () => {
+  for (const code of ['CM', 'ML', 'NG', 'SD']) {
     assert.equal(C.COUNTRIES[code].sales_rep_backend, null, code);
   }
 });
 
-test('sales-rep assignment requests Mali only and applies the assigned contact', async () => {
+test('sales-rep assignment runs only for a country explicitly configured with a backend', async () => {
   const requested = [];
   const loader = C.createSalesRepLoader({
     fetch: async url => {
@@ -115,12 +111,16 @@ test('sales-rep assignment requests Mali only and applies the assigned contact',
     },
   });
   const fallbackTargets = [{ phone: '8615851496160', label: 'Elena 🇨🇳' }];
+  const pooledCountry = {
+    ...C.COUNTRIES.ML,
+    sales_rep_backend: 'https://rep-assignment.example',
+  };
 
-  const mali = await loader.load(C.COUNTRIES.ML, 'rs-a/b', '8615851496160', fallbackTargets);
+  const mali = await loader.load(pooledCountry, 'rs-a/b', '8615851496160', fallbackTargets);
   const nigeria = await loader.load(C.COUNTRIES.NG, 'rs-other', '2349063612011', []);
 
   assert.deepEqual(requested, [
-    'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev/api/sales-rep?session=rs-a%2Fb&source=page_load',
+    'https://rep-assignment.example/api/sales-rep?session=rs-a%2Fb&source=page_load',
   ]);
   assert.equal(mali.phone, '22370001122');
   assert.deepEqual(mali.targets, [{ phone: '22370001122', label: 'Awa' }]);
@@ -133,8 +133,12 @@ test('a sales-rep response is stale after a newer country load starts', async ()
   const loader = C.createSalesRepLoader({
     fetch: () => new Promise(resolve => { finishMali = resolve; }),
   });
+  const pooledCountry = {
+    ...C.COUNTRIES.ML,
+    sales_rep_backend: 'https://rep-assignment.example',
+  };
 
-  const mali = loader.load(C.COUNTRIES.ML, 'rs-1', '8615851496160', []);
+  const mali = loader.load(pooledCountry, 'rs-1', '8615851496160', []);
   await Promise.resolve();
   await loader.load(C.COUNTRIES.NG, 'rs-1', '2349063612011', []);
   finishMali({ ok: true, json: async () => ({ phone: '22370001122', name: 'Awa' }) });
@@ -147,8 +151,12 @@ test('a failed sales-rep request keeps the configured contact', async () => {
   const loader = C.createSalesRepLoader({
     fetch: async () => ({ ok: false, status: 503, json: async () => ({}) }),
   });
+  const pooledCountry = {
+    ...C.COUNTRIES.ML,
+    sales_rep_backend: 'https://rep-assignment.example',
+  };
 
-  const result = await loader.load(C.COUNTRIES.ML, 'rs-1', '8615851496160', fallbackTargets);
+  const result = await loader.load(pooledCountry, 'rs-1', '8615851496160', fallbackTargets);
 
   assert.equal(result.phone, '8615851496160');
   assert.deepEqual(result.targets, fallbackTargets);
@@ -163,18 +171,34 @@ test('config_contact and order_contact point at real contacts', () => {
   }
 });
 
-test('the top utility bar uses the confirmed Cameroon and Mali contacts', () => {
-  const cameroon = C.COUNTRIES.CM.contacts[C.COUNTRIES.CM.config_contact];
-  const mali = C.COUNTRIES.ML.contacts[C.COUNTRIES.ML.config_contact];
+test('each country uses the same confirmed contact for the top bar and WhatsApp', () => {
+  const expected = {
+    CM: { name: 'Tom', phone: '237681129183', phone_display: '+237 681 129 183' },
+    ML: { name: 'Kate', phone: '22372593539', phone_display: '+223 72 593 539' },
+    NG: { name: 'James', phone: '2349161101749', phone_display: '+234 916 110 1749' },
+    SD: { name: 'Zhang Gang', phone: '249915348323', phone_display: '+249 91 534 8323' },
+  };
 
-  assert.deepEqual(
-    { name: cameroon.name, phone: cameroon.phone, phone_display: cameroon.phone_display },
-    { name: 'Tom', phone: '237681129183', phone_display: '+237 681 129 183' }
-  );
-  assert.deepEqual(
-    { name: mali.name, phone: mali.phone, phone_display: mali.phone_display },
-    { name: 'Kate', phone: '22372593539', phone_display: '+223 72 593 539' }
-  );
+  for (const [code, contact] of Object.entries(expected)) {
+    const country = C.COUNTRIES[code];
+    const topBar = country.contacts[country.config_contact];
+    const whatsapp = country.contacts[country.order_contact];
+    assert.deepEqual(
+      { name: topBar.name, phone: topBar.phone, phone_display: topBar.phone_display },
+      contact,
+      `${code} top bar`
+    );
+    assert.deepEqual(
+      { name: whatsapp.name, phone: whatsapp.phone, phone_display: whatsapp.phone_display },
+      contact,
+      `${code} WhatsApp`
+    );
+    assert.deepEqual(
+      country.contacts.map(item => item.phone),
+      [contact.phone],
+      `${code} customer-visible WhatsApp targets`
+    );
+  }
 });
 
 test('every phone number is digits only, so wa.me links cannot break', () => {
