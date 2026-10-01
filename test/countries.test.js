@@ -163,6 +163,20 @@ test('config_contact and order_contact point at real contacts', () => {
   }
 });
 
+test('the top utility bar uses the confirmed Cameroon and Mali contacts', () => {
+  const cameroon = C.COUNTRIES.CM.contacts[C.COUNTRIES.CM.config_contact];
+  const mali = C.COUNTRIES.ML.contacts[C.COUNTRIES.ML.config_contact];
+
+  assert.deepEqual(
+    { name: cameroon.name, phone: cameroon.phone, phone_display: cameroon.phone_display },
+    { name: 'Tom', phone: '237681129183', phone_display: '+237 681 129 183' }
+  );
+  assert.deepEqual(
+    { name: mali.name, phone: mali.phone, phone_display: mali.phone_display },
+    { name: 'Kate', phone: '22372593539', phone_display: '+223 72 593 539' }
+  );
+});
+
 test('every phone number is digits only, so wa.me links cannot break', () => {
   for (const code of C.ORDER) {
     for (const contact of C.COUNTRIES[code].contacts) {

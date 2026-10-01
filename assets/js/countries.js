@@ -26,10 +26,9 @@
       sales_rep_backend: null,
       contacts: [
         { name: 'Luc Su', flag: '🇨🇲', label: 'Cameroon', phone: '237681105611', phone_display: '+237 681 105 611' },
-        TOM_YANG
+        { name: 'Tom', flag: '🇨🇲', label: 'Cameroon', phone: '237681129183', phone_display: '+237 681 129 183' }
       ],
-      // Index into contacts[] for the top utility bar / footer phone. Cameroon
-      // intentionally shows Tom Yang there, matching the pre-unification site.
+      // Index into contacts[] for the top utility bar / footer phone.
       config_contact: 1,
       // The wa.me target for cart orders and the chat's first "Send to X"
       // button. Overridden at runtime by /api/sales-rep where a rep pool
@@ -41,13 +40,14 @@
       lang: 'fr', currency: 'XOF',
       address: "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
       sales_rep_backend: 'https://camaroom-cart-backend-mali.zhixuanlucasfeng.workers.dev',
-      // Mali's local side is a 5-person rep pool assigned per session by
-      // /api/sales-rep (seeded in backend/scripts/seed_mali_sales_reps.sql),
-      // not a single named badge — so only Elena is listed statically.
+      // Mali's local side also has a rep pool assigned per session by
+      // /api/sales-rep (seeded in backend/scripts/seed_mali_sales_reps.sql).
+      // Kate is the confirmed public contact shown in the utility bar.
       contacts: [
-        { name: 'Elena', flag: '🇨🇳', label: 'China sales', phone: '8615851496160', phone_display: '+86 158 5149 6160' }
+        { name: 'Elena', flag: '🇨🇳', label: 'China sales', phone: '8615851496160', phone_display: '+86 158 5149 6160' },
+        { name: 'Kate', flag: '🇲🇱', label: 'Mali', phone: '22372593539', phone_display: '+223 72 593 539' }
       ],
-      config_contact: 0,
+      config_contact: 1,
       order_contact: 0
     },
     NG: {
