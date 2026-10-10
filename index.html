@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="preload" as="image" href="assets/video/poster.jpg" fetchpriority="high">
+<link rel="preconnect" href="https://rest-solar-agent-cm.onrender.com" crossorigin>
 <script>
 // This repo serves restarsolar.net and the old zhixuanlucasfeng-cmyk.github.io
 // project page from the same files. Anyone arriving on the github.io URL
@@ -112,6 +114,12 @@ img{max-width:100%;display:block}
 .nav-links a::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--sun);transition:width .25s ease}
 .nav-links a:hover::after{width:100%}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.nav-country{min-height:44px;max-width:180px;padding:8px 10px;border:2px solid var(--navy);border-radius:6px;background:#fff;color:var(--navy);font:inherit;font-weight:700;cursor:pointer}
+.nav-country:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+@media(max-width:720px){.header .nav-links{top:100%}}
+@media(max-width:1350px){.nav-links{gap:12px;margin-left:0}.nav{gap:12px}.nav-links a{font-size:13px}.nav-right{gap:8px}}
+@media(min-width:721px) and (max-width:1150px){.nav{height:auto;min-height:70px;flex-wrap:wrap;padding-block:10px}.nav-links{order:3;width:100%;justify-content:center;flex-wrap:wrap}}
+@media(max-width:560px){.nav{height:auto;min-height:70px;flex-wrap:wrap;padding-block:10px}.nav-right{width:100%;margin-left:0}.nav-country{flex:1;max-width:none;min-width:0}.nav-right .burger{margin-left:auto}}
 .lang{display:inline-flex;border:1px solid rgba(255,255,255,.3);border-radius:4px;overflow:hidden;font-family:var(--mono);font-size:12px;background:transparent}
 .lang button{background:transparent;border:0;color:#fff;opacity:.8;padding:5px 10px;cursor:pointer;font:inherit;letter-spacing:.04em}
 .lang button.on{background:var(--sun);opacity:1;color:#241500}
@@ -376,7 +384,6 @@ img{max-width:100%;display:block}
       </div>
     </div>
     <div class="util-right">
-      <select id="countrySel" class="util-country" aria-label="Country"></select>
       <div class="lang" role="group" aria-label="Language">
         <button data-lang="en" class="on">EN</button>
         <button data-lang="fr">FR</button>
@@ -415,6 +422,7 @@ img{max-width:100%;display:block}
       <a href="contact.html" data-i18n="nav.contact">Contact</a>
     </nav>
     <div class="nav-right">
+      <select id="countrySel" class="nav-country" aria-label="Country"></select>
       <a class="btn btn--sun" id="navWa" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
         <span data-i18n="nav.whatsapp">WhatsApp</span>
@@ -425,16 +433,12 @@ img{max-width:100%;display:block}
 </header>
 <section class="hero" id="top">
   <video id="heroVideo" autoplay muted loop playsinline preload="metadata" fetchpriority="low" poster="assets/video/poster.jpg" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4;opacity:0.55;pointer-events:none;">
-    <source data-src="hero-bg.mp4" type="video/mp4">
+    <source data-src="assets/video/hero-optimized.mp4" type="video/mp4">
   </video>
   <script>
-  /* The hero video is 3.9MB — real money and real waiting on the mobile
-     networks most of our customers browse on, and it kept autoplaying even
-     for visitors who asked for less motion (the CSS rule below only stops
-     CSS animations, never a <video autoplay>). The poster image is 18KB and
-     already carries the design, so the video is treated as an enhancement:
-     the source stays unset — and therefore unfetched — unless the visitor's
-     settings and connection both welcome it. */
+  /* The original footage is compressed for delivery. Show the 18KB poster
+     first, then start the video after page load when motion/data preferences
+     permit it. Slow connections keep the poster. */
   (function () {
     var source = document.querySelector('#heroVideo source[data-src]');
     if (!source) return;
@@ -444,8 +448,15 @@ img{max-width:100%;display:block}
     var wantsLessData = net.saveData === true
       || /^(slow-2g|2g|3g)$/.test(net.effectiveType || '');
     if (wantsLessMotion || wantsLessData) return;
-    source.src = source.getAttribute('data-src');
-    source.parentNode.load();
+    function startVideo() {
+      source.src = source.getAttribute('data-src');
+      source.parentNode.load();
+    }
+    // Let the page and poster finish before the decorative video uses bandwidth.
+    window.addEventListener('load', function () {
+      if (window.requestIdleCallback) window.requestIdleCallback(startVideo, { timeout: 1500 });
+      else setTimeout(startVideo, 300);
+    }, { once: true });
   })();
   </script>
   <div class="hero-sky" data-depth="6" aria-hidden="true"></div>

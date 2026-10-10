@@ -170,12 +170,21 @@
       var mine = ++generation;
       var code = String(country || '').toUpperCase();
       var url = baseUrl + '/api/products?country=' + encodeURIComponent(code);
-      return Promise.resolve()
-        .then(function () { return request(url); })
+      var timer;
+      var controller = typeof AbortController === 'function' ? new AbortController() : null;
+      var pending = Promise.resolve()
+        .then(function () { return request(url, controller ? { signal: controller.signal } : undefined); })
         .then(function (response) {
           if (!response || !response.ok) throw new Error('catalog_http_' + (response && response.status));
           return response.json();
-        })
+        });
+      var deadline = new Promise(function (_, reject) {
+        timer = setTimeout(function () {
+          reject(new Error('catalog_timeout'));
+          if (controller) controller.abort();
+        }, options.timeoutMs || 8000);
+      });
+      return Promise.race([pending, deadline])
         .then(function (rows) {
           if (!Array.isArray(rows)) throw new Error('catalog_invalid_payload');
           if (mine !== generation) return { stale: true };
@@ -190,7 +199,7 @@
           result.source = 'fallback';
           result.stale = false;
           return result;
-        });
+        }).finally(function () { clearTimeout(timer); });
     }
 
     return { load: load };

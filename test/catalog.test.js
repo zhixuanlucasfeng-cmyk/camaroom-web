@@ -39,6 +39,19 @@ const API_PRODUCT = {
   datasheet: 'https://rest-solar-agent-cm.onrender.com/media/13',
 };
 
+test('a stalled catalog request stops waiting and aborts with a country-safe fallback', async () => {
+  let signal;
+  const loader = Catalog.createLoader({
+    timeoutMs: 20,
+    fetch: (_, options) => { signal = options.signal; return new Promise(() => {}); },
+    fallbackProducts: []
+  });
+  const result = await loader.load('ML');
+  assert.equal(result.source, 'fallback');
+  assert.deepEqual(result.products, []);
+  assert.equal(signal.aborted, true);
+});
+
 test('public feed products map to the card shape without rewriting remote media URLs', () => {
   assert.equal(typeof Catalog.adaptCatalog, 'function', 'catalog adapter must be loadable in Node');
 

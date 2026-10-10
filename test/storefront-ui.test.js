@@ -20,7 +20,7 @@ test('the old hero video is shipped and enhanced for visitors who allow motion',
 
   assert.match(firstViewport, /<video[^>]*id="heroVideo"[^>]*autoplay[^>]*muted[^>]*loop[^>]*playsinline/);
   assert.match(firstViewport, /poster="assets\/video\/poster\.jpg"/);
-  assert.match(firstViewport, /<source data-src="hero-bg\.mp4" type="video\/mp4">/);
+  assert.match(firstViewport, /<source data-src="assets\/video\/hero-optimized\.mp4" type="video\/mp4">/);
   assert.match(firstViewport, /source\.parentNode\.load\(\)/);
   assert.equal(fs.existsSync(path.join(root, 'hero-bg.mp4')), true);
   assert.equal(fs.existsSync(path.join(root, 'assets', 'video', 'poster.jpg')), true);
