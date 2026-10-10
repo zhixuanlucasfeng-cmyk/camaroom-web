@@ -436,27 +436,20 @@ img{max-width:100%;display:block}
     <source data-src="assets/video/hero-optimized.mp4" type="video/mp4">
   </video>
   <script>
-  /* The original footage is compressed for delivery. Show the 18KB poster
-     first, then start the video after page load when motion/data preferences
-     permit it. Slow connections keep the poster. */
+  /* Start the original footage immediately, independently of other assets.
+     Honor explicit accessibility/data-saving preferences, not estimated speed. */
   (function () {
     var source = document.querySelector('#heroVideo source[data-src]');
     if (!source) return;
     var wantsLessMotion = window.matchMedia
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var net = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
-    var wantsLessData = net.saveData === true
-      || /^(slow-2g|2g|3g)$/.test(net.effectiveType || '');
+    var wantsLessData = net.saveData === true;
     if (wantsLessMotion || wantsLessData) return;
-    function startVideo() {
-      source.src = source.getAttribute('data-src');
-      source.parentNode.load();
-    }
-    // Let the page and poster finish before the decorative video uses bandwidth.
-    window.addEventListener('load', function () {
-      if (window.requestIdleCallback) window.requestIdleCallback(startVideo, { timeout: 1500 });
-      else setTimeout(startVideo, 300);
-    }, { once: true });
+    source.src = source.getAttribute('data-src');
+    source.parentNode.load();
+    var playback = source.parentNode.play();
+    if (playback) playback.catch(function () {});
   })();
   </script>
   <div class="hero-sky" data-depth="6" aria-hidden="true"></div>

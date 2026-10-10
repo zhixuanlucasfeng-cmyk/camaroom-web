@@ -6,6 +6,25 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
+test('hero video starts on 3G without waiting for page load or idle', () => {
+  const vm = require('node:vm');
+  const script = html.slice(html.indexOf('</video>')).match(/<script>([\s\S]*?)<\/script>/)[1];
+  let loads = 0;
+  let plays = 0;
+  const source = {
+    getAttribute: () => 'assets/video/hero-optimized.mp4',
+    parentNode: { load: () => loads++, play: () => { plays++; return Promise.resolve(); } }
+  };
+  vm.runInNewContext(script, {
+    document: { querySelector: () => source },
+    window: { matchMedia: () => ({ matches: false }) },
+    navigator: { connection: { effectiveType: '3g', saveData: false } }
+  });
+  assert.equal(source.src, 'assets/video/hero-optimized.mp4');
+  assert.equal(loads, 1);
+  assert.equal(plays, 1);
+});
+
 function firstViewportMarkup(document) {
   const match = document.match(/<section[^>]*\bid="top"[^>]*>/);
   const start = match ? match.index : -1;
