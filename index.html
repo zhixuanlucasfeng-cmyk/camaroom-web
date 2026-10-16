@@ -183,8 +183,9 @@ img{max-width:100%;display:block}
 .stock-badge--out{background:#FBE7E7;color:#B3261E}
 .stock-badge--low{background:#FFF3E0;color:#B5620A}
 .desc{color:var(--muted);font-size:14px;margin-top:8px;flex:1}
-.card-actions{display:flex;gap:10px;margin-top:18px}
-.card-actions .btn{padding:10px 16px;font-size:14px;flex:1;justify-content:center}
+.card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.card-actions .btn{padding:10px 12px;font-size:14px;min-width:0;min-height:44px;justify-content:center;text-align:center;white-space:normal;overflow-wrap:anywhere}
+.card-actions .btn:last-child{grid-column:1 / -1}
 .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:48px}
 .why-card{border-radius:var(--r);padding:26px;transition:transform .3s ease,border-color .3s ease}
 .why-card:hover{transform:translateY(-6px);border-color:var(--line-2)}
