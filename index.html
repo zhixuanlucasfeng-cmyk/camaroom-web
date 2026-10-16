@@ -848,6 +848,9 @@ function renderWhy(){
 }
 let activeCat = "all";
 function catLabel(cat){
+  if(cat === "panel" && lang === "en") return "Solar Panels";
+  if(cat === "ess") return "ESS";
+  if(cat === "kit") return tr({en:"Others",fr:"Autres",ar:"أخرى"});
   const map = {panel:OFFER[0],battery:OFFER[1],inverter:OFFER[2],light:OFFER[3],kit:OFFER[4]};
   const extra = {controller:{en:"Controllers",fr:"Régulateurs",ar:"أجهزة التحكم"}, pump:{en:"Water pumps",fr:"Pompes à eau",ar:"مضخات المياه"}, ess:{en:"Energy storage",fr:"Stockage",ar:"تخزين الطاقة"}, ac:{en:"Air conditioners",fr:"Climatiseurs",ar:"مكيفات الهواء"}, fan:{en:"Fans",fr:"Ventilateurs",ar:"مراوح"}, fridge:{en:"Refrigeration",fr:"Réfrigération",ar:"التبريد"}};
   if(map[cat]) return tr(map[cat].t);
@@ -855,7 +858,9 @@ function catLabel(cat){
   return cat;
 }
 function renderFilters(){
-  const cats = ["all", ...Array.from(new Set(CATALOG_PRODUCTS.filter(p=>!p.hidden).map(p=>p.cat)))];
+  const available = new Set(CATALOG_PRODUCTS.filter(p=>!p.hidden).map(p=>p.cat));
+  const order = ["panel", "inverter", "battery", "controller", "ess", "kit"];
+  const cats = ["all", ...order.filter(c=>available.has(c)), ...Array.from(available).filter(c=>!order.includes(c))];
   if (!cats.includes(activeCat)) activeCat = "all";
   document.getElementById("filters").innerHTML = cats.map(c=>`<button class="chip ${c===activeCat?'on':''}" data-cat="${catalogAttr(c)}">${catalogHTML(c==='all'?t('filter.all'):catLabel(c))}</button>`).join("");
   document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{activeCat=ch.dataset.cat;renderFilters();renderGrid();});
