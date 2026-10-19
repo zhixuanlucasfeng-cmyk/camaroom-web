@@ -37,6 +37,42 @@
     return String(value).split(/\r?\n/).map(function (part) { return part.trim(); }).filter(Boolean).join(', ');
   }
 
+  // Translate known catalogue prose only, never model identifiers or technical values.
+  // New free-form descriptions need an explicit French translation, not guessed specs.
+  var FRENCH_DESCRIPTION = {
+    home_backup: 'Alimentation de secours pour la maison',
+    shop_fridge: 'Réfrigération pour les boutiques et commerces',
+    borehole_pump: 'Pompage d’eau et alimentation des forages',
+    street_lighting: 'Éclairage public et extérieur',
+    business_ess: 'Stockage d’énergie pour les entreprises',
+    high_efficiency: 'Installations à haut rendement',
+    business_high_watt: 'Grandes installations solaires commerciales',
+    lifepo4: 'Stockage lithium longue durée',
+    'Solar Pump Inverter': 'Onduleur pour pompe solaire',
+    'On-Grid Inverter': 'Onduleur raccordé au réseau',
+    'Off-Grid Inverter': 'Onduleur hors réseau',
+    'Hybrid Inverter': 'Onduleur hybride',
+    'Other Inverter': 'Autre onduleur',
+    'AGM Battery': 'Batterie AGM',
+    'GEL Battery': 'Batterie GEL',
+    'Lithium battery': 'Batterie au lithium',
+    'MPPT Controller': 'Régulateur MPPT',
+    'PWM Controller': 'Régulateur PWM',
+    'WiFi Monitoring': 'Suivi par WiFi',
+    'Built-in BMS': 'BMS intégré',
+    'All-in-One': 'Tout-en-un',
+    'Bifacial': 'Bifacial',
+    'Black Frame': 'Cadre noir',
+    'Full Black': 'Entièrement noir',
+    'Dual Glass': 'Double verre'
+  };
+
+  function frenchDescription(value) {
+    return compactText(value).split(', ').map(function (part) {
+      return Object.prototype.hasOwnProperty.call(FRENCH_DESCRIPTION, part) ? FRENCH_DESCRIPTION[part] : part;
+    }).join(', ');
+  }
+
   function addSpec(target, label, value) {
     var text = compactText(value);
     if (text) target[label] = text;
@@ -59,7 +95,7 @@
     ];
     fields.forEach(function (field) {
       addSpec(en, field[0], field[3]);
-      addSpec(fr, field[1], field[3]);
+      addSpec(fr, field[1], ['Use cases', 'Features'].includes(field[0]) ? frenchDescription(field[3]) : field[3]);
       addSpec(ar, field[2], field[3]);
     });
     return { en: en, fr: fr, ar: ar };
@@ -100,7 +136,7 @@
       price: localPrice === null ? legacyXaf : localPrice,
       currency: useLegacyXaf ? 'XAF' : currency,
       stock: finiteNumber(row.stock),
-      desc: { en: description, fr: description, ar: description },
+      desc: { en: description, fr: frenchDescription(description), ar: description },
       specs: buildSpecs(row),
       featured: !!row.featured,
       datasheet: row.datasheet || null,

@@ -1,6 +1,24 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+test('French product descriptions translate prose without changing model, measurements or commercial data', () => {
+  const row = {...API_PRODUCT, model:'RT-B5~16kWh-51.2V', use_cases:'business_ess, home_backup', features:'LiFePO4, Built-in BMS, WiFi Monitoring, IP65'};
+  const before = JSON.stringify(row);
+  const product = Catalog.adaptProduct(row, 'CM');
+  assert.equal(product.desc.fr, 'Stockage d’énergie pour les entreprises, Alimentation de secours pour la maison');
+  assert.equal(product.desc.en, row.use_cases);
+  assert.equal(product.name, row.name);
+  assert.equal(product.specs.fr.Modèle, row.model);
+  assert.equal(product.specs.fr['Puissance (W)'], row.wattage);
+  assert.equal(product.specs.fr.Tension, row.voltage);
+  assert.equal(product.specs.fr.Dimensions, row.dimensions);
+  assert.equal(product.specs.fr.Caractéristiques, 'LiFePO4, BMS intégré, Suivi par WiFi, IP65');
+  assert.equal(product.price, row.price_local);
+  assert.equal(product.stock, row.stock);
+  assert.equal(JSON.stringify(row), before);
+  assert.equal(Catalog.adaptProduct({...row, use_cases:null, features:null, subcategory:'On-Grid Inverter'}, 'CM').desc.fr, 'Onduleur raccordé au réseau');
+});
+
 let Catalog = {};
 try {
   Catalog = require('../assets/js/catalog.js');

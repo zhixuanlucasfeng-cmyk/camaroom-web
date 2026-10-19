@@ -99,6 +99,7 @@
         (imageUrl ? '<img loading="lazy" src="' + catalog.escapeAttr(imageUrl) + '" alt="' + catalog.escapeAttr(product.name) + '">' : '') +
         '<div class="content-card-body"><div class="meta">' + safe(categoryNames[product.cat] || categoryNames.other) + '</div>' +
         '<h2>' + safe(product.name) + '</h2>' +
+        (product.desc ? '<p class="product-description">' + safe(product.desc[language] || product.desc.en || '') + '</p>' : '') +
         (detail ? '<p>' + safe(detail) + '</p>' : '') +
         '<p class="product-price">' + price + '</p>' +
         (stockStatus ? '<span class="stock-status' + (stock === 0 ? ' stock-status--out' : '') + '">' + stockStatus + '</span>' : '') +

@@ -81,7 +81,7 @@ test('products page loads the shared catalog before its page script and keeps of
   for (const category of ['Solar Panel', 'Solar Battery', 'Solar Inverter', 'ESS', 'Solar Charge Controller', 'Other Solar Products']) {
     assert.match(html, new RegExp(category));
   }
-  const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(match => match[1]);
+  const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(match => match[1].split('?')[0]);
   assert.deepEqual(scripts, [
     'assets/js/countries.js',
     'assets/js/french.js',
