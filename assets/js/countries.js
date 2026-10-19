@@ -21,7 +21,7 @@
   var COUNTRIES = {
     CM: {
       code: 'CM', name: 'Cameroon', name_fr: 'Cameroun', name_ar: 'الكاميرون', fr_in: "au Cameroun", fr_of: "du Cameroun", flag: '🇨🇲',
-      lang: 'en', currency: 'XAF',
+      lang: 'fr', currency: 'XAF',
       address: 'Rue Léman, Douala, Cameroon',
       sales_rep_backend: null,
       contacts: [

@@ -16,6 +16,8 @@
   var params = new URLSearchParams(window.location.search);
   var explicit = countries && countries.normalize ? countries.normalize(params.get('country')) : null;
   if (explicit) countryCode = explicit;
+  var site = window.RSSite;
+  var language = site.preference || countries.COUNTRIES[countryCode].lang;
 
   var countryLabel = document.querySelector('[data-country-label]');
   var socialWhatsapp = document.getElementById('social-whatsapp');
@@ -28,11 +30,12 @@
     });
 
     var country = countries && countries.COUNTRIES[countryCode];
-    if (countryLabel && country) countryLabel.textContent = country.flag + ' ' + country.name;
+    if (countryLabel && country) countryLabel.textContent = country.flag + ' ' + (country['name_' + language] || country.name);
     if (socialWhatsapp && country) {
       var contact = country.contacts[country.order_contact] || country.contacts[0];
       if (contact && contact.phone) socialWhatsapp.href = 'https://wa.me/' + contact.phone;
     }
+    site.update(countryCode, language);
   }
   updateCountryUI();
 
@@ -59,7 +62,7 @@
   }
 
   function productText(key) {
-    var lang = countries && countries.COUNTRIES[countryCode] && countries.COUNTRIES[countryCode].lang;
+    var lang = language;
     var messages = {
       loading: { en: 'Loading products…', fr: 'Chargement des produits…', ar: 'جارٍ تحميل المنتجات…' },
       empty: { en: 'No products', fr: 'Aucun produit', ar: 'لا توجد منتجات' },
@@ -101,6 +104,8 @@
         (stockStatus ? '<span class="stock-status' + (stock === 0 ? ' stock-status--out' : '') + '">' + stockStatus + '</span>' : '') +
         '<a class="action" data-local-link href="index.html?country=' + encodeURIComponent(countryCode) + '#products">Inquire Now →</a></div></article>';
     }).join('') || '<p class="empty">' + productText('empty') + '</p>';
+    site.translate(productGrid);
+    site.update(countryCode, language);
   }
 
   if (productGrid && productFilters) {
@@ -116,6 +121,7 @@
       productFilters.innerHTML = categories.map(function (category) {
         return '<button type="button" data-category="' + safe(category) + '" class="' + (category === activeCategory ? 'active' : '') + '">' + safe(categoryNames[category] || categoryNames.other) + '</button>';
       }).join('');
+      site.translate(productFilters);
     }
 
     productFilters.addEventListener('click', function (event) {
@@ -167,7 +173,7 @@
     var status = document.getElementById('quote-status');
     countrySelect.innerHTML = countries.ORDER.map(function (code) {
       var option = countries.COUNTRIES[code];
-      return '<option value="' + code + '"' + (code === countryCode ? ' selected' : '') + '>' + safe(option.flag + ' ' + option.name) + '</option>';
+      return '<option value="' + code + '"' + (code === countryCode ? ' selected' : '') + '>' + safe(option.flag + ' ' + (option['name_' + language] || option.name)) + '</option>';
     }).join('');
 
     quoteForm.addEventListener('submit', async function (event) {
@@ -176,7 +182,7 @@
       var country = countries.COUNTRIES[code] || countries.COUNTRIES.OTHER;
       var fallbackContact = country.contacts[country.order_contact] || country.contacts[0];
       var phone = fallbackContact.phone;
-      status.textContent = 'Opening WhatsApp…';
+      status.textContent = site.text('Opening WhatsApp…');
 
       if (country.sales_rep_backend) {
         var session = localStorage.getItem('rs_session_id');
@@ -193,9 +199,9 @@
       var contact = document.getElementById('quote-contact').value.trim();
       var subject = document.getElementById('quote-subject').value.trim();
       var message = document.getElementById('quote-message').value.trim();
-      var text = ['Request a quote', 'Country: ' + country.name, 'Name: ' + name, 'Phone or email: ' + contact, 'Subject: ' + subject, '', message].join('\n');
+      var text = [site.text('Request a quote'), site.text('Country') + ': ' + country.name, site.text('Name') + ': ' + name, site.text('Phone or email') + ': ' + contact, site.text('Subject') + ': ' + subject, '', message].join('\n');
       window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
-      status.textContent = 'WhatsApp opened with your request.';
+      status.textContent = site.text('WhatsApp opened with your request.');
     });
   }
 })();

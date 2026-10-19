@@ -1,0 +1,19 @@
+#floating-whatsapp{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:#25d366;color:#fff;border:2px solid #fff;border-radius:50%;box-shadow:0 3px 14px #0003;z-index:990;text-decoration:none}
+#floating-whatsapp svg{width:29px;height:29px;fill:currentColor}
+#floating-whatsapp:hover{background:#128c7e}
+#floating-whatsapp:focus-visible{outline:3px solid #004598;outline-offset:3px}
+body{padding-bottom:90px}
+/* Keep both contact channels visible, without covering each other's windows. */
+#rs-bubble{bottom:calc(86px + env(safe-area-inset-bottom))!important;right:max(16px,env(safe-area-inset-right))!important;width:54px!important;height:54px!important}
+#rs-win{bottom:calc(150px + env(safe-area-inset-bottom))!important;right:16px!important;width:min(360px,calc(100vw - 32px))!important;max-height:calc(100dvh - 174px)!important}
+.modal.open~#floating-whatsapp{visibility:hidden}
+.site-language{display:flex;justify-content:flex-end;gap:4px;padding:6px max(20px,calc((100vw - 1180px)/2));background:#f5f7fa}
+.site-language button{border:1px solid #b8bfcc;border-radius:4px;background:#fff;color:#004598;padding:6px 12px;min-height:36px;cursor:pointer}
+.site-language button[aria-pressed="true"]{background:#ff9600;color:#241500;border-color:#ff9600}
+.header .brand,.header .nav-right{flex-shrink:0}
+.header #navWa{white-space:nowrap;overflow-wrap:normal;min-width:118px;flex-shrink:0}
+.header #navWa span{white-space:nowrap}
+.hero .hero-inner{padding-inline:24px}
+@media(min-width:721px) and (max-width:1450px){.header .nav{height:auto;min-height:70px;flex-wrap:wrap;padding-block:10px}.header .nav-links{order:3;width:100%;justify-content:center;flex-wrap:wrap}.header .nav-links a{white-space:nowrap}}
+@media(max-width:720px){.header .nav-links{top:100%}.main-nav a,.download-btn,.primary-btn{overflow-wrap:break-word;white-space:normal}.site-header .header-row{flex-wrap:wrap}.top-strip .wrap{flex-wrap:wrap;gap:8px;padding-block:8px}.socials{flex-wrap:wrap}}
+@media(max-width:560px){.header .nav-right{width:100%;min-width:0}.header #countrySel{flex:1;min-width:0}.header #navWa{min-width:110px;padding-inline:12px}.header .brand img{max-width:160px}.site-language{justify-content:center}}

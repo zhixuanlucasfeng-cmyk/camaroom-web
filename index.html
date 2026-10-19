@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="stylesheet" href="assets/css/site-shell.css">
 <link rel="preload" as="image" href="assets/video/poster.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://rest-solar-agent-cm.onrender.com" crossorigin>
 <script>
@@ -657,6 +658,8 @@ img{max-width:100%;display:block}
   <img id="lbImg" class="lb-img" alt="Certificate">
 </div>
 <script src="assets/js/countries.js"></script>
+<script src="assets/js/french.js"></script>
+<script src="assets/js/site-shell.js"></script>
 <script src="assets/data/products.js"></script>
 <script src="assets/js/catalog.js"></script>
 <script>
@@ -732,10 +735,10 @@ const I18N = {
   },
   fr:{
     "nav.products":"Produits","nav.catalogue":"Catalogue","nav.about":"À propos","nav.contact":"Contact","nav.whatsapp":"WhatsApp",
-    "hero.eyebrow":"Énergie solaire · {country}","hero.title1":"Une énergie qui","hero.title2":"ne s'arrête pas.",
-    "hero.sub":"Restar Solar fournit et installe panneaux solaires, batteries et onduleurs conçus pour les maisons, boutiques et entreprises {ofCountry} — avec aide au dimensionnement, livraison et service après-vente.",
-    "hero.cta1":"Voir les produits","hero.cta2":"Discuter sur WhatsApp",
-    "hero.t1":"Matériel authentique et garanti","hero.t2":"Aide au dimensionnement","hero.t3":"Livraison partout {inCountry}",
+    "hero.eyebrow":"Énergie solaire · {country}","hero.title1":"Une énergie qui","hero.title2":"ne s’arrête jamais.",
+    "hero.sub":"Restar Solar fournit et installe des panneaux solaires, batteries et onduleurs pour les maisons, boutiques et entreprises {inCountry}. Nous proposons l’étude de dimensionnement, la livraison et le service après-vente.",
+    "hero.cta1":"Parcourir les produits","hero.cta2":"Discuter sur WhatsApp",
+    "hero.t1":"Matériel authentique sous garantie","hero.t2":"Aide au dimensionnement et à l’installation","hero.t3":"Livraison partout {inCountry}",
     "offer.eyebrow":"Ce que nous fournissons","offer.title":"Tout pour un système solaire","offer.sub":"D'un simple panneau à un kit autonome complet.",
     "products.eyebrow":"Catalogue","products.title":"Produits et prix","products.sub":"Touchez un produit pour voir les spécifications. Les prix utilisent la monnaie locale du pays sélectionné ; contactez-nous pour confirmer le prix et la disponibilité.",
     "qnav.products":"Produits","qnav.catalogue":"Catalogue","qnav.why":"Pourquoi Restar Solar","qnav.about":"À propos","qnav.contact":"Contact",
@@ -797,7 +800,7 @@ const I18N = {
     "card.addToCart":"أضف إلى السلة","card.inquireWa":"استفسار عبر واتساب",
   }
 };
-let lang = "en";
+let lang = RSSite.preference || "fr";
 // The country currently being served. Real value arrives from
 // RSCountries.resolveCountry() at the bottom of this page; until then the
 // page renders as OTHER, which is a valid state, not a placeholder.
@@ -808,7 +811,7 @@ let COUNTRY = "OTHER";
 window.CART_SESSION_ID = 'rs-' + Math.random().toString(36).slice(2);
 // True once the visitor picks a language themselves — after that, switching
 // country must not override their choice.
-let langChosen = false;
+let langChosen = !!RSSite.preference;
 // Online ordering is handled by the central agent backend for all managed
 // countries. OTHER remains WhatsApp-only.
 window.CART_ENABLED = false;
@@ -960,8 +963,12 @@ document.getElementById("modalClose").onclick=closeModal;
 document.getElementById("modalBg").onclick=closeModal;
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 function applyI18n(){
+  RSSite.update(COUNTRY, lang);
+  if (window.Cart) window.Cart.renderDrawer();
+  RSSite.translate(document.getElementById('rs-win'));
   document.documentElement.lang = lang;
   document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
   document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n"); if(I18N[lang][k]!==undefined) el.textContent=t(k);});
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const k=el.getAttribute("data-i18n-ph"); if(I18N[lang][k]!==undefined) el.placeholder=t(k);});
 }
@@ -997,8 +1004,14 @@ document.getElementById("formSend").onclick=()=>{
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{
   lang=b.dataset.lang;
   langChosen=true;
+  RSSite.saveLanguage(lang);
+  const languageUrl = new URL(location.href);
+  languageUrl.searchParams.set('lang', lang);
+  history.replaceState(null, '', languageUrl);
   document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));
   renderAll();
+  renderCountrySelect();
+  renderCountryContacts(RSCountries.COUNTRIES[COUNTRY]);
 });
 document.getElementById("countrySel").onchange = e => requestCountrySwitch(e.target.value);
 
@@ -1397,6 +1410,7 @@ observeReveals();
     'cursor:pointer;font-size:13px;font-weight:700;">Send</button></div></div>'
   ].join('');
   document.body.appendChild(el);
+  RSSite.translate(el);
 
   var bubble = document.getElementById('rs-bubble');
   var win    = document.getElementById('rs-win');

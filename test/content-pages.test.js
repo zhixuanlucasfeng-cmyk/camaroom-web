@@ -84,6 +84,8 @@ test('products page loads the shared catalog before its page script and keeps of
   const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(scripts, [
     'assets/js/countries.js',
+    'assets/js/french.js',
+    'assets/js/site-shell.js',
     'assets/data/products.js',
     'assets/js/catalog.js',
     'assets/js/content-pages.js',
@@ -129,6 +131,7 @@ function productPage(fetch, country = 'NG') {
     normalize: code => code === 'NG' || code === 'CM' ? code : null,
   };
   const window = { location, RSCountries: countries, RSCatalog: Catalog, fetch,
+    RSSite: { preference: null, update() {}, translate() {}, text: value => value },
     addEventListener(type, callback) { if (type === 'popstate') this.popstate = callback; } };
   const context = {
     document, URL, URLSearchParams, PRODUCTS: [{ id: 'STATIC-1', name: 'Bundled panel', cat: 'panel', img: 'fallback.jpg' }],

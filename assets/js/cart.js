@@ -60,6 +60,7 @@
 
     if (items.length === 0) {
       drawer.innerHTML = '<p class="cart-empty">Cart is empty</p>';
+      if (window.RSSite) window.RSSite.translate(drawer);
       return;
     }
 
@@ -78,6 +79,7 @@
     drawer.innerHTML =
       '<ul class="cart-list">' + rows + '</ul>' +
       '<button id="cart-submit" type="button" class="btn btn--sun">Request quote for cart</button>';
+    if (window.RSSite) window.RSSite.translate(drawer);
 
     drawer.querySelectorAll('.cart-row-remove').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -104,6 +106,7 @@
       '<input id="cart-phone" placeholder="WhatsApp number (with country code)" required>' +
       '<button type="submit" class="btn btn--sun">Submit</button>' +
       '</form><p id="cart-submit-error"></p>';
+    if (window.RSSite) window.RSSite.translate(drawer);
 
     var form = document.getElementById('cart-contact-form');
     var submitButton = form.querySelector('button[type="submit"]');
@@ -112,7 +115,7 @@
       fetch: window.fetch.bind(window),
       onPending: function (pending) {
         submitButton.disabled = pending;
-        submitButton.textContent = pending ? 'Submitting…' : originalButtonText;
+        submitButton.textContent = pending ? (window.RSSite ? window.RSSite.text('Submitting…') : 'Submitting…') : originalButtonText;
       },
       onError: function (message) {
         var errorEl = document.getElementById('cart-submit-error');
