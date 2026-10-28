@@ -41,6 +41,7 @@
       sales_rep_backend: null,
       // Elena handles Mali; her contact number uses China's +86 calling code.
       wechat: { name: 'Elena', qr: 'assets/wechat-mali-elena.jpg' },
+      emails: ['elena.bao@restarsolar.com', 'elena.bao@resunsolar.com'],
       contacts: [
         { name: 'Elena', flag: '🇲🇱', label: 'Mali', phone: '8615851496160', phone_display: '+86 158 5149 6160' }
       ],

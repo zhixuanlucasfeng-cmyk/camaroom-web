@@ -979,7 +979,15 @@ function wireContacts(){
     : lang==='ar' ? "مرحبًا ريستار سولار، لدي سؤال حول الطاقة الشمسية."
     : "Hello Restar Solar, I have a question about solar.";
   ["navWa","heroWa","directWa","fWa","utilWaSocial"].forEach(id=>{const el=document.getElementById(id); if(el) el.href=wa(hello);});
-  document.getElementById("cEmail").textContent = CONFIG.email;
+  const emailBlock = document.getElementById("cEmail");
+  emailBlock.replaceChildren();
+  (CONFIG.emails || [CONFIG.email]).forEach((email, index) => {
+    if (index) emailBlock.appendChild(document.createElement('br'));
+    const link = document.createElement('a');
+    link.href = 'mailto:' + email;
+    link.textContent = email;
+    emailBlock.appendChild(link);
+  });
   document.getElementById("cAddr").textContent = CONFIG.address;
   document.getElementById("fPhone").textContent = CONFIG.phone;
   document.getElementById("fPhone").href = "tel:"+CONFIG.phone.replace(/\s/g,"");
@@ -989,6 +997,7 @@ function wireContacts(){
   document.getElementById("uPhoneLink").href = "tel:"+CONFIG.phone.replace(/\s/g,"");
   document.getElementById("uEmail").textContent = CONFIG.email;
   document.getElementById("uEmailLink").href = "mailto:"+CONFIG.email;
+  document.querySelectorAll('.util-social-link[href^="mailto:"]').forEach(link => { link.href = 'mailto:' + CONFIG.email; });
 }
 document.getElementById("formSend").onclick=()=>{
   const name=document.getElementById("f-name").value.trim();
@@ -1190,6 +1199,8 @@ function applyCountry(code){
   const headline = country.contacts[country.config_contact];
   CONFIG.whatsapp = headline.phone;
   CONFIG.phone = headline.phone_display;
+  CONFIG.emails = country.emails || ['info@restarsolar.com'];
+  CONFIG.email = CONFIG.emails[0];
   // No confirmed street address means the country name, never an invented one.
   CONFIG.address = country.address || countryName();
 

@@ -30,6 +30,12 @@
     });
 
     var country = countries && countries.COUNTRIES[countryCode];
+    if (country && country.emails) {
+      document.querySelectorAll('.top-contact a[href^="mailto:"], .socials a[href^="mailto:"]').forEach(function (link) {
+        link.href = 'mailto:' + country.emails[0];
+        if (link.closest('.top-contact')) link.textContent = country.emails[0];
+      });
+    }
     if (countryLabel && country) countryLabel.textContent = country.flag + ' ' + (country['name_' + language] || country.name);
     if (socialWhatsapp && country) {
       var contact = country.contacts[country.order_contact] || country.contacts[0];

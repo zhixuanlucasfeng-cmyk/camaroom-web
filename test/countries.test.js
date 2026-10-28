@@ -268,3 +268,8 @@ test('sync and async resolution agree wherever sync has an answer', async () => 
     assert.deepEqual(async_, sync);
   }
 });
+test('Mali publishes both Elena emails without assigning them to other markets', () => {
+  const { COUNTRIES } = require('../assets/js/countries.js');
+  assert.deepEqual(COUNTRIES.ML.emails, ['elena.bao@restarsolar.com', 'elena.bao@resunsolar.com']);
+  for (const code of ['CM', 'NG', 'SD']) assert.equal(COUNTRIES[code].emails, undefined);
+});
