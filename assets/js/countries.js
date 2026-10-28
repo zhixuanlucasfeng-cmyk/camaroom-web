@@ -39,10 +39,10 @@
       lang: 'fr', currency: 'XOF',
       address: "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
       sales_rep_backend: null,
-      // Kate is the confirmed public phone and WhatsApp contact for Mali.
+      // Elena handles Mali; her contact number uses China's +86 calling code.
       wechat: { name: 'Elena', qr: 'assets/wechat-mali-elena.jpg' },
       contacts: [
-        { name: 'Kate', flag: '🇲🇱', label: 'Mali', phone: '22372593539', phone_display: '+223 72 593 539' }
+        { name: 'Elena', flag: '🇲🇱', label: 'Mali', phone: '8615851496160', phone_display: '+86 158 5149 6160' }
       ],
       config_contact: 0,
       order_contact: 0

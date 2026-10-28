@@ -174,7 +174,7 @@ test('config_contact and order_contact point at real contacts', () => {
 test('each country uses the same confirmed contact for the top bar and WhatsApp', () => {
   const expected = {
     CM: { name: 'Tom', phone: '237681129183', phone_display: '+237 681 129 183' },
-    ML: { name: 'Kate', phone: '22372593539', phone_display: '+223 72 593 539' },
+    ML: { name: 'Elena', phone: '8615851496160', phone_display: '+86 158 5149 6160' },
     NG: { name: 'James', phone: '2349161101749', phone_display: '+234 916 110 1749' },
     SD: { name: 'Zhang Gang', phone: '249915348323', phone_display: '+249 91 534 8323' },
   };
