@@ -40,6 +40,7 @@
       address: "Sis à l'immeuble à Sotuba Rond-Point, près de Shell, Bamako, Mali",
       sales_rep_backend: null,
       // Kate is the confirmed public phone and WhatsApp contact for Mali.
+      wechat: { name: 'Elena', qr: 'assets/wechat-mali-elena.jpg' },
       contacts: [
         { name: 'Kate', flag: '🇲🇱', label: 'Mali', phone: '22372593539', phone_display: '+223 72 593 539' }
       ],

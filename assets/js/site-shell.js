@@ -13,6 +13,81 @@
   floating.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons/social-icons.svg#ico-whatsapp"/></svg>';
   document.body.appendChild(floating);
 
+  // One native dialog for the shared social, hero, footer and floating links.
+  var contactDialog = document.createElement('dialog');
+  contactDialog.id = 'country-contact-dialog';
+  contactDialog.dataset.noTranslate = '';
+  contactDialog.setAttribute('aria-labelledby', 'country-contact-title');
+  contactDialog.innerHTML = '<form method="dialog"><button class="contact-close" aria-label="Close">×</button></form><h2 id="country-contact-title"></h2><label for="contact-market"></label><select id="contact-market"></select><div class="contact-result" aria-live="polite"></div>';
+  document.body.appendChild(contactDialog);
+  var contactMarket = contactDialog.querySelector('select');
+  var contactResult = contactDialog.querySelector('.contact-result');
+  var contactChannel = 'whatsapp';
+  var contactMessage = '';
+  function contactCopy(en, fr, ar) { return language === 'fr' ? fr : language === 'ar' ? ar : en; }
+  function renderContact() {
+    var market = countries.COUNTRIES[contactMarket.value];
+    var rep = market.contacts[market.order_contact];
+    contactResult.replaceChildren();
+    if (contactChannel === 'wechat' && market.wechat) {
+      var name = document.createElement('p');
+      name.textContent = market.wechat.name + ' · WeChat';
+      var qr = document.createElement('img');
+      qr.src = market.wechat.qr;
+      qr.width = 946; qr.height = 1280;
+      qr.alt = 'Elena · Mali · WeChat QR';
+      var hint = document.createElement('p');
+      hint.textContent = contactCopy('Scan with WeChat, or save the image and select it in WeChat Scan.', 'Scannez avec WeChat, ou enregistrez l’image et sélectionnez-la dans le scanner WeChat.', 'امسح الرمز عبر WeChat، أو احفظ الصورة واخترها من ماسح WeChat.');
+      var imageLink = document.createElement('a');
+      imageLink.href = market.wechat.qr;
+      imageLink.target = '_blank'; imageLink.rel = 'noopener';
+      imageLink.textContent = contactCopy('Open QR image', 'Ouvrir le code QR', 'فتح صورة الرمز');
+      contactResult.append(name, qr, hint, imageLink);
+      return;
+    }
+    var description = document.createElement('p');
+    description.textContent = contactChannel === 'wechat'
+      ? contactCopy('This market’s WeChat QR is not available yet. Contact the local team on WhatsApp.', 'Le code WeChat de ce marché n’est pas encore disponible. Contactez l’équipe locale sur WhatsApp.', 'رمز WeChat لهذا السوق غير متوفر بعد. تواصل مع الفريق المحلي عبر واتساب.')
+      : rep.name + ' · ' + rep.phone_display;
+    var link = document.createElement('a');
+    link.className = 'contact-continue';
+    link.dataset.contactContinue = '';
+    link.target = '_blank'; link.rel = 'noopener';
+    link.textContent = contactCopy('Continue on WhatsApp', 'Continuer sur WhatsApp', 'المتابعة على واتساب');
+    var marketName = language === 'fr' ? market.name_fr : language === 'ar' ? market.name_ar : market.name;
+    var message = contactMessage || contactCopy('Hello Restar Solar, I would like to contact your team in ', 'Bonjour Restar Solar, je souhaite contacter votre équipe : ', 'مرحبًا ريستار سولار، أود التواصل مع فريقكم في ') + marketName + '.';
+    link.href = 'https://wa.me/' + rep.phone + '?text=' + encodeURIComponent(message);
+    contactResult.append(description, link);
+  }
+  contactMarket.addEventListener('change', renderContact);
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest('a');
+    if (!link || link.hasAttribute('data-contact-continue')) return;
+    var wechat = !!link.querySelector('use[href$="ico-wechat"]');
+    var url = new URL(link.href, location.href);
+    if (!wechat && url.hostname !== 'wa.me' && link.id !== 'social-whatsapp') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    contactChannel = wechat ? 'wechat' : 'whatsapp';
+    // Keep product enquiry context, but regenerate generic country greetings.
+    contactMessage = link === floating ? '' : (url.searchParams.get('text') || '');
+    contactDialog.dir = language === 'ar' ? 'rtl' : 'ltr';
+    contactDialog.querySelector('h2').textContent = contactCopy('Which country’s team would you like to contact?', 'L’équipe de quel pays souhaitez-vous contacter ?', 'فريق أي بلد تود التواصل معه؟');
+    contactDialog.querySelector('label').textContent = contactCopy('Country', 'Pays', 'البلد');
+    contactDialog.querySelector('.contact-close').setAttribute('aria-label', contactCopy('Close', 'Fermer', 'إغلاق'));
+    contactMarket.replaceChildren();
+    countries.ORDER.forEach(function (code) {
+      var market = countries.COUNTRIES[code];
+      var option = document.createElement('option');
+      option.value = code;
+      option.textContent = language === 'fr' ? market.name_fr : language === 'ar' ? market.name_ar : market.name;
+      option.selected = code === current;
+      contactMarket.appendChild(option);
+    });
+    renderContact();
+    contactDialog.showModal();
+  }, true);
+
   function text(value) {
     var table = language === 'fr' ? window.RS_FRENCH : language === 'ar' ? arabic : null;
     return table && table[value] || value;
