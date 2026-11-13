@@ -63,7 +63,7 @@ test('the original product catalogue layout remains wired to live products and c
   assert.match(html, /class="card-photo"/);
   assert.match(html, /class="btn btn--ghost add-to-cart"/);
   assert.match(html, /window\.Cart\.add\(\{ sku:/);
-  assert.match(html, /catalogLoader\.load\(servedCountry\)/);
+  assert.match(html, /catalogLoader\.load\(servedCountry,\s*applyCatalog\)/);
   assert.match(html, /id="modal" role="dialog"/);
 });
 

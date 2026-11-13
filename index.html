@@ -1150,13 +1150,14 @@ function updateCartToggle(){
  */
 function refreshCountryCatalog(){
   const servedCountry = COUNTRY;
-  return catalogLoader.load(servedCountry).then(result => {
+  const applyCatalog = result => {
     if (result.stale || COUNTRY !== servedCountry) return;
     CATALOG_PRODUCTS = result.products;
     INVENTORY = result.inventory;
     renderFilters();
     renderGrid();
-  });
+  };
+  return catalogLoader.load(servedCountry, applyCatalog).then(applyCatalog);
 }
 
 /* Sales-rep assignment is deliberately separate from the central product,

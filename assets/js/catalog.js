@@ -202,7 +202,7 @@
     var fallbackProducts = options.fallbackProducts || [];
     var generation = 0;
 
-    function load(country) {
+    function load(country, onRecovered) {
       var mine = ++generation;
       var code = String(country || '').toUpperCase();
       var url = baseUrl + '/api/products?country=' + encodeURIComponent(code);
@@ -234,6 +234,13 @@
           var result = fallbackCatalog(fallbackProducts, code);
           result.source = 'fallback';
           result.stale = false;
+          // Render fallback promptly, then allow one bounded cold-start recovery.
+          if (typeof onRecovered === 'function') {
+            createLoader({fetch: request, baseUrl: baseUrl, timeoutMs: options.recoveryTimeoutMs || 65000})
+              .load(code).then(function (fresh) {
+                if (mine === generation && fresh.source === 'remote') onRecovered(fresh);
+              }).catch(function () { /* Keep the already-visible fallback. */ });
+          }
           return result;
         }).finally(function () { clearTimeout(timer); });
     }

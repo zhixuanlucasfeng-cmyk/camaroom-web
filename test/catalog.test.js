@@ -57,6 +57,40 @@ const API_PRODUCT = {
   datasheet: 'https://rest-solar-agent-cm.onrender.com/media/13',
 };
 
+test('a timed-out feed recovers in the background after showing fallback', async () => {
+  let calls = 0;
+  let refreshed;
+  const loader = Catalog.createLoader({
+    timeoutMs: 5, recoveryTimeoutMs: 50,
+    fetch: async () => ++calls === 1 ? new Promise(() => {}) : {ok:true,json:async()=>[API_PRODUCT]},
+    fallbackProducts: []
+  });
+  const result = await loader.load('CM', value => { refreshed = value; });
+  assert.equal(result.source, 'fallback');
+  await new Promise(resolve => setTimeout(resolve, 15));
+  assert.equal(refreshed?.source, 'remote');
+  assert.equal(refreshed.products[0].id, 'SP-API-1');
+});
+
+test('late recovery from a previous market cannot replace the current catalogue', async () => {
+  let resolveOld;
+  let calls = 0;
+  const updates = [];
+  const loader = Catalog.createLoader({timeoutMs:5,recoveryTimeoutMs:50,fallbackProducts:[],
+    fetch: async () => {
+      calls++;
+      if(calls===1) throw new Error('offline');
+      if(calls===2) return new Promise(resolve=>{resolveOld=resolve;});
+      return {ok:true,json:async()=>[]};
+    }
+  });
+  await loader.load('CM', value=>updates.push(value));
+  await loader.load('ML', value=>updates.push(value));
+  if(resolveOld) resolveOld({ok:true,json:async()=>[API_PRODUCT]});
+  await new Promise(resolve=>setTimeout(resolve,10));
+  assert.deepEqual(updates,[]);
+});
+
 test('a stalled catalog request stops waiting and aborts with a country-safe fallback', async () => {
   let signal;
   const loader = Catalog.createLoader({

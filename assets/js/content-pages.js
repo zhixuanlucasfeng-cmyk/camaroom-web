@@ -150,7 +150,7 @@
       productFilters.innerHTML = '';
       productGrid.innerHTML = '<p class="empty">' + productText('loading') + '</p>';
       if (catalogNotice) catalogNotice.hidden = true;
-      return loader.load(requestedCountry).then(function (result) {
+      function applyCatalog(result) {
         if (result.stale || countryCode !== requestedCountry) return;
         catalogProducts = result.products;
         inventory = result.inventory;
@@ -161,7 +161,8 @@
         }
         renderFilters();
         renderProducts();
-      });
+      }
+      return loader.load(requestedCountry, applyCatalog).then(applyCatalog);
     }
 
     window.addEventListener('popstate', function () {
